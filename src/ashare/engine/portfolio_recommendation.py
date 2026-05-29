@@ -41,6 +41,19 @@ from .technical_confirmation import build_technical_confirmation_artifacts
 from .global_objective import build_unified_objective_bundle
 
 
+def _series_or_zero(df: pd.DataFrame, col: str) -> pd.Series:
+    """安全获取 DataFrame 中可能缺失的列；缺失或为标量时返回全 0 同长度 Series。
+
+    场景：V5 latest_portfolio 上游可能没有跑过 strategy_activation 富化，导致
+    valuation_signal_score / liquidity_signal_score / seed_weight_norm 等列缺失。
+    `pd.to_numeric(df.get("missing"), errors="coerce")` 会返回标量 nan，
+    后续 .fillna(0.0) 在 numpy.float64 上会抛 AttributeError。
+    """
+    if col in df.columns:
+        return pd.to_numeric(df[col], errors="coerce").fillna(0.0)
+    return pd.Series(0.0, index=df.index, dtype="float64")
+
+
 def _sort_score_frame(df: pd.DataFrame) -> pd.DataFrame:
     sort_cols = [c for c in ['total_score', 'sharpe', 'valid_ic', 'created_at'] if c in df.columns]
     if not sort_cols:
@@ -851,8 +864,8 @@ def build_portfolio_recommendation(config: Dict[str, Any], bridge_root: Path | N
             broad_pool_df["selection_score"] = (
                 broad_pool_df["seed_weight_norm"] * seed_w
                 + broad_pool_df["pred_score_norm"] * pred_w
-                + pd.to_numeric(broad_pool_df.get("valuation_signal_score"), errors="coerce").fillna(0.0) * valuation_w
-                + pd.to_numeric(broad_pool_df.get("liquidity_signal_score"), errors="coerce").fillna(0.0) * liquidity_w
+                + _series_or_zero(broad_pool_df, "valuation_signal_score") * valuation_w
+                + _series_or_zero(broad_pool_df, "liquidity_signal_score") * liquidity_w
             ) / total_w
             broad_pool_df["candidate_pool_basis"] = "hard_data_only"
         else:
@@ -890,10 +903,10 @@ def build_portfolio_recommendation(config: Dict[str, Any], bridge_root: Path | N
         liquidity_w = float(hard_weights.get("liquidity", 0.16) or 0.0)
         total_w = max(seed_w + pred_w + valuation_w + liquidity_w, 1e-9)
         broad_pool_df["selection_score"] = (
-            pd.to_numeric(broad_pool_df.get("seed_weight_norm"), errors="coerce").fillna(0.0) * seed_w
-            + pd.to_numeric(broad_pool_df.get("pred_score_norm"), errors="coerce").fillna(0.0) * pred_w
-            + pd.to_numeric(broad_pool_df.get("valuation_signal_score"), errors="coerce").fillna(0.0) * valuation_w
-            + pd.to_numeric(broad_pool_df.get("liquidity_signal_score"), errors="coerce").fillna(0.0) * liquidity_w
+            _series_or_zero(broad_pool_df, "seed_weight_norm") * seed_w
+            + _series_or_zero(broad_pool_df, "pred_score_norm") * pred_w
+            + _series_or_zero(broad_pool_df, "valuation_signal_score") * valuation_w
+            + _series_or_zero(broad_pool_df, "liquidity_signal_score") * liquidity_w
         ) / total_w
         broad_pool_df["candidate_pool_basis"] = "hard_data_only"
     broad_pool_df = apply_candidate_llm_overlay(broad_pool_df, llm_candidate_review, candidate_llm_cfg)
