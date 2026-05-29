@@ -1,0 +1,98 @@
+{
+  "spec_version": "industry_router_thesis_v1",
+  "thesis_policy": {
+    "min_total_evidence": 2,
+    "min_non_event_evidence": 1,
+    "max_event_clue_share": 0.45,
+    "entry_score": 0.63,
+    "hold_score": 0.52,
+    "entry_evidence_floor": 0.55,
+    "negative_evidence_stop": 0.35
+  },
+  "stock_signal_policy": {
+    "entry_score": 0.61,
+    "hold_score": 0.50,
+    "min_exposure_score": 0.45
+  },
+  "scoring_weights": {
+    "evidence_score": 0.27,
+    "causal_clarity_score": 0.16,
+    "persistence_score": 0.16,
+    "exposure_score": 0.18,
+    "underpricing_score": 0.15,
+    "crowding_penalty": 0.08
+  },
+  "evidence_types": {
+    "price": {
+      "base_weight": 0.22,
+      "max_share": 0.35
+    },
+    "inventory": {
+      "base_weight": 0.24,
+      "max_share": 0.35
+    },
+    "production": {
+      "base_weight": 0.22,
+      "max_share": 0.30
+    },
+    "trade": {
+      "base_weight": 0.20,
+      "max_share": 0.30
+    },
+    "policy": {
+      "base_weight": 0.18,
+      "max_share": 0.30
+    },
+    "event_clue": {
+      "base_weight": 0.10,
+      "max_share": 0.20
+    }
+  },
+  "shock_types": {
+    "supply_cut": {
+      "half_life_days": 20,
+      "min_persistence_days": 10,
+      "invalidate_conditions": [
+        "供给恢复",
+        "价格转弱",
+        "库存重新累积"
+      ]
+    },
+    "demand_expansion": {
+      "half_life_days": 30,
+      "min_persistence_days": 12,
+      "invalidate_conditions": [
+        "订单回落",
+        "开支下修",
+        "需求验证失败"
+      ]
+    },
+    "inventory_reversal": {
+      "half_life_days": 18,
+      "min_persistence_days": 8,
+      "invalidate_conditions": [
+        "去库结束",
+        "价格重新走弱",
+        "库存再度累积"
+      ]
+    },
+    "price_transmission": {
+      "half_life_days": 16,
+      "min_persistence_days": 6,
+      "invalidate_conditions": [
+        "涨价无法传导",
+        "价差收窄",
+        "需求侧承接不足"
+      ]
+    },
+    "policy_shift": {
+      "half_life_days": 35,
+      "min_persistence_days": 15,
+      "invalidate_conditions": [
+        "政策逆转",
+        "流动性收紧",
+        "风险偏好回落"
+      ]
+    }
+  }
+}

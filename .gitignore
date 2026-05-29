@@ -1,0 +1,103 @@
+# ====== venvs (重装即可，不进 git) ======
+.venv/
+.venv313/
+.venv*/
+venvs/
+
+# ====== Python ======
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ====== IDE / OS ======
+.idea/
+.vscode/
+*.swp
+*.swo
+Thumbs.db
+desktop.ini
+
+# ====== 运行时产物（不进 git，重跑会生成）======
+outputs/
+latest/
+tmp/
+backups/
+releases/
+archive/
+
+# ====== Logs ======
+*.log
+data/event_lake_v6/logs/
+
+# ====== 生成的运行时 config（每次跑都不同）======
+src/ashare/configs/generated_runtime/
+src/ashare/configs/*.autogen.json
+src/ashare/configs/gmtrade_runtime_config.autogen.json
+src/ashare/configs/runtime_config.runtime.*.json
+src/ashare/configs/hub_config.v6.runtime.*.json
+!src/ashare/configs/hub_config.v6.runtime.daily_production.json
+!src/ashare/configs/hub_config.v6.runtime.quick_test.json
+
+# ====== 大型数据（git 不擅长存 GB 级 SQLite/CSV）======
+data/sql_store/*.sqlite3
+data/sql_store/*.sqlite3-wal
+data/sql_store/*.sqlite3-shm
+data/sql_store/*.sqlite3-journal
+data/daily_csv_qfq/
+data/enriched_daily_csv_qfq/
+data/ml_datasets/
+data/auxiliary_data/
+
+# ====== Runtime state（每天会变；不该 commit）======
+data/trade_clock/
+data/trade_release_v1/
+data/live_execution_bridge/
+data/research_hub_integrated/
+data/research_hub_v5_1_gpu_integrated/
+data/portfolio_recommendation_v6/
+data/daily_cache_v6/
+data/event_lake_v6/raw/
+data/event_lake_v6/curated/
+data/event_lake_v6/inventory/
+data/event_lake_v6/bridge/
+data/event_lake_v6/research/supervisor/
+data/event_lake_v6/research/context_pack/
+data/event_lake_v6/research/integrated_thesis/
+data/event_lake_v6/research/industry_router/
+data/event_lake_v6/research/evidence_cards/
+data/event_lake_v6/research/technical_confirmation/
+data/event_lake_v6/research/manual_event_proxy/
+data/audit_v1/
+data/market_state_v6/
+data/external_research_feeds/
+data/account_switch_archive/
+data/private/
+
+# ====== Secrets / 私密 ======
+data/private/
+src/ashare/configs/gmtrade_runtime_config.local.json
+.env
+.env.*
+*.token
+*.key
+secrets.json
+
+# ====== local_settings 私密覆盖（如果你以后加了私有 local_settings） ======
+src/ashare/engine/local_settings.local.py
+
+# ====== probe 临时输出 ======
+src/ashare/configs/probe_intraday_tactics.*.json
+!src/ashare/configs/probe_intraday_tactics.quick_test.json
+
+# ====== 临时调试 ======
+tmp_*.html
+*.tmp
+*.bak
+*.orig

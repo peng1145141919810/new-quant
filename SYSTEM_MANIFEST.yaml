@@ -1,0 +1,45 @@
+{
+  "project_id": "ashare_quant_runtime",
+  "law_version": 1,
+  "canonical": {
+    "formal_operator_entry": "H:\\Ashare\\launch_canonical.py",
+    "trade_clock_service_entry": "H:\\Ashare\\trade_clock_service.py",
+    "wrapped_business_root_entry": "H:\\Ashare\\main_research_runner.py",
+    "workspace_runtime_entry": "H:\\Ashare\\main_research_runner.py",
+    "live_runtime_root": "H:\\Ashare\\src\\ashare",
+    "workspace_runtime_root": "H:\\Ashare\\src\\ashare",
+    "default_mode": "integrated_supervisor",
+    "default_profile": "quick_test",
+    "formal_output_root": "H:\\Ashare\\outputs\\canonical_runs",
+    "formal_run_manifest_name": "run_manifest.json"
+  },
+  "paths": {
+    "repo_root": "H:\\Ashare",
+    "live_data_root": "H:\\Ashare\\data",
+    "active_v6_root": "H:\\Ashare\\src\\ashare",
+    "workspace_runtime_root": "H:\\Ashare\\src\\ashare",
+    "active_v5_runtime_root": "H:\\Ashare\\src\\ashare\\research_brain",
+    "research_runtime_root": "H:\\Ashare\\src\\ashare\\research_brain",
+    "archive_roots": [
+      "F:\\quant_data\\早期实验数据\\Ashare_legacy_code_20260321"
+    ],
+    "experiment_roots": [
+      "H:\\Ashare\\src\\ashare\\examples"
+    ],
+    "mixed_roots": [
+      {
+        "path": "H:\\Ashare\\outputs",
+        "default_status": "experiment",
+        "formal_subroots": [
+          "H:\\Ashare\\outputs\\canonical_runs"
+        ]
+      }
+    ]
+  },
+  "directory_definitions": {
+    "live": "Current runtime code or operator-facing output used by the official chain.",
+    "archive": "Historical rollback/reference assets. Not a live source of truth.",
+    "experiment": "Samples, generated workspaces, scratch outputs, or other non-canonical artifacts.",
+    "deprecated": "Transitional paths that must point to the current replacement."
+  }
+}

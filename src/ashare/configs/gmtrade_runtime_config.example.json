@@ -1,0 +1,48 @@
+{
+  "portfolio_root": "H:\\Ashare\\data\\research_hub_integrated",
+  "explicit_portfolio_path": "",
+  "price_snapshot_path": "",
+  "output_dir": "H:\\Ashare\\data\\gmtrade_execution_bridge",
+  "broker": {
+    "token": "替换为你的 token",
+    "account_id": "替换为你的掘金股票仿真账户ID",
+    "account_alias": "paper_stock_01",
+    "account_profiles": {
+      "simulation": {
+        "account_id": "替换为你的掘金股票仿真账户ID",
+        "account_alias": "paper_stock_01"
+      },
+      "precision": {
+        "account_id": "替换为你的掘金股票精准撮合账户ID",
+        "account_alias": "precision_stock_01"
+      }
+    },
+    "endpoint": "api.myquant.cn:9000",
+    "buy_price_ratio": 1.01,
+    "sell_price_ratio": 0.99,
+    "order_wait_seconds": 3.0,
+    "sell_by_available": true,
+    "lot_size": 100,
+    "min_trade_value": 2000.0,
+    "cash_reserve_ratio": 0.02
+  },
+  "portfolio": {
+    "max_names": 20,
+    "fallback_equal_weight": true,
+    "weight_sum_limit": 0.98
+  },
+  "portfolio_control": {
+    "enabled": true,
+    "drift_threshold": 0.005,
+    "max_daily_turnover_ratio": 0.25,
+    "enable_execution_feedback": true,
+    "enable_dev_log_snapshot": false,
+    "dev_log_top_holdings": 8,
+    "allow_odd_lot_exit": true
+  },
+  "execution_policy": {
+    "account_mode": "precision",
+    "precision_trade_enabled": false,
+    "allow_integrated_precision_execution": false
+  }
+}

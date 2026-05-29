@@ -1,0 +1,15 @@
+﻿symbol,name,industry_primary,industry_secondary,industry_bucket,mechanism_primary,subchain_primary,secondary_exposures,theme_primary,liquidity_bucket,notes
+688618.SH,三旺通信,通信设备,工业通信,tech_equipment,trend_capex,工业通信,工业互联网|边缘通信,工业互联,A,trend_capex seed
+688380.SH,中微半导,半导体,模拟芯片,tech_hardware,trend_capex,半导体设计,MCU|车规芯片,芯片国产化,A,trend_capex seed
+600050.SH,中国联通,电信运营,算力网络,telecom_infra,trend_capex,算力网络,IDC|云通信,央国企算力,A,trend_capex seed
+002463.SZ,沪电股份,元器件,PCB,tech_hardware,trend_capex,高速互连,AI服务器|交换机,算力链,A,trend_capex seed
+300308.SZ,中际旭创,通信设备,光模块,tech_equipment,trend_capex,光模块,800G|AI光互连,算力链,A,trend_capex seed
+600309.SH,万华化学,化工原料,MDI,commodity_cycle,price_inventory,化工景气,化工品价格|库存周期,化工龙头,A,price_inventory seed
+600111.SH,北方稀土,小金属,稀土,commodity_cycle,price_inventory,稀土,氧化镨钕|库存,战略金属,A,price_inventory seed
+603799.SH,华友钴业,小金属,钴锂资源,commodity_cycle,price_inventory,有色资源,钴价|镍价|库存,新能源金属,A,price_inventory seed
+000878.SZ,云南铜业,铜,铜冶炼,commodity_cycle,price_inventory,铜,铜价|库存,工业金属,A,price_inventory seed
+002460.SZ,赣锋锂业,小金属,锂,commodity_cycle,price_inventory,锂,锂价|库存,新能源金属,A,price_inventory seed
+600036.SH,招商银行,银行,股份行,financial_style,macro_style,银行股息,红利|社融,高股息,A,macro_style seed
+601398.SH,工商银行,银行,国有大行,financial_style,macro_style,银行股息,红利|社融,高股息,A,macro_style seed
+601688.SH,华泰证券,证券,券商,financial_style,macro_style,券商Beta,流动性|风险偏好,资本市场,A,macro_style seed
+601318.SH,中国平安,保险,综合金融,financial_style,macro_style,保险股息,红利|利率,高股息,A,macro_style seed

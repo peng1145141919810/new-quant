@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "research_actions",
+  "type": "object",
+  "required": [
+    "route_override",
+    "candidate_override",
+    "refresh_tasks",
+    "context_snapshot"
+  ],
+  "properties": {
+    "route_override": {
+      "type": "object"
+    },
+    "candidate_override": {
+      "type": "object"
+    },
+    "refresh_tasks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "context_snapshot": {
+      "type": "object"
+    }
+  }
+}

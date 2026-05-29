@@ -1,0 +1,15 @@
+ts_code,theme_id,theme_name,mechanism_primary,chain_position,exposure_strength,benefit_direction,purity_score,profit_path,evidence_note,mapping_confidence,active_flag
+688618.SH,industrial_iot,工业互联,trend_capex,industrial_network,0.82,long,0.78,订单放量|工业互联网渗透,工业通信订单和工业互联网设备需求扩张,0.93,1
+688380.SH,domestic_chip,芯片国产化,trend_capex,chip_design,0.86,long,0.82,国产替代|量价齐升,MCU 与车规芯片渗透提升,0.90,1
+600050.SH,state_compute,央国企算力,trend_capex,operator,0.76,long,0.70,capex放量|云网建设,运营商算力网络建设与 IDC 投入,0.86,1
+002463.SZ,ai_compute_chain,算力链,trend_capex,interconnect_components,0.84,long,0.80,服务器互连升级|份额提升,高速 PCB 受益于 AI 服务器与交换机升级,0.92,1
+300308.SZ,ai_compute_chain,算力链,trend_capex,optical_modules,0.93,long,0.88,800G涨价|出货放量,800G 光模块受益于 AI 光互连升级,0.95,1
+600309.SH,chemical_cycle,化工景气,price_inventory,materials,0.88,long,0.84,产品涨价|价差扩张,MDI 价格和库存周期修复,0.90,1
+600111.SH,strategic_metals,战略金属,price_inventory,resource,0.90,long,0.86,稀土涨价|配额收紧,稀土供给约束和库存收紧,0.91,1
+603799.SH,new_energy_metals,新能源金属,price_inventory,resource_refining,0.78,long,0.72,钴镍涨价|库存回补,钴镍资源与库存周期修复,0.88,1
+000878.SZ,industrial_metals,工业金属,price_inventory,smelting,0.80,long,0.74,铜价传导|加工费改善,铜价上涨与工业金属补库,0.89,1
+002460.SZ,new_energy_metals,新能源金属,price_inventory,lithium_resource,0.87,long,0.83,锂价修复|库存去化,锂价与库存反转修复,0.87,1
+600036.SH,dividend_financials,高股息,macro_style,bank,0.86,long,0.80,股息防御|信贷扩张,股份行兼具股息和信用扩张受益,0.94,1
+601398.SH,dividend_financials,高股息,macro_style,bank,0.90,long,0.84,股息防御|低波收息,国有大行高股息与低波防御,0.95,1
+601688.SH,capital_markets,资本市场,macro_style,broker,0.88,long,0.82,成交放量|风险偏好修复,券商对流动性和风险偏好弹性最高,0.90,1
+601318.SH,dividend_financials,高股息,macro_style,insurer,0.78,long,0.70,利率改善|股息重估,保险受益于利率与长钱风格回暖,0.89,1

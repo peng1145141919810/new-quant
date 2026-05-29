@@ -1,0 +1,16 @@
+﻿POSITION_LEDGER_FIELDS = [
+    "snapshot_time",
+    "account_id",
+    "symbol",
+    "actual_shares",
+    "available_shares",
+    "cost_basis",
+    "market_value",
+    "actual_weight",
+    "realized_pnl",
+    "unrealized_pnl",
+    "last_price",
+    "price_timestamp",
+    "price_source",
+    "release_id",
+]

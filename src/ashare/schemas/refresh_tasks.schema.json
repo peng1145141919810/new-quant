@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "refresh_tasks",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "task_id",
+      "task_type",
+      "priority",
+      "reason"
+    ],
+    "properties": {
+      "task_id": {
+        "type": "string"
+      },
+      "task_type": {
+        "type": "string"
+      },
+      "priority": {
+        "type": "string",
+        "enum": [
+          "high",
+          "medium",
+          "low"
+        ]
+      },
+      "reason": {
+        "type": "string"
+      },
+      "dataset_name": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "feature_name": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "trigger_event_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "route_override": {
+    "feature": 4,
+    "data": 3,
+    "risk": 2,
+    "model": 1,
+    "training": 1,
+    "portfolio": 2,
+    "hybrid": 2
+  },
+  "candidate_override": {
+    "feature_profiles": [
+      "generated_feature_pack",
+      "vol_liq_quality"
+    ],
+    "label_horizons": [
+      10,
+      20
+    ],
+    "top_ks": [
+      20,
+      30
+    ]
+  },
+  "refresh_tasks": [
+    {
+      "task_id": "refresh_daily_basic_20260318",
+      "task_type": "refresh_dataset",
+      "priority": "high",
+      "reason": "表已过期",
+      "dataset_name": "daily_basic"
+    },
+    {
+      "task_id": "refresh_index_weight_20260318",
+      "task_type": "refresh_dataset",
+      "priority": "medium",
+      "reason": "指数成分状态临近过期",
+      "dataset_name": "index_weight"
+    },
+    {
+      "task_id": "recompute_earnings_surprise_20260318",
+      "task_type": "recompute_feature",
+      "priority": "high",
+      "reason": "业绩预告事件密集",
+      "feature_name": "earnings_surprise_proxy"
+    }
+  ],
+  "context_snapshot": {
+    "research_thesis": "近期业绩披露与政策扰动叠加，短中期横截面收益可能更多来自事件驱动而非纯价量延续。",
+    "why_now": "业绩预告密集、市场风格偏防御、现有特征对事件冲击覆盖不足。"
+  }
+}

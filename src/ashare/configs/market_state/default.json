@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "score_weights": {
+    "trend": 0.35,
+    "breadth": 0.3,
+    "liquidity": 0.2,
+    "style": 0.15
+  },
+  "regime_thresholds": {
+    "panic_max": -0.55,
+    "risk_off_max": -0.15,
+    "risk_on_min": 0.3
+  },
+  "mechanism_bias_threshold": 0.08,
+  "regime_policy": {
+    "risk_on": {
+      "risk_budget_multiplier": 1.0,
+      "turnover_multiplier": 1.0,
+      "entry_strictness": 0.28,
+      "new_position_policy": "allow",
+      "de_risk_hint": "allow_normal_risk"
+    },
+    "neutral": {
+      "risk_budget_multiplier": 0.9,
+      "turnover_multiplier": 0.88,
+      "entry_strictness": 0.42,
+      "new_position_policy": "selective",
+      "de_risk_hint": "keep_selective"
+    },
+    "risk_off": {
+      "risk_budget_multiplier": 0.72,
+      "turnover_multiplier": 0.7,
+      "entry_strictness": 0.54,
+      "new_position_policy": "selective",
+      "de_risk_hint": "de_risk_but_keep_selective_offense"
+    },
+    "panic": {
+      "risk_budget_multiplier": 0.25,
+      "turnover_multiplier": 0.3,
+      "entry_strictness": 0.82,
+      "new_position_policy": "no_new_positions",
+      "de_risk_hint": "reduce_risk_and_protect_capital"
+    }
+  }
+}

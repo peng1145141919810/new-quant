@@ -1,0 +1,126 @@
+{
+  "defaults": {
+    "t_allowed": true,
+    "allow_new_t": true,
+    "allow_second_leg": true,
+    "max_t_ratio": 0.2,
+    "min_feature_quality": "snapshot_ok",
+    "blocked_windows": [
+      "open_noise",
+      "post_1450_close_only"
+    ],
+    "blocked_lifecycle_states": [
+      "exit",
+      "unknown"
+    ],
+    "blocked_event_types": []
+  },
+  "mechanism_policies": {
+    "price_inventory": {
+      "max_t_ratio": 0.22,
+      "allow_second_leg": true
+    },
+    "trend_capex": {
+      "max_t_ratio": 0.12,
+      "allow_second_leg": false
+    },
+    "macro_style": {
+      "t_allowed": false,
+      "allow_new_t": false,
+      "allow_second_leg": false,
+      "max_t_ratio": 0.0
+    },
+    "unknown": {
+      "t_allowed": false,
+      "allow_new_t": false,
+      "allow_second_leg": false,
+      "max_t_ratio": 0.0
+    }
+  },
+  "event_policies": {
+    "earnings_guidance": {
+      "t_allowed": false,
+      "allow_new_t": false,
+      "allow_second_leg": false,
+      "max_t_ratio": 0.0
+    },
+    "major_contract_binding": {
+      "t_allowed": false,
+      "allow_new_t": false,
+      "allow_second_leg": false,
+      "max_t_ratio": 0.0
+    },
+    "major_order_award": {
+      "t_allowed": false,
+      "allow_new_t": false,
+      "allow_second_leg": false,
+      "max_t_ratio": 0.0
+    },
+    "buyback_or_increase_holding": {
+      "t_allowed": false,
+      "allow_new_t": false,
+      "allow_second_leg": false,
+      "max_t_ratio": 0.0
+    }
+  },
+  "lifecycle_policies": {
+    "hold": {
+      "max_t_ratio": 0.2
+    },
+    "build": {
+      "max_t_ratio": 0.12
+    },
+    "trim": {
+      "max_t_ratio": 0.08,
+      "allow_second_leg": false
+    },
+    "pilot": {
+      "max_t_ratio": 0.06,
+      "allow_second_leg": false
+    }
+  },
+  "window_policies": {
+    "morning_primary": {
+      "max_t_ratio": 0.2,
+      "allow_second_leg": false
+    },
+    "mid_morning_low_speed": {
+      "t_allowed": false,
+      "allow_new_t": false,
+      "allow_second_leg": false,
+      "max_t_ratio": 0.0
+    },
+    "afternoon_primary": {
+      "max_t_ratio": 0.18,
+      "allow_second_leg": true
+    },
+    "late_afternoon_reconcile": {
+      "max_t_ratio": 0.1,
+      "allow_second_leg": true
+    }
+  },
+  "quality_policies": {
+    "snapshot_ok": {
+      "quality_ratio_multiplier": 1.0,
+      "min_feature_quality": "snapshot_ok"
+    },
+    "snapshot_degraded": {
+      "allow_new_t": false,
+      "allow_second_leg": false,
+      "quality_ratio_multiplier": 0.0,
+      "min_feature_quality": "snapshot_ok"
+    },
+    "no_live_snapshot": {
+      "allow_new_t": false,
+      "allow_second_leg": false,
+      "quality_ratio_multiplier": 0.0,
+      "min_feature_quality": "snapshot_ok"
+    },
+    "unknown": {
+      "allow_new_t": false,
+      "allow_second_leg": false,
+      "quality_ratio_multiplier": 0.0,
+      "min_feature_quality": "snapshot_ok"
+    }
+  }
+}

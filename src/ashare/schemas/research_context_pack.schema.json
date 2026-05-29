@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "research_context_pack",
+  "type": "object",
+  "required": [
+    "generated_at",
+    "event_summary",
+    "data_gap_report",
+    "market_state",
+    "recent_experiments",
+    "family_state",
+    "research_space"
+  ],
+  "properties": {
+    "generated_at": {
+      "type": "string"
+    },
+    "event_summary": {
+      "type": "object"
+    },
+    "priority_events": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "data_gap_report": {
+      "type": "object"
+    },
+    "market_state": {
+      "type": "object"
+    },
+    "recent_experiments": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "family_state": {
+      "type": "object"
+    },
+    "research_space": {
+      "type": "object"
+    }
+  }
+}

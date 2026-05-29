@@ -1,0 +1,85 @@
+{
+  "generated_at": "2026-03-18 21:20:00",
+  "research_thesis": "近期业绩披露与政策扰动叠加，短中期横截面收益可能更多来自事件驱动而非纯价量延续。",
+  "why_now": "业绩预告密集、市场风格偏防御、现有特征对事件冲击覆盖不足。",
+  "priority_events": [
+    {
+      "event_id": "evt_20260318_0001",
+      "reason": "财报改善与资产质量改善同时出现，值得测试事件后1-4周收益延续"
+    }
+  ],
+  "data_actions": [
+    {
+      "action": "refresh_dataset",
+      "dataset_name": "daily_basic",
+      "priority": "high"
+    },
+    {
+      "action": "refresh_dataset",
+      "dataset_name": "index_weight",
+      "priority": "medium"
+    }
+  ],
+  "feature_actions": [
+    {
+      "action": "recompute_feature",
+      "feature_name": "earnings_surprise_proxy",
+      "priority": "high"
+    },
+    {
+      "action": "add_candidate_feature",
+      "feature_name": "earnings_event_density_20d",
+      "priority": "high"
+    }
+  ],
+  "label_actions": [
+    {
+      "action": "test_label_horizon",
+      "label_horizon": 10,
+      "reason": "事件冲击可能在1-4周更明显"
+    }
+  ],
+  "model_actions": [
+    {
+      "action": "keep_primary_family",
+      "model_family": "xgboost_gpu"
+    },
+    {
+      "action": "freeze_branch",
+      "model_family": "ridge_ranker",
+      "reason": "当前阶段解释性可以保留，但不应占用太多预算"
+    }
+  ],
+  "portfolio_actions": [
+    {
+      "action": "tighten_industry_cap",
+      "value": 0.2,
+      "reason": "政策事件可能放大行业集中风险"
+    }
+  ],
+  "risk_actions": [
+    {
+      "action": "raise_event_risk_watch",
+      "event_type": "regulatory_action"
+    }
+  ],
+  "candidate_experiments": [
+    {
+      "experiment_name": "evt_dense_xgb_h10_top20",
+      "route": "feature",
+      "hypothesis": "事件密度与 surprise 叠加在10日标签上优于5日标签",
+      "feature_profile": "generated_feature_pack",
+      "model_family": "xgboost_gpu",
+      "label_horizon": 10,
+      "top_k": 20
+    }
+  ],
+  "stop_conditions": [
+    "连续3轮事件增强实验 test_ic 未超过基线 20bp 即暂停该支线",
+    "新增事件因子若存在明显发布时间后视偏差，立即冻结"
+  ],
+  "ban_items": [
+    "禁止直接把原始公告情感分数作为唯一主信号",
+    "禁止在未完成数据落盘校验前把事件特征并入正式训练表"
+  ]
+}

@@ -1,0 +1,3 @@
+先打开 README_PYCHARM.md。
+真正要运行的文件：run_v6_full_cycle_real.py
+想改模式：改 engine/local_settings.py

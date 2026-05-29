@@ -1,0 +1,9 @@
+requests
+pypdf
+pandas
+pyarrow
+tushare
+openai
+xgboost
+scikit-learn
+lightgbm

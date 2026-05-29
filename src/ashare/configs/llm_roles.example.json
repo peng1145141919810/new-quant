@@ -1,0 +1,29 @@
+{
+  "deepseek_worker": {
+    "role": "低成本执行脑",
+    "allowed_tasks": [
+      "event_extract",
+      "event_dedup_summary",
+      "data_gap_candidate_tasks",
+      "context_compression"
+    ],
+    "forbidden_tasks": [
+      "final_research_brief",
+      "deployment_decision",
+      "live_trading_decision"
+    ]
+  },
+  "openai_research": {
+    "role": "高价值研究脑",
+    "allowed_tasks": [
+      "research_brief",
+      "research_actions",
+      "route_override",
+      "candidate_override",
+      "branch_pause_or_ban"
+    ],
+    "forbidden_tasks": [
+      "high_frequency_raw_text_cleaning"
+    ]
+  }
+}

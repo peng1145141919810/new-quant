@@ -1,0 +1,1668 @@
+# Codex Update Log
+
+## Indexing Rule
+- Every new entry must have a unique id in the form `CDL-YYYYMMDD-###`.
+- Add the new entry here in reverse chronological order.
+- Update `CODEX_DEV_STABLE.md` first if current truth changed.
+- Update `CODEX_DEV_LOG_INDEX.md` with the new id, summary, and retrieval hints in the same turn.
+
+## Change Log
+
+### CDL-20260529-045
+- Local time: `2026-05-29 19:30:00`
+- Type: `workspace-fork-and-slim`
+- Scope: `new active workspace at H:\Ashare, governance docs forked, C#/RPC/site/operator-portal cut, new CLAUDE_CODEX_DIALOGUE.md introduced`
+- Author: `Claude (Opus 4.7)` — first non-Codex author entry; coordinated with user
+- Touched paths:
+  - `H:\Ashare\` (new repo root)
+  - `H:\Ashare\src\ashare\` (full Python runtime, mirrored from `F:\quant_data\AshareC#\src\ashare`, `__pycache__` excluded)
+  - `H:\Ashare\tools\`, `H:\Ashare\configs\`
+  - `H:\Ashare\scripts\` (filtered to 19 essential files; deploy / install / publish / gdrive-sync / operator-ollama / codex-log-sync / site-build scripts dropped)
+  - `H:\Ashare\data\sql_store\research_data_v1.sqlite3` (16 GB), `affordable_data_v1.sqlite3`, `research_fact_layers_v1.sqlite3`
+  - `H:\Ashare\data\daily_csv_qfq`, `enriched_daily_csv_qfq`, `index_daily_csv`, `event_lake_v6`, `affordable_feeds`, `auxiliary_data`, `ml_datasets\train_table_v1`
+  - `H:\Ashare\CLAUDE_CODEX_DIALOGUE.md` (NEW — async leave-a-note channel between Claude and Codex)
+  - `H:\Ashare\CODEX_DEV_STABLE.md`, `CODEX_DEV_UPDATES.md`, `CODEX_DEV_LOG_INDEX.md` (mirrored, this entry appended)
+  - `H:\Ashare\PROJECT_LAW.md`, `AGENTS.md` (mirrored, slated for refresh in next pass)
+- What changed:
+  - User decided current `F:\quant_data\AshareC#` workspace is bloated past sustainable maintenance; resolved to make a slimmed copy on a separate disk and continue active work there, leaving the F: workspace untouched as historical reference.
+  - New active workspace: `H:\Ashare` (note: `#` dropped from name — it broke shells, URLs, and path parsing in too many contexts).
+  - Explicitly excluded from the new workspace:
+    - `csharp_runtime_skeleton/` entire C# solution
+    - `python_rpc_bridge.py` and all C#-to-Python RPC plumbing
+    - `site_portal/`, `ashare_control/`, all `operator_chat_backend*` / `portal_backend*` / `deploy_*_to_server.ps1` / `publish_*_to_site.ps1` / `*_gdrive*` scripts
+    - `data/research_hub_v5_1_gpu_integrated/` (124 GB historical training artifacts)
+    - `data/research_hub_integrated/`, `data/trade_clock/`, `data/trade_release_v1/`, `data/live_execution_bridge/`, `data/portfolio_recommendation_v6/`, `data/daily_cache_v6/` (runtime state — clean start)
+    - `outputs/`, `backups/`, `releases/`, `archive/`, `latest/`, `tmp/`, `tmp_*.html`, `index.html`, `identifier.sqlite`, `.idea/`, all `__pycache__`
+    - `.git/` (clean history start; user can `git init` fresh)
+    - venvs (`.venv`, `.venv313` — to be reinstalled per `src/ashare/requirements_v6_runtime.txt`)
+  - Total new workspace size: ~21.6 GB (vs ~149 GB at source).
+  - New governance document introduced: `CLAUDE_CODEX_DIALOGUE.md` is a 2-way async leave-a-note channel between Claude (Anthropic) and Codex (OpenAI) so neither AI has to rebuild prior cross-session context only through the user. Format and maintenance rules are in that file. User has explicitly endorsed this addition.
+  - First dialogue entry posted by Claude under [2026-05-29 19:30] requesting Codex to acknowledge the fork, confirm history of the empty `engine/alpha_engine/` directory, and weigh in on alpha methodology concerns (label = raw `future_ret_5` without cross-section / industry-neutral transform; auto-everything-numeric feature selection; 45-180 day event windows being too slow for A-share 1-5 day event cycles).
+- Impact:
+  - F:\quant_data\AshareC# is now historical reference only. New work lands on H:\Ashare.
+  - Trade-clock service, runtime release artifacts, OMS ledgers, and execution reports are all reset — the new workspace has no live release, no live OMS state, and `data/trade_release_v1/` is intentionally absent. First runs on H: must regenerate these from scratch.
+  - The four user-stated refactor goals are now the binding scope on H:\Ashare: (1) tighten module responsibilities and collapse overlapping schedulers; (2) fix alpha pipeline (data + label + features); (3) tighten LLM use without losing interpretability; (4) preserve currently-working selection mechanisms — do not nuke-and-pave.
+  - Workspace default mode / profile and Trade-clock truth (`daily_production`) carry over unchanged.
+  - All Codex Secure Ops rules from `CODEX_SECURE_OPS.md` still apply on H:\Ashare; no secret values are stored in the dialogue document.
+- Validation:
+  - `H:\Ashare` directory structure verified after copy: `data` 22149.5 MB, `src` 4.4 MB, `scripts` 0.2 MB, governance docs present.
+  - `H:\Ashare\data\sql_store\research_data_v1.sqlite3` verified at 15.61 GB matching source size.
+  - 19 essential scripts confirmed present in `H:\Ashare\scripts\`.
+  - No code in the new workspace has been executed yet (no preflight, no compile pass). First runtime validation is left to the next session — the new workspace has not yet been proven runnable.
+- Compatibility:
+  - Hard-coded `F:\quant_data\AshareC#\...` path strings exist throughout the copied source and configs; these are listed as known naming debt for a follow-up pass and will need either env-var indirection or batch path rewrite.
+  - `local_settings.py` paths to Python executables (`.venv313`, `gmtrade39`) remain pointing at machine-local F:-side paths and must be re-pointed before H: runtime is functional.
+  - The previously-mentioned `D:\AshareHotData\research_hub_integrated\runs` NVMe junction does NOT exist on H: yet; the V5 hot data path needs reconfigured before research_only runs are attempted on H:.
+- Rollback:
+  - Original F:\quant_data\AshareC# remains untouched. To abandon H: fork, simply delete `H:\Ashare` — no impact on F:.
+
+### CDL-20260509-044
+- Local time: `2026-05-09 03:10:05`
+- Type: `end-to-end-gate-and-release-authority-fix`
+- Scope: `market refresh ordering + fresh market-state scheduling + research deployment gate propagation + release/execution fail-closed authority`
+- Touched paths:
+  - `src/ashare/engine/clock_supervisor.py`
+  - `src/ashare/engine/supervisor.py`
+  - `src/ashare/engine/portfolio_recommendation.py`
+  - `src/ashare/engine/portfolio_release.py`
+  - `src/ashare/engine/execution_manager.py`
+  - `data/trade_release_v1/latest_release.json`
+  - `data/trade_release_v1/releases/release_20260509_011316_90218762/release_manifest.json`
+  - `data/trade_release_v1/releases/release_20260509_011316_90218762/release_revocation.json`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Root-caused the latest research deadlock to refresh ordering: `integrated_supervisor` checked the data-consistency gate before the `market_pipeline` stage, so stale market tables blocked the very market refresh that would have made the gate pass.
+  - Moved `market_pipeline_refresh` into `run_pre_research_refresh_bundle(...)` so market data is refreshed before the data gate, and made `supervisor.py` reuse that payload in the later `market_pipeline` stage instead of refreshing twice in one process.
+  - Root-caused stale objective scheduling to `objective_scheduler` consuming an older `market_state.json` before V6 rebuilt fresh market-state artifacts; `supervisor.py` now calls `build_market_state_artifacts(...)` immediately before objective scheduling and only falls back to the latest file if rebuild output is empty.
+  - Root-caused an invalid release to a missing gate handoff: V5 cycle summaries could say "no champion" while portfolio recommendation/release still published a trade release. `portfolio_recommendation.py` now reads the latest V5 cycle deployment gate and sets `research_deployment_ready=false` / `simulation_ready=false` when there is no champion.
+  - `portfolio_release.py` now rejects not-ready recommendations by default unless `trade_release.allow_not_ready_release=true` is explicitly configured.
+  - Revoked quick-test release `release_20260509_011316_90218762`, which was created before the no-champion research gate was propagated into release readiness.
+  - Fixed release authority ordering: release JSON files are read first and SQL runtime artifacts are fallback/cache, so stale SQL mirrors cannot override file-side revocation.
+  - `execution_manager.py` now requires release status `published` or `active`; revoked/draft/failed/unknown release states block execution even when other readiness flags look permissive.
+- Impact:
+  - A stale market database no longer traps research in a pre-research gate before the market refresh can run.
+  - Research budget decisions should use the same refreshed market date as the rest of the run instead of a prior artifact.
+  - The release/execution chain now fails closed when research completes but does not produce a deployment-grade champion.
+  - The current system state is safer but stricter: the latest daily-production research produced portfolio recommendations, but release publishing was intentionally blocked because the V5 deployment gate found no champion.
+- Validation:
+  - `.\.venv313\Scripts\python.exe .\launch_canonical.py --mode research_only --profile quick_test --preflight-only` passed.
+  - `.\.venv313\Scripts\python.exe .\scripts\run_validation_tiers.py --max-tier 1` passed.
+  - Initial quick research run `20260508_235356_34803645` reproduced the ordering bug and stopped at `data_gate=market_data_too_old:26d`.
+  - After moving market refresh before the gate, quick research run `20260509_000722_b2aef930` completed pre-research refresh, refreshed market tables through trade date `2026-05-08`, completed V6 and one V5 cycle, and generated a recommendation.
+  - Direct scheduler probe after the fix showed `market_state_date=20260508` in the objective-scheduler decision path.
+  - Direct portfolio recommendation rebuild returned `simulation_ready=false`, `research_deployment_ready=false`, and no-champion deployment reason.
+  - `.\.venv313\Scripts\python.exe .\launch_canonical.py --mode release_only --profile quick_test` now fails closed with "portfolio recommendation not research/simulation ready" instead of publishing a no-champion release.
+  - `assess_execution_gate(ignore_window=True)` and `launch_canonical.py --mode execution_only --profile quick_test --gate-only --ignore-window` both blocked the revoked release with `release_status_revoked`.
+  - Daily-production research run `20260509_012554_b1d1ce42` completed in about `99.5` minutes, ran three V5 cycles / thirty-six candidates, and correctly refused release publishing because no champion was found.
+  - `.\.venv313\Scripts\python.exe -m py_compile src\ashare\engine\clock_supervisor.py src\ashare\engine\supervisor.py src\ashare\engine\portfolio_recommendation.py src\ashare\engine\portfolio_release.py src\ashare\engine\execution_manager.py`
+- Compatibility:
+  - `run_pre_research_refresh_bundle(...)` now returns an additional `market_pipeline_refresh` stage result; consumers that only read the older affordable/external/fact keys should continue to work.
+  - Publishing a not-ready release now requires an explicit `trade_release.allow_not_ready_release=true` override; default behavior is intentionally more restrictive.
+  - File-first release loading changes stale SQL mirror behavior. SQL artifacts remain useful for audit/fallback, but should not be treated as authoritative over current release JSON files.
+  - The revoked release is intentionally not executable; consumers that expect every `latest_release.json` pointer to be executable must now handle `status=revoked`.
+- Rollback:
+  - Revert the market-refresh ordering only if the data gate is redesigned to trigger required refreshes itself; otherwise stale market tables can again deadlock the research path.
+  - Revert the no-champion release block only for an explicitly shadow/simulation-only experiment, and prefer using `trade_release.allow_not_ready_release=true` so the override remains visible.
+  - Revert file-first release loading only after SQL runtime artifacts become a transactional source of truth with revocation/readiness updates written atomically with the release manifest.
+
+### CDL-20260508-043
+- Local time: `2026-05-08 23:29:48`
+- Type: `research-feedback-and-liquidity-root-cause-fix`
+- Scope: `scheduler feedback recursion guard + V5 portfolio liquidity fallback`
+- Touched paths:
+  - `src/ashare/engine/objective_scheduler.py`
+  - `src/ashare/research_brain/hub/candidate_factory.py`
+  - `src/ashare/research_brain/hub/training_engine.py`
+  - `src/ashare/research_brain/hub/portfolio_engine.py`
+  - `data/event_lake_v6/bridge/performance_feedback.json`
+  - `data/event_lake_v6/research/supervisor/performance_feedback.json`
+  - `data/research_hub_integrated/cycles/cycle_001_20260413_081008/cycle_plan.json`
+  - `data/event_lake_v6/research/supervisor/objective_scheduler/*.json` oversized runtime artifacts
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Root-caused the ~13 GB feedback incident to recursive embedding: `objective_scheduler.py` loaded prior `bridge_feedback`, copied it into `advisor_chain` / `signal_snapshot`, and `merge_signals_with_budget_feedback(...)` wrote the full scheduler decision back into `performance_feedback.json`.
+  - Added a `5 MB` scheduler input guard and compact feedback payloads so future scheduler artifacts store summaries instead of full prior decision trees.
+  - Made `candidate_factory.py` skip oversized bridge input JSON files and write compact `bridge_inputs` snapshots to `cycle_plan.json` instead of copying full feedback artifacts into every research cycle plan.
+  - Replaced already-generated oversized recursive JSON files with small tombstone JSON documents, including the bridge/supervisor `performance_feedback.json`, the affected `cycle_plan.json`, and objective-scheduler decision files over the active input limit.
+  - Root-caused the latest V5 portfolio collapse to `amount_mean_20` being null for nearly all `MAIN/GEM/STAR` rows while BSE rows still had liquidity values.
+  - Kept raw `amount` in V5 runtime/latest-score frames and changed portfolio filtering to compare normalized `liquidity_amount_cny`, preferring `amount_mean_20`, falling back to `amount`, and scaling likely Tushare-thousand-CNY values by `1000`.
+- Impact:
+  - Research scheduling should no longer grow active feedback artifacts exponentially or attempt to read multi-GB JSON as live input.
+  - Future `cycle_plan.json` artifacts should stay reviewable even when upstream feedback files are large or tombstoned.
+  - The V5 portfolio layer no longer turns a missing 20-day rolling-liquidity field into a BSE-only 20-name book by default.
+  - The data-quality root cause remains visible: enriched market history still has date gaps and mixed `amount` units, so source-level backfill and unit normalization remain necessary before treating research metrics as final.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv313\Scripts\python.exe -m py_compile src\ashare\engine\objective_scheduler.py src\ashare\research_brain\hub\candidate_factory.py src\ashare\research_brain\hub\training_engine.py src\ashare\research_brain\hub\portfolio_engine.py`
+  - Compact-feedback probe confirmed `merge_signals_with_budget_feedback(...)` writes a compact payload (~1.8 KB on a nested mock decision) and does not persist `signal_snapshot` inside the stored compact scheduler decision.
+  - Bridge-input probe confirmed `_load_bridge_inputs()` now returns bounded inputs and treats the tombstoned `performance_feedback.json` as a small normal JSON instead of loading recursive content.
+  - Portfolio-filter probe on the old winning `latest_scores.csv` merged with runtime `amount` showed the filter keeping `4150` rows across `MAIN/GEM/STAR/BSE`; the top 20 after filtering were `18 MAIN`, `1 GEM`, and `1 STAR` instead of BSE-only.
+  - Size inspection after cleanup showed the formerly multi-GB bridge/supervisor feedback files and cycle plan are now small tombstones, and the largest remaining objective-scheduler JSON file is below the new `5 MB` input limit.
+- Compatibility:
+  - The scheduler still emits the same top-level decision/verdict surfaces, but deep nested prior-feedback details are intentionally summarized.
+  - Tombstones preserve path, original size, replacement time, and recovery reason, but not the full original multi-GB recursive payload.
+  - `portfolio_min_amount_mean_20` keeps its threshold semantics; the compared field is now normalized to CNY through `liquidity_amount_cny`.
+- Rollback:
+  - Revert the compaction helpers and input-size guards only if a typed state store replaces JSON feedback recursion first; otherwise the old behavior can recreate multi-GB artifacts.
+  - Revert the liquidity fallback only after upstream market data guarantees complete, unit-normalized rolling amount fields for the full investable universe.
+
+### CDL-20260413-042
+- Local time: `2026-04-13 18:31:00`
+- Type: `trade-clock-scheduler-recovery-fix`
+- Scope: `runtime-state hygiene + retry/expiry logic for same-day scheduler phases`
+- Touched paths:
+  - `src/ashare/engine/clock_supervisor.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added bounded retry logic so same-day `research_refresh` can retry after a temporary `data_consistency_gate_failed`, and `release_refresh` can retry after a temporary `research_refresh_not_ready`, as long as the retry still occurs before the `preopen_gate` cutoff.
+  - Added phase-expiry filtering so stale same-day queued phases are no longer replayed after their valid window has passed; restarting the trade clock after market close no longer reruns morning/intraday phases like `preopen_gate` or `simulation`.
+  - Cleared stale `stop_reason`, `reload_reason`, reload digests, and active-phase metadata on trade-clock startup so `scheduler_runtime.json` reflects the current process instead of inheriting leftover fields from the previous run.
+  - Verified that a restarted trade clock now requeues orphaned running phases cleanly and advances to the next valid phase (`research` for the next trade date) instead of attempting stale same-day intraday execution phases.
+- Impact:
+  - Trade-clock recovery is now materially more robust after mid-session bug fixes or restarts.
+  - Post-close restarts no longer create false execution activity by replaying expired current-day phases.
+  - Runtime-state artifacts are easier to trust during incident response because stale stop/reload markers are not carried forward into a fresh process.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv313\Scripts\python.exe -m py_compile src\ashare\engine\clock_supervisor.py`
+  - Restarted the trade-clock service and directly inspected:
+    - `data\trade_clock\runtime\scheduler_runtime.json`
+    - `data\trade_clock\clock_state.json`
+    - `data\trade_clock\phase_state\20260413.json`
+  - Confirmed the orphaned `preopen_gate` was requeued once, then later no longer selected as `next_due_phase`; `clock_state.json` advanced to `next_due_phase=research` for `2026-04-14`.
+- Compatibility:
+  - The retry path is intentionally narrow and only applies to the two morning refresh phases with known temporary-state failures.
+  - Phase expiry does not change next-trade-date planning phases (`research`, `release`) or end-of-day `summary`.
+- Rollback:
+  - Revert the retry helper, phase-expiry helper, and startup runtime-state clearing in `clock_supervisor.py` if strict non-retry semantics are preferred.
+
+### CDL-20260413-040
+- Local time: `2026-04-13 08:06:00`
+- Type: `runtime-dependency-repair-and-manual-research-start`
+- Scope: `canonical research startup, venv313 dependency gap, trade-clock attach`
+- Touched paths:
+  - `src/ashare/requirements_v6_runtime.txt`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added `pypdf` to `src/ashare/requirements_v6_runtime.txt` because `engine/pdf_utils.py` imports `PdfReader` through the `announcement_fetchers` chain during `research_only` startup.
+  - Installed `pypdf` into the canonical research interpreter `.venv313` after a real `launch_canonical.py --mode research_only --profile quick_test` attempt failed with `ModuleNotFoundError: No module named 'pypdf'`.
+  - Re-ran canonical `research_only` under `.venv313`; the run advanced through pre-research refresh, market pipeline, scheduler budgeting, V6 planning, and into the V5.1 GPU research phase instead of failing at import time.
+  - Started the trade-clock service again through `scripts/start_trade_clock.ps1`, producing a fresh `clock_supervisor.pid` under `data/trade_clock/runtime`.
+- Impact:
+  - The canonical `.venv313` research path now has the PDF dependency required by announcement/event ingestion, so `research_only` no longer dies before entering the main V6/V5 research stages.
+  - Current `quick_test` manual research is still long-running and has not yet completed a bounded full cycle; it progressed far enough to confirm the dependency fix.
+  - The manual run exposed a new operational warning: `data/event_lake_v6/research/supervisor/performance_feedback.json` ballooned to roughly `13 GB` before the run moved into the V5.1 GPU stage.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv313\Scripts\python.exe .\tools\preflight_check.py --profile quick_test --mode research_only`
+  - Initial failure repro:
+    - `F:\quant_data\AshareC#\.venv313\Scripts\python.exe .\launch_canonical.py --mode research_only --profile quick_test`
+    - failed at `src\ashare\engine\pdf_utils.py` with `ModuleNotFoundError: No module named 'pypdf'`
+  - Dependency repair:
+    - `F:\quant_data\AshareC#\.venv313\Scripts\python.exe -m pip install pypdf`
+  - Post-repair manual start:
+    - `F:\quant_data\AshareC#\.venv313\Scripts\python.exe .\launch_canonical.py --mode research_only --profile quick_test`
+    - reached V6 planning completion and emitted `Supervisor Note: ... V5.1 GPU ...`
+  - Trade clock attach:
+    - `powershell -ExecutionPolicy Bypass -File .\scripts\start_trade_clock.ps1`
+    - active PID file now points to a fresh `.venv313` `trade_clock_service.py` process
+    - `data\trade_clock\runtime\scheduler_runtime.json` updated at `2026-04-13T08:03:58+08:00`
+
+### CDL-20260413-041
+- Local time: `2026-04-13 17:45:00`
+- Type: `automation-gate-root-cause-fix`
+- Scope: `industry hard-factor refresh failure root cause and market snapshot gate alignment`
+- Touched paths:
+  - `scripts/build_industry_hard_factor_layer.py`
+  - `src/ashare/engine/data_consistency_guard.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Fixed `scripts/build_industry_hard_factor_layer.py` so `_build_official_metric_rows(...)` accepts and passes `config`; the prior code referenced `config` out of scope and caused all official-page hard-factor fetches to log `NameError: name 'config' is not defined`.
+  - Re-ran `build_industry_hard_factor_layer.py` under `.venv313`; the refresh now writes real rows and new `source_fetch_run_log` successes for `industry_hard_factor_refresh` instead of only failed rows.
+  - Fixed `src/ashare/engine/data_consistency_guard.py` so `market_table_spread_days` is computed from the daily tables (`market_enriched_daily`, `market_hs300_daily`) only; same-day `market_price_snapshot` no longer falsely triggers `market_table_mismatch` during Monday pre-open / post-weekend conditions.
+- Impact:
+  - The original automation block on `2026-04-13` was a real refresh failure, not a pure detection false positive: `industry_hard_factor_refresh` genuinely failed because of the `config` NameError.
+  - After the hard-factor rerun, the next remaining gate blocker was the market-table mismatch heuristic, not stale fact refreshes.
+  - `assess_automation_data_readiness(..., trade_date='2026-04-13', phase_name='research_refresh')` now returns `ok=true` on the repaired environment.
+- Validation:
+  - SQLite inspection of `source_fetch_run_log` before the fix showed `trade_date='2026-04-13' and pipeline_name='industry_hard_factor_refresh'` rows all failed with `error_class='NameError'` and `message=\"name 'config' is not defined\"`.
+  - `F:\quant_data\AshareC#\.venv313\Scripts\python.exe -m py_compile scripts\build_industry_hard_factor_layer.py src\ashare\engine\data_consistency_guard.py`
+  - `F:\quant_data\AshareC#\.venv313\Scripts\python.exe scripts\build_industry_hard_factor_layer.py`
+  - Post-fix SQLite counts for `2026-04-13`:
+    - `industry_hard_factor_refresh success_count = 14`
+    - `industry_hard_factor_refresh row_count = 68`
+  - Post-fix guard probe:
+    - `assess_automation_data_readiness(... trade_date='2026-04-13', phase_name='research_refresh')`
+    - returned `ok=true`, `issues=[]`, `night_window_covered=true`
+
+### CDL-20260412-039
+- Local time: `2026-04-12 00:35:00`
+- Type: `training-timing-backtest-and-data-gate-hardening`
+- Scope: `execution-aligned labels, embargoed splits, cost-aware V5 backtests, automation freshness gate, overnight-news coverage`
+- Touched paths:
+  - `src/ashare/research_brain/hub/dataset.py`
+  - `src/ashare/research_brain/hub/metrics.py`
+  - `src/ashare/research_brain/hub/training_engine.py`
+  - `src/ashare/research_brain/hub/portfolio_engine.py`
+  - `src/ashare/research_brain/hub/single_run_v5.py`
+  - `src/ashare/research_brain/hub/evaluator.py`
+  - `src/ashare/engine/data_consistency_guard.py`
+  - `src/ashare/engine/clock_supervisor.py`
+  - `src/ashare/engine/supervisor.py`
+  - `src/ashare/engine/config_builder.py`
+  - `src/ashare/engine/local_settings.example.py`
+  - `src/ashare/configs/runtime_config.quick_test.json`
+  - `src/ashare/configs/runtime_config.daily_production.json`
+  - `src/ashare/configs/hub_config.v6.runtime.quick_test.json`
+  - `src/ashare/configs/hub_config.v6.runtime.daily_production.json`
+  - `src/ashare/research_brain/configs/hub_config.v5_1.example.json`
+  - `src/ashare/research_brain/configs/hub_config.v5_1.local.json`
+  - `src/ashare/research_brain/configs/hub_config.v5_1.sandbox.json`
+  - `src/ashare/research_brain/configs/hub_config.v5_1.integrated_gpu.json`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Replaced V5 same-bar training labels with execution-aligned labels derived from `close` (for example `future_ret_5__entry_lag_1`) so model fitting, validation, and test metrics now use the same next-bar entry convention as the stricter backtest path.
+  - Added date-split embargo support in `dataset.py`; V5 training now leaves a `label_horizon + execution_lag_bars` gap between train/valid/test windows to reduce label bleed across split boundaries.
+  - Added explicit `time_alignment` and `overfit_diagnostics` into `train_summary.json`, and made the evaluator penalize medium/high overfit risk instead of only logging classic IC / correlation metrics.
+  - Hardened the V5 backtest again from `next-bar executable` to `next-bar cost-aware executable` by applying configurable buy/sell fees, stamp tax, base slippage, and an additional queue-risk penalty on extreme bars.
+  - Added `data_consistency_guard.py` and wired it into both `clock_supervisor` and `integrated_supervisor`; automation now fails closed when required same-day refresh evidence is missing, which is the new protection against leaking a previous-evening data snapshot into a morning release or simulation run.
+  - Changed the trade-clock default `research_refresh_profile` from `quick_test` to the scheduler production profile (`daily_production` on this machine) and added explicit `data_consistency_gate` defaults to the generated runtime configs.
+  - Updated the checked-in V5 config family with cost-aware backtest defaults and overfit-score penalties so the stricter runtime behavior is not dependent on ad-hoc local overrides.
+- Impact:
+  - The main V5 leak surface is now the execution contract itself rather than an internal label mismatch: the model is scored on the same lagged entry convention that the backtest uses.
+  - Morning automation now has an explicit answer to the overnight-news problem: `research_refresh` / `release_refresh` must prove today's external/fact refreshes happened before pre-open/simulation phases continue.
+  - Candidate ranking is now less tolerant of validation-vs-test degradation; strategies with attractive in-sample metrics but poor out-of-sample stability lose score automatically.
+- Validation:
+  - `F:/quant_data/AshareC#/.venv313/Scripts/python.exe -m py_compile ...` on all touched Python files completed successfully.
+  - Synthetic V5 smoke run confirmed:
+    - derived label column `future_ret_5__entry_lag_1`
+    - `time_alignment.execution_lag_bars = 1`
+    - `time_alignment.split_embargo_days = 6`
+    - backtest execution model `next_bar_close_cost_aware_limit_aware_exit`
+  - Config smoke confirmed generated runtime config now carries:
+    - `trade_clock.scheduler.research_refresh_profile = daily_production`
+    - `trade_clock.scheduler.data_consistency_gate.enabled = true`
+  - Data-gate smoke on the current machine returned `ok=true` for `trade_date=2026-04-11`, `phase_name=research_refresh`.
+- Compatibility:
+  - New V5 train summaries now contain `effective_label_col`, `time_alignment`, and `overfit_diagnostics`.
+  - V5 backtest outputs remain CSV/JSON compatible, but returns are net of explicit costs/slippage and are intentionally stricter than previous optimistic runs.
+  - Automation phase payloads can now include `data_consistency_gate` results.
+- Rollback:
+  - Remove `data_consistency_guard.py`, revert the `research_refresh_profile` default, restore `portfolio_engine.py` to the previous cost-free model, and stop deriving execution-aligned labels in `training_engine.py` if you intentionally want to return to the earlier optimistic research contract.
+
+### CDL-20260411-036
+- Local time: `2026-04-11 22:50:00`
+- Type: `refresh-validation-and-limit-check`
+- Scope: `real refresh execution validation, log-based limit check, current freshness classification`
+- Touched paths:
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Ran the shared pre-research refresh bundle for real after the root-cause fixes and confirmed all three legs now succeed on this machine:
+    - `affordable_data_bundle`
+    - `external_research_refresh`
+    - `research_fact_refresh`
+  - Ran `market_pipeline` for real and confirmed it completed without runtime errors, refreshed the daily price snapshot, and mirrored market data into the runtime SQLite.
+  - Checked refresh stdout/stderr logs for rate-limit, permission, timeout, and denial signatures; none were observed in the validated run set.
+  - Reclassified the remaining stale-looking tables into two buckets:
+    - true automation bugs already fixed
+    - source/cadence-limited datasets that can legitimately remain older or empty on a given run
+- Impact:
+  - We now have proof that the refresh modules can actually fetch and persist data on this machine rather than only static confidence from code inspection.
+  - The remaining freshness gaps are no longer explained by orchestration/import failures.
+  - Future debugging can focus on source coverage/cadence or vendor-side data availability instead of the automation entrypoints.
+- Validation:
+  - Shared pre-research refresh bundle returned:
+    - `elapsed_seconds=510.0`
+    - `ok=true`
+    - `warning_count=0`
+    - `affordable_ok=true`
+    - `external_ok=true`
+    - `research_fact_ok=true`
+  - `market_pipeline` returned without errors and reported:
+    - `price_snapshot.rows=5495`
+    - `price_snapshot.trade_date=20260410`
+    - `price_snapshot.snapshot_quality=realtime_quote`
+    - `price_snapshot.updated_sql_rows=5495`
+  - Post-run SQLite spot checks:
+    - `research_data_v1.sqlite3`: `market_enriched_daily`, `market_hs300_daily`, `market_price_snapshot` all at `2026-04-10`
+    - `affordable_data_v1.sqlite3`: recent dataset runs updated at `2026-04-11 22:43`, recent primary dates at `2026-04-10/11`
+    - `research_fact_layers_v1.sqlite3`: `qianzhan_indicator_daily=2026-04-11`, `event_fact_company_actions=2026-04-11`, `industry_factor_price_inventory_daily=2026-04-10`
+  - Log scan over the validated refresh artifacts found no `429`, `timeout`, `denied`, `forbidden`, or traceback signatures.
+- Compatibility:
+  - No runtime contracts changed in this entry; this is an operational validation record of the repaired refresh chain.
+- Rollback:
+  - Not applicable; this entry documents execution results rather than a separate code-path change.
+
+### CDL-20260411-035
+- Local time: `2026-04-11 22:00:00`
+- Type: `refresh-script-bootstrap-root-cause-fix`
+- Scope: `repair refresh-script import roots, fix customs helper dynamic import, validate shared refresh bundle`
+- Touched paths:
+  - `scripts\update_affordable_data_bundle.py`
+  - `scripts\build_event_fact_layer.py`
+  - `scripts\build_industry_hard_factor_layer.py`
+  - `scripts\update_external_research_feeds.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Fixed the four refresh scripts so they bootstrap Python imports from `F:\quant_data\AshareC#\src\ashare` instead of the deleted/stale historical path `src\ashare\src\ashare`.
+  - Fixed `update_affordable_data_bundle.py`'s `customs_summary` dynamic helper loader by registering the module in `sys.modules` before `exec_module(...)`, which eliminates the dataclass loader crash that surfaced as `'NoneType' object has no attribute '__dict__'`.
+  - Re-ran the shared pre-research refresh bundle after the bootstrap fix and confirmed `external_research_refresh` and `research_fact_refresh` now succeed; then ran the isolated `customs_summary` affordable dataset successfully after the helper fix.
+- Impact:
+  - The shared refresh authority added in `CDL-20260411-034` is now actually executable on this machine instead of immediately failing with `ModuleNotFoundError: engine`.
+  - `affordable_data_v1.sqlite3` and `research_fact_layers_v1.sqlite3` can refresh again through the automated path; the prior stale state was not just an entrypoint bug, it also depended on broken script bootstrapping.
+  - The remaining freshness gap now mostly sits in market-file age (`HS300` / `price_snapshot`) and any source-specific dataset cadence, not in the refresh orchestration itself.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv313\Scripts\python.exe -m py_compile scripts\update_affordable_data_bundle.py scripts\build_event_fact_layer.py scripts\build_industry_hard_factor_layer.py scripts\update_external_research_feeds.py src\ashare\engine\clock_supervisor.py src\ashare\engine\supervisor.py`
+  - Shared refresh bundle probe returned:
+    - `external_ok=true`
+    - `research_fact_ok=true`
+    - `affordable_ok=false` before the customs-helper fix, with only `affordable_data_refresh` remaining failed
+  - Isolated affordable run after the customs-helper fix:
+    - `scripts\update_affordable_data_bundle.py ... --dataset customs_summary`
+    - completed successfully with `rows_written=2`
+  - Post-fix SQLite spot checks:
+    - `research_fact_layers_v1.sqlite3`: `qianzhan_indicator_daily` max `trade_date=2026-04-11`, `event_fact_company_actions` max `publish_date=2026-04-11`
+    - `affordable_data_v1.sqlite3`: recent dataset runs and primary dates advanced to `2026-04-10` / `2026-04-11`
+- Compatibility:
+  - Script CLIs and data locations are unchanged; only the runtime bootstrap/import path and one dynamic import edge case were corrected.
+  - Existing automation can keep calling the same scripts and shared bundle entrypoints.
+- Rollback:
+  - Restore the old script bootstrap paths and remove the `sys.modules[spec.name] = module` registration if you intentionally want to return to the broken import layout, though that would reintroduce the refresh failures.
+
+### CDL-20260411-034
+- Local time: `2026-04-11 21:05:00`
+- Type: `automation-root-cause-fix-and-doc-principle`
+- Scope: `unified pre-research refresh authority for automated research entrypoints, root-cause-first engineering rule`
+- Touched paths:
+  - `src\ashare\engine\clock_supervisor.py`
+  - `src\ashare\engine\supervisor.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added shared `run_pre_research_refresh_bundle(...)` in `clock_supervisor.py` to orchestrate `affordable_data_bundle`, `external_research_refresh`, and `research_fact_refresh` in one place.
+  - Rewired `clock_supervisor` research phases to consume that shared refresh bundle instead of duplicating the three refresh calls inline.
+  - Rewired `integrated_supervisor` to run the same pre-research refresh bundle as its own first stage (`pre_research_refresh`) before `market_pipeline`, V6 planning, or V5 research.
+  - When the shared bundle reports a blocking failure (`fail_open=false` on a failed refresh), `integrated_supervisor` now records the failed stage and stops the current tick instead of continuing into research on stale inputs.
+  - Added an explicit `Engineering Principles` section to the stable handoff doc that states the repository standard is root-cause-first repair rather than symptom-hiding compatibility patching.
+- Impact:
+  - The earlier divergence where one automated path refreshed only market data while another refreshed the broader research databases is removed.
+  - Future staleness is now attributable to refresh jobs not succeeding or not being scheduled, not to the top-level automation entrypoint bypassing the refresh code.
+  - The dev-log truth now explicitly encodes the expected engineering posture for future Codex sessions: fix the authority path / root cause rather than layering shims.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv313\Scripts\python.exe -m py_compile src\ashare\engine\clock_supervisor.py src\ashare\engine\supervisor.py`
+  - Verified `main_research_runner.py --mode integrated_supervisor` still targets `run_integrated_supervisor(...)`, and that `run_integrated_supervisor(...)` now includes the new `pre_research_refresh` stage before `market_pipeline`.
+- Compatibility:
+  - Existing refresh scripts and runtime config sections are unchanged; the fix centralizes orchestration rather than replacing the refresh jobs themselves.
+  - Stage/state consumers may now see a new `pre_research_refresh` stage in supervisor artifacts.
+- Rollback:
+  - Remove the shared bundle function, restore the old inline refresh handling in `clock_supervisor`, and delete the `pre_research_refresh` stage from `supervisor.py` if the centralized authority model is rejected.
+
+### CDL-20260411-033
+- Local time: `2026-04-11 20:35:00`
+- Type: `backtest-execution-hardening-and-sql-audit`
+- Scope: `V5 backtest timing/tradability correction, market SQLite mirroring fix, SQL freshness audit`
+- Touched paths:
+  - `src\ashare\research_brain\hub\portfolio_engine.py`
+  - `src\ashare\research_brain\hub\training_engine.py`
+  - `src\ashare\engine\market_pipeline.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Reworked V5 paper backtest execution in `portfolio_engine.py` so signal rows are no longer assumed to be executable on the same close used by the model features and labels.
+  - Added next-bar-close entry logic, blocked entry when the next bar is suspended / limit-up / not basic-tradable, and deferred exit until the first sellable bar after the target holding horizon instead of directly averaging `future_ret_*`.
+  - Added `pct_chg` to the runtime/backtest projection in `training_engine.py` so limit-up / limit-down direction can be inferred during backtest even when the training table only carries generic `is_limit`.
+  - Added SQLite mirroring for HS300 daily data and price snapshots in `market_pipeline.py`; whenever those file-backed artifacts are refreshed, `research_data_v1.sqlite3` now updates `market_hs300_daily` and `market_price_snapshot` too.
+  - Backfilled the new SQL mirroring logic once from the current local files so the runtime SQLite schema and file layer are at least aligned to the same local source state.
+  - Audited the major SQLite stores and recorded that several are configured for automatic refresh but are not currently fresh on disk.
+- Impact:
+  - The V5 backtest no longer overstates performance by letting after-close signals trade on the same close and by assuming all selected names can always enter/exit on schedule.
+  - Runtime consumers that query `research_data_v1.sqlite3` can now rely on HS300 and price-snapshot tables being maintained by the market pipeline rather than silently lagging forever behind the file layer.
+  - The current machine state is now clearer: stale databases are no longer confused with missing refresh code paths.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv313\Scripts\python.exe -m py_compile src\ashare\research_brain\hub\portfolio_engine.py src\ashare\research_brain\hub\training_engine.py src\ashare\engine\market_pipeline.py`
+  - Queried `research_data_v1.sqlite3`, `research_fact_layers_v1.sqlite3`, and `affordable_data_v1.sqlite3` to inspect tables and latest observed dates / run timestamps.
+  - Backfilled runtime SQL mirrors from the current local HS300 CSV and price snapshot CSV and verified row counts were written (`hs300_rows=3949`, `price_rows=5495`).
+- Compatibility:
+  - The V5 outputs remain CSV/JSON compatible, but `portfolio_backtest_curve.csv` and `portfolio_backtest_holdings.csv` now represent a stricter execution model and will no longer be directly comparable to older optimistic runs.
+  - The market SQLite mirroring change is additive for runtime consumers; file-backed artifacts remain in place.
+- Rollback:
+  - Restore the previous `portfolio_engine.py` same-day label-averaging logic, remove `pct_chg` from the runtime projection if desired, and remove the new HS300 / price-snapshot SQL mirror helpers from `market_pipeline.py` if the stricter execution model or SQLite mirroring is rejected.
+
+### CDL-20260411-032
+- Local time: `2026-04-11 19:22:45`
+- Type: `runtime-stability-hardening`
+- Scope: `Python 3.13 cutover, V5 IO-pressure reduction, hot-run-path SSD migration`
+- Touched paths:
+  - `src\ashare\engine\local_settings.example.py`
+  - `src\ashare\research_brain\hub\training_engine.py`
+  - `src\ashare\research_brain\hub\single_run_v5.py`
+  - `src\ashare\research_brain\configs\hub_config.v5_1.integrated_gpu.json`
+  - `F:\quant_data\AshareC#\.venv313`
+  - `F:\quant_data\AshareC#\data\research_hub_integrated\runs` (now junction)
+  - `D:\AshareHotData\research_hub_integrated\runs`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Installed Python `3.13.12`, created workspace research venv `F:\quant_data\AshareC#\.venv313`, and installed `src\ashare\requirements_v6_runtime.txt` into that venv.
+  - Changed `local_settings.example.py` so canonical research now prefers `.venv313\Scripts\python.exe` by default when present, while keeping `GMTRADE_PYTHON_EXECUTABLE` on the separate Python 3.9 bridge.
+  - Updated the checked-in manual V5 config `hub_config.v5_1.integrated_gpu.json` to point at `.venv313\Scripts\python.exe` instead of `.venv` / Python 3.14.
+  - Changed `training_engine.py` and `single_run_v5.py` so portfolio backtests use the in-memory `pred_test_df` directly; the runtime no longer forces a full `pred_test.csv` write/read round-trip by default.
+  - Added bounded debug controls for prediction artifacts: `ASHARE_WRITE_FULL_PRED_TEST_CSV=1` restores the old full CSV behavior, and `ASHARE_PRED_TEST_SAMPLE_ROWS` controls an optional sampled `pred_test.sample.csv`.
+  - Moved the hot V5 run tree from `F:\quant_data\AshareC#\data\research_hub_integrated\runs` to `D:\AshareHotData\research_hub_integrated\runs` and replaced the old path with a junction so existing relative paths still resolve.
+- Impact:
+  - Canonical research no longer defaults to the Python 3.14 runtime that was repeatedly crashing in `python314.dll` / `ntdll.dll` during the 2026-04-11 investigation.
+  - The largest repeated V5 write amplifier is removed from the normal path: backtests no longer require writing hundreds of MB to multiple GB of `pred_test.csv` per candidate before reading the same data back.
+  - The hottest run-artifact path now lands on `D:` NVMe while preserving the logical repo-local path shape expected by existing code and registry records.
+  - `D:` capacity is preserved by moving only `research_hub_integrated\runs`, not the whole `data` tree.
+- Validation:
+  - `py -0p` shows `Python 3.13` installed at `C:\Users\Administrator\AppData\Local\Programs\Python\Python313\python.exe`
+  - `F:\quant_data\AshareC#\.venv313\Scripts\python.exe -m py_compile src\ashare\engine\local_settings.example.py src\ashare\research_brain\hub\training_engine.py src\ashare\research_brain\hub\single_run_v5.py`
+  - Imported `engine.local_settings` under `.venv313` and verified `PYTHON_EXECUTABLE=F:\quant_data\AshareC#\.venv313\Scripts\python.exe`
+  - Verified `data\research_hub_integrated\runs` is now a junction targeting `D:\AshareHotData\research_hub_integrated\runs`
+  - Verified migrated hot-run payload size on `D:` is about `110.3 GB`
+- Compatibility:
+  - Registry rows and downstream path consumers still see the logical run root `data\research_hub_integrated\runs`; the storage relocation is transparent through the junction.
+  - Full `pred_test.csv` can still be restored explicitly for deep debugging, but it is no longer the default runtime contract.
+  - Broker / Gmtrade execution remains on Python 3.9 and was not merged into the research environment.
+- Rollback:
+  - Point `hub_config.v5_1.integrated_gpu.json` and `local_settings.example.py` back to `.venv` / Python 3.14, remove `.venv313`, move `D:\AshareHotData\research_hub_integrated\runs` back under repo `data`, and replace the junction with a normal directory if the Python 3.13 + NVMe-hotpath cutover is rejected.
+
+### CDL-20260411-031
+- Local time: `2026-04-11 16:35:30`
+- Type: `runtime-validation-and-debug-data-cleanup`
+- Scope: `manual debug artifact cleanup and post-GPU-fix integrated validation`
+- Touched paths:
+  - `data\research_hub_integrated\runs\20260411_145856_1c45e4d5`
+  - `data\research_hub_integrated\runs\20260411_145856_0b490f76`
+  - `data\research_hub_integrated\runs\20260411_145914_1c45e4d5`
+  - `data\research_hub_integrated\runs\20260411_145914_0b490f76`
+  - `data\research_hub_integrated\runs\20260411_155851_0feb4e6f`
+  - `data\research_hub_integrated\runs\20260411_160109_gpucheck`
+  - `data\research_hub_integrated\runs\20260411_160300_gpucheck`
+  - `data\research_hub_integrated\registry\experiment_registry.csv`
+  - `data\research_hub_integrated\registry\experiment_registry.before_cleanup_20260411_161040.csv`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Deleted the clearly manual debug / gpucheck research run directories created during candidate-level reproduction so they do not consume disk or pollute future research history.
+  - Removed the corresponding rows from `experiment_registry.csv` and wrote a registry backup before cleanup.
+  - Re-ran the full canonical integrated path after the GPU fixes using `launch_canonical.py --mode integrated_supervisor --profile quick_test`.
+  - Confirmed the new integrated quick-test run actually scheduled `lightgbm_gpu` candidates and that candidate `004` wrote `train_summary.json` with `gpu_used=true` and `effective_model_family=lightgbm_gpu`.
+  - Confirmed the remaining native failure now occurs after GPU training and `pred_test.csv` write, and before `run_summary.json` / portfolio-backtest completion.
+- Impact:
+  - Manual debug experiments no longer contaminate future parent selection or consume several gigabytes of space in the active research output tree.
+  - The integrated runtime is now proven to use the GPU path for real candidates, not just isolated smoke tests.
+  - The remaining crash surface is narrowed further to the post-training late-stage path on the GPU candidate chain.
+- Validation:
+  - Registry backup written to `data\research_hub_integrated\registry\experiment_registry.before_cleanup_20260411_161040.csv`
+  - Verified deleted run directories no longer exist and their `run_id`s are absent from `experiment_registry.csv`
+  - Full canonical rerun:
+    - run id `20260411_161117_e1dddd38`
+    - V5 child failed with native exit `3221225477`
+    - candidate `004` run dir `20260411_163304_c2d2568e` contains `train_summary.json` showing `gpu_used=true`, `effective_model_family=lightgbm_gpu`, and a large `pred_test.csv`, but no `run_summary.json`
+- Compatibility:
+  - Cleanup only removed manual debug artifacts and their registry rows; the prior full canonical repro set was preserved.
+  - The active runtime and config contracts are unchanged by the cleanup itself.
+- Rollback:
+  - Restore `experiment_registry.before_cleanup_20260411_161040.csv` over `experiment_registry.csv` and recover deleted run directories from external backup if those manual debug artifacts are later required.
+
+### CDL-20260411-030
+- Local time: `2026-04-11 16:05:00`
+- Type: `gpu-route-fix-and-late-crash-narrowing`
+- Scope: `quick-test GPU restoration, late-stage V5 crash narrowing, runtime naming-debt cleanup`
+- Touched paths:
+  - `src\ashare\research_brain\hub\model_families.py`
+  - `src\ashare\engine\objective_scheduler.py`
+  - `src\ashare\research_brain\hub\candidate_factory.py`
+  - `src\ashare\engine\supervisor.py`
+  - `src\ashare\research_brain\hub\training_engine.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `src\ashare\configs\gmtrade_runtime_config.example.json`
+  - `src\ashare\configs\runtime_config.example.json`
+  - `src\ashare\configs\runtime_config.quick_test.json`
+  - `src\ashare\configs\runtime_config.daily_production.json`
+  - `src\ashare\configs\probe_intraday_tactics.quick_test.json`
+  - `src\ashare\research_brain\configs\hub_config.v5_1.integrated_gpu.json`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Confirmed both `xgboost_gpu` and `lightgbm_gpu` are usable on this machine, and identified that quick-test was not using GPU because the centralized scheduler preferred `lightgbm_auto` and explicitly banned `xgboost_gpu`.
+  - Changed quick-test research scheduling to prefer `ridge_ranker` plus `lightgbm_gpu`, and aligned candidate-factory GPU-priority ordering plus supervisor fallback signal preferences to the same family set.
+  - Fixed `lightgbm_gpu` model construction so LightGBM GPU no longer receives an invalid `max_bin=256` equivalent; the builder now clamps GPU `max_bin` to `<=255`.
+  - Narrowed the late V5 crash by verifying the `2026-04-11 15:04` integrated run progressed to candidate `12/12`, and that the child still died with native exit `3221226356` before batch-finalization artifacts were written.
+  - Reduced one obvious memory-pressure path in `training_engine.py` by projecting runtime/backtest frames down to the columns actually needed downstream instead of carrying the full feature table forward.
+  - Cleared remaining active naming debt in runtime-facing config/examples by moving `V5_PROJECT_ROOT` and `portfolio_root`/`project_root` references to the real `src\ashare\research_brain` and `data\research_hub_integrated` locations.
+- Impact:
+  - Quick-test research no longer silently routes onto CPU-only `lightgbm_auto` when GPU is available and desired.
+  - GPU-backed LightGBM is now a valid quick-test default path instead of a fallback-only option.
+  - The research crash is now narrowed to a late candidate/finalization region, which is a materially smaller debugging surface than the previous “somewhere inside V5” state.
+  - Active config files better match current workspace truth instead of preserving old `quant_research_hub_integrated` / `research_hub_v5_1_gpu_integrated` naming.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\research_brain\hub\model_families.py src\ashare\engine\objective_scheduler.py src\ashare\research_brain\hub\candidate_factory.py src\ashare\engine\supervisor.py src\ashare\research_brain\hub\training_engine.py src\ashare\engine\local_settings.example.py`
+  - Quick-test scheduler probe now returns `preferred_model_families = ['ridge_ranker', 'lightgbm_gpu']` and `ban_model_families = ['xgboost_gpu', 'generated_family']`.
+  - Single-candidate GPU validation using candidate `001` with `model_family=lightgbm_gpu`:
+    - first repro showed GPU attempted but fell back because LightGBM rejected `max_bin`
+    - after the clamp fix, run `20260411_160300_gpucheck` completed with `effective_model_family=lightgbm_gpu` and `gpu_used=true`
+  - Integrated canonical run `20260411_150409_6318030b` ended with supervisor state showing candidate `12/12` reached and V5 child native exit `3221226356`.
+- Compatibility:
+  - `ridge_ranker` remains in the quick-test family set, so environments where GPU later regresses still retain a stable non-GPU candidate path.
+  - `lightgbm_auto` is still supported; this change only removes it from the top quick-test preferred list.
+  - Runtime config/example naming changes are path-truth corrections, not contract removals.
+- Rollback:
+  - Restore the previous quick-test preferred-model lists in `objective_scheduler.py`, `candidate_factory.py`, and `supervisor.py`, remove the LightGBM GPU `max_bin` clamp, and revert the runtime config/example path updates if GPU-first quick-test routing is rejected.
+
+### CDL-20260411-029
+- Local time: `2026-04-11 00:23:25`
+- Type: `research-scheduler-centralization`
+- Scope: `signal-only local advisors, central research authority, candidate-factory scheduler obedience, and full-run verification`
+- Touched paths:
+  - `src\ashare\engine\objective_scheduler.py`
+  - `src\ashare\engine\supervisor.py`
+  - `src\ashare\research_brain\hub\candidate_factory.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Upgraded `objective_scheduler.py` from a narrow budget helper into the central research authority producer for the supervisor path.
+  - Added `research_scheduler_decision_v2` with `artifact_identity`, `advisor_chain`, `reason_chain`, `route_budget`, `research_brain_overrides`, `strategy_overrides`, and `portfolio_overrides`.
+  - Changed `supervisor._build_strategy_feedback(...)` so the local performance/regime module is now explicitly signal-only (`authority_role=local_signal_only`) and no longer writes final strategy / portfolio overrides by itself.
+  - Added `latest_research_scheduler_verdict.json` beside the existing research-budget artifact alias.
+  - Hardened `candidate_factory.py` so route generation now obeys scheduler-provided `model_families` and ban lists even on routes that previously hard-coded `xgboost_gpu` or `generated_family`, and non-model routes no longer inherit a banned parent model family.
+  - Added a quick-test scheduler safety rule that prefers `ridge_ranker` / `lightgbm_auto` and bans `xgboost_gpu` / `generated_family` when the goal is orchestration validation rather than aggressive GPU exploration.
+- Impact:
+  - Research-side authority is now aligned with the same central-scheduler design already used on the execution side.
+  - Local modules now provide signals, evidence, and suggested constraints; the scheduler is the single writer of final research / portfolio overrides in the supervisor path.
+  - V5 candidate generation can no longer bypass central scheduler bans through route-specific hard-coding.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\engine\objective_scheduler.py src\ashare\engine\supervisor.py src\ashare\research_brain\hub\candidate_factory.py`
+  - Direct candidate-factory probe under the generated integrated config confirmed `feature`, `risk`, `model`, `data`, and `hybrid` samples now resolve only to `lightgbm_auto` / `ridge_ranker` when the scheduler bans `xgboost_gpu` / `generated_family`.
+  - Full canonical run attempts:
+    - `2026-04-10 22:50` run id `20260410_225047_603ac68d` via `launch_canonical.py --skip-preflight --mode integrated_supervisor --profile quick_test` failed in the V5.1 child with native exit `3221225477`
+    - `2026-04-10 23:19` run id `20260410_231921_18245dda` failed the same way before the candidate-factory inheritance fix was complete
+    - `2026-04-10 23:54` run id `20260410_235405_999e50a0` showed the scheduler ban taking effect (`lightgbm_auto` / `ridge_ranker` in candidate logs) but the V5.1 child still failed natively with exit `3221226356`
+  - `tools\preflight_check.py --profile quick_test --mode integrated_supervisor` still fails only on legacy `hub_v6.*` import checks, so real runs currently require `--skip-preflight`
+- Compatibility:
+  - Existing consumers of `performance_feedback.json` remain compatible because the merged payload still exposes `route_weights`, `route_space_overrides`, model-family preferences, and override sections.
+  - The new research scheduler artifact and richer decision structure are additive.
+- Rollback:
+  - Revert `objective_scheduler.py`, `supervisor.py`, and `candidate_factory.py` to restore local override writing and route-specific hard-coded model-family behavior; remove the new research scheduler verdict alias from the supervisor artifact writer.
+
+### CDL-20260410-028
+- Local time: `2026-04-10 20:05:00`
+- Type: `objective-unification`
+- Scope: `econometric guardrails and real scheduler arbitration`
+- Touched paths:
+  - `src\ashare\engine\econometric_guardrails.py`
+  - `src\ashare\engine\global_objective.py`
+  - `src\ashare\engine\intelligent_scheduler.py`
+  - `src\ashare\engine\execution_ems.py`
+  - `src\ashare\engine\execution_manager.py`
+  - `src\ashare\engine\portfolio_recommendation.py`
+  - `src\ashare\engine\config_builder.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added `econometric_guardrails.py` to produce explicit anti-overfit / pseudo-correlation / regime-dependency scores and a unified `guardrail_penalty`.
+  - Upgraded `global_objective.py` so a single `build_unified_objective_bundle(...)` now produces `econometric_guardrails`, `harvest_risk`, and `global_objective` together.
+  - Added constitution/policy knobs for guardrail ceilings and a `guardrail_weight`, and fed those into the overall objective score and hard-flag generation.
+  - Changed `intelligent_scheduler.py` so the unified objective bundle is no longer audit-only: high guardrail penalty, low incremental value, weak evidence, or excessive harvest risk can now directly downgrade the final execution verdict and reduce turnover/size multipliers.
+  - Updated `portfolio_recommendation.py` and `execution_manager.py` to consume the unified bundle instead of reassembling the layers separately.
+- Impact:
+  - The system now has one canonical producer for objective/risk/guardrail signals, and the scheduler is the actual final arbitration point for those signals.
+  - Econometric guardrails are now part of the live decision chain instead of being left as future design notes.
+- Validation:
+  - `python -m py_compile src\ashare\engine\econometric_guardrails.py src\ashare\engine\global_objective.py src\ashare\engine\execution_ems.py src\ashare\engine\intelligent_scheduler.py src\ashare\engine\portfolio_recommendation.py src\ashare\engine\execution_manager.py src\ashare\engine\config_builder.py src\ashare\engine\local_settings.example.py`
+  - Stress smoke: a deliberately crowded / low-evidence sample returned hard flags `['evidence_below_floor', 'family_concentration_above_ceiling', 'guardrail_penalty_above_ceiling', 'incremental_value_below_floor']`, `guardrail_penalty=0.7856`, and the scheduler downgraded the final verdict to `reduce_only`.
+- Compatibility:
+  - Existing recommendation and execution artifact paths remain valid; the new `econometric_guardrails.json` file is additive.
+  - Existing C# consumers still do not need to parse the new guardrail file immediately, but if they want the newest execution authority explanation they should start reading it together with `global_objective_snapshot.json`.
+- Rollback:
+  - Remove `econometric_guardrails.py`, revert `build_unified_objective_bundle(...)`, and restore the previous audit-only handling of objective signals in `intelligent_scheduler.py`.
+
+### CDL-20260410-027
+- Local time: `2026-04-10 19:35:00`
+- Type: `objective-ems-architecture`
+- Scope: `global objective scaffolding, harvest-risk scoring, EMS execution layer`
+- Touched paths:
+  - `src\ashare\engine\global_objective.py`
+  - `src\ashare\engine\harvest_risk.py`
+  - `src\ashare\engine\execution_ems.py`
+  - `src\ashare\engine\intelligent_scheduler.py`
+  - `src\ashare\engine\portfolio_recommendation.py`
+  - `src\ashare\engine\execution_manager.py`
+  - `src\ashare\engine\config_builder.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added a first-class `global_objective.py` layer that normalizes portfolio/execution state into five buckets: `Outcome`, `Evidence`, `Diversity`, `Execution`, and `Adversarial`.
+  - Added `harvest_risk.py` to score crowding / fallback / weak-fact / execution-risk style institutional-harvest danger using existing candidate-pool, market-state, and execution-review signals.
+  - Added `execution_ems.py` as a dedicated EMS policy layer that converts scheduler/objective/risk state into an explicit execution-management posture (`active`, `defensive`, `reduce_only`, `shadow`, `standby`) plus allowed actions and pacing.
+  - Wired `portfolio_recommendation.py` to emit `global_objective_snapshot.json` and `harvest_risk_assessment.json` beside `portfolio_recommendation.json`.
+  - Wired `execution_manager.py` and `intelligent_scheduler.py` to carry `global_objective`, `harvest_risk`, and EMS posture into the dispatch chain and to persist `data\trade_clock\ems\<namespace>\<timestamp>\execution_management_decision.json`.
+  - Added runtime-config/default knobs for `global_objective` and `execution_management` in `config_builder.py` and `local_settings.example.py`.
+- Impact:
+  - The system now has a centralized, machine-readable objective contract and adversarial-risk layer that downstream execution and future research-budget routing can consume without inferring everything from disparate local heuristics.
+  - EMS is now explicitly separated from OMS truth: OMS still records what happened, while EMS records how and why execution should be staged or constrained.
+  - Current behavior is intentionally conservative: the new objective/EMS layers annotate and steer execution, but they do not yet override upstream research cycle counts or route budgets.
+- Validation:
+  - `python -m py_compile src\ashare\engine\global_objective.py src\ashare\engine\harvest_risk.py src\ashare\engine\execution_ems.py src\ashare\engine\intelligent_scheduler.py src\ashare\engine\portfolio_recommendation.py src\ashare\engine\execution_manager.py src\ashare\engine\config_builder.py src\ashare\engine\local_settings.example.py`
+  - Smoke import / scoring probe:
+    - `assess_harvest_risk(...)`
+    - `build_global_objective_snapshot(...)`
+    - `build_execution_management_decision(...)`
+    - Returned `{'harvest_level': 'low', 'overall': 0.6701, 'ems_posture': 'stage'}`
+- Compatibility:
+  - Existing OMS ledger truth, bridge invocation, and release artifacts remain intact.
+  - Existing C# runtime readers are not yet required to consume the new objective / EMS artifacts; they remain additive JSON outputs for now.
+- Rollback:
+  - Revert the three new engine modules plus the portfolio/execution/scheduler wiring and remove the new runtime-config sections.
+
+### CDL-20260410-026
+- Local time: `2026-04-10 18:20:00`
+- Type: `market-data-integration`
+- Scope: `eastmoney intraday minute-bar provider`
+- Touched paths:
+  - `src\ashare\engine\eastmoney_client.py`
+  - `src\ashare\engine\intraday_proxy_store.py`
+  - `src\ashare\engine\config_builder.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added a lightweight `EastmoneyClient` that pulls minute K-line history from the public Eastmoney `push2his` endpoint and normalizes it into the repo's existing intraday-minute frame shape.
+  - Updated `intraday_proxy_store.build_intraday_proxy_snapshot(...)` so the `rt_min` leg now defaults to `market_pipeline.rt_min_provider = eastmoney` and falls back to Tushare `rt_min` only if the Eastmoney pull returns empty.
+  - Added runtime-config / local-settings knobs for `INTRADAY_RT_MIN_PROVIDER`, `INTRADAY_RT_MIN_FALLBACK_PROVIDER`, and the Eastmoney endpoint/retry/timeout settings.
+- Impact:
+  - The system now has a concrete Eastmoney-backed minute-bar history source wired into the existing intraday proxy pipeline without changing the quote/list/tick parts of that pipeline.
+  - New intraday proxy snapshots can accumulate Eastmoney minute bars into the existing `intraday_rt_min_snapshot.csv` artifact path and downstream consumers.
+- Validation:
+  - `python -m py_compile src\ashare\engine\eastmoney_client.py src\ashare\engine\intraday_proxy_store.py src\ashare\engine\config_builder.py`
+  - Live probe: `EastmoneyClient().intraday_bars(ts_codes=['600000.SH'], freq='1MIN', trade_date='2026-04-10')` returned `240` rows with normalized minute-bar fields.
+- Compatibility:
+  - Existing Tushare realtime quote/list/tick paths are unchanged.
+  - If the Eastmoney minute-bar call returns empty, the configured fallback provider still allows the previous Tushare `rt_min` path to run.
+- Rollback:
+  - Remove `eastmoney_client.py` and revert the `rt_min_provider` routing logic plus the new config/default settings.
+
+### CDL-20260410-025
+- Local time: `2026-04-10 17:40:00`
+- Type: `release-gating-fix`
+- Scope: `same-day release trade_date selection`
+- Touched paths:
+  - `src\ashare\engine\portfolio_release.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Changed `_resolve_trade_date(...)` so same-day release publication remains allowed whenever the current trading day still has at least one remaining execution window.
+  - Removed the previous behavior that forced `trade_date=next_trading_day` immediately after the first execution window start, even if an afternoon execution window still existed.
+- Impact:
+  - Manual `release_only` runs during midday now stay on the current trade date and remain eligible for the later precision paper-execution window.
+  - Releases created only after all configured windows have ended still roll forward to the next trading day.
+- Validation:
+  - `python -m py_compile src\ashare\engine\portfolio_release.py`
+  - Probed `_resolve_trade_date(...)` against `hub_config.v6.runtime.quick_test.json`:
+    - `2026-04-10T08:50:00+08:00` -> `trade_date=2026-04-10`
+    - `2026-04-10T11:00:00+08:00` -> `trade_date=2026-04-10`
+    - `2026-04-10T14:54:00+08:00` -> `trade_date=2026-04-13`
+- Compatibility:
+  - No change to forced trade-date overrides or non-trading-day handling.
+  - Same-day publication still requires a valid trading day and at least one remaining configured execution window.
+- Rollback:
+  - Restore the older `_resolve_trade_date(...)` logic that only allowed same-day release publication before the earliest execution-window start.
+
+### CDL-20260410-024
+- Local time: `2026-04-10 15:35:00`
+- Type: `execution-contract-fix`
+- Scope: `oms execution report success contract`
+- Touched paths:
+  - `src\ashare\engine\oms\runtime.py`
+  - `src\ashare\engine\execution_bridge_runner.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added explicit `ok: true` and `status` fields to OMS `execution_report_*.json` payloads emitted by `run_oms_cycle(...)`.
+  - Hardened the execution-bridge stdout parser so older report-shaped JSON payloads that omitted `ok` / `status` are still interpreted as successful execution artifacts instead of defaulting to `execution_error`.
+- Impact:
+  - `execution_only` no longer misclassifies normal OMS artifact emission as bridge failure just because the child report omitted success flags.
+  - Existing older execution reports remain readable through the updated parser without rewriting historical files.
+- Validation:
+  - `python -m py_compile src\ashare\engine\oms\runtime.py src\ashare\engine\execution_bridge_runner.py`
+  - Parsed `data\live_execution_bridge\execution_report_20260410_145514.json` through `_parse_bridge_stdout(...)` and verified `ok=true`, `status=executed`
+- Compatibility:
+  - Older reports without `ok` / `status` now gain inferred success semantics only when they already contain execution-report structure such as `execution_report_path`, `timestamp`, `oms`, or `portfolio_control`.
+  - New reports always emit the fields directly at the source.
+- Rollback:
+  - Revert the `run_oms_cycle(...)` report-field addition and the compatibility inference in `_parse_bridge_stdout(...)`.
+
+### CDL-20260410-023
+- Local time: `2026-04-10 17:15:00`
+- Type: `ops-clarification`
+- Scope: `execution account semantics and default manual probe mode`
+- Touched paths:
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Recorded the user-facing operational distinction between the two current Gmtrade paper modes:
+    - `simulation` = simulated matching / mock execution
+    - `precision` = precision-matching paper account, still simulated capital rather than live trading
+  - Recorded that future live trading is intended to use QMT / QM rather than the current Gmtrade path.
+  - Clarified that the earlier bounded end-to-end smoke hit the `simulation` account only because the command explicitly overrode `--execution-mode simulation`.
+  - Verified the actual default runtime behavior for `quick_test`:
+    - `src\ashare\configs\hub_config.v6.runtime.quick_test.json` already sets `execution_policy.account_mode = precision`
+    - `execution_bridge_runner.build_execution_runtime_config(...)` maps that default to `account_profiles.precision`
+    - generated runtime config selected `account_id=b551a677-2f1a-11f1-b8c2-00163e022aa6` / `account_alias=precision_stock_01`
+- Impact:
+  - Future manual execution probes should default to the precision paper account unless the user explicitly asks for mock/simulated matching.
+  - The earlier no-order simulation smoke should not be misread as proof that the workspace default is still the deleted `simulation` account.
+- Validation:
+  - inspected `src\ashare\configs\hub_config.v6.runtime.quick_test.json`
+  - inspected `src\ashare\engine\execution_bridge_runner.py`
+  - generated a fresh runtime config through `build_execution_runtime_config(...)` and confirmed `selected_account_mode=precision`
+- Compatibility:
+  - No runtime code or config behavior changed in this step; this entry documents the current intended operating semantics.
+- Rollback:
+  - Revert the doc set changes only if the execution-account semantics or future real-trading platform plan changes.
+
+### CDL-20260410-022
+- Local time: `2026-04-10 15:05:00`
+- Type: `runtime-hardening`
+- Scope: `portfolio recommendation column-contract fixes and bounded end-to-end canonical smoke`
+- Touched paths:
+  - `src\ashare\engine\outer_intelligence.py`
+  - `src\ashare\engine\portfolio\runtime.py`
+  - `src\ashare\engine\portfolio\lifecycle_engine.py`
+  - `src\ashare\engine\portfolio\admission_engine.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Fixed a chain of portfolio recommendation / V2A failures caused by assuming `DataFrame.get(...).fillna(...)` always returns a Series even when the requested column is absent.
+  - Added local Series helpers and required-column defaults so missing optional columns such as `event_fact_backed`, `is_existing_position`, `router_allow_entry`, `tech_allow_entry`, `current_weight_ref`, `previous_state`, and `portfolio_weight` no longer crash outer-intelligence scoring, lifecycle construction, or admission replacement.
+  - Re-ran a bounded end-to-end canonical smoke during trading hours:
+    - `research_only` run `20260410_135207_52b93513` completed V5.1 research but originally died at portfolio recommendation with scalar `.fillna(...)`
+    - repaired portfolio recommendation then regenerated a fresh recommendation (`run_id=20260410_141652_84ddc5ec`)
+    - `release_only` published `release_20260410_145439_6eaa1b2b`
+    - `execution_only --execution-mode simulation --precision-trade on` wrote execution report `data\live_execution_bridge\execution_report_20260410_145514.json`, OMS ledgers, `control_feedback_latest.json`, and `research_meta_feedback_latest.json`
+    - `plan_only` run `20260410_145553_0cb4f257` successfully reloaded that execution meta feedback into `data\event_lake_v6\research\context_pack\research_context_pack.json`
+  - Confirmed a remaining runner-level issue: `main_research_runner._result_exit_code(...)` still returns exit code `2` for the simulation execution path because the returned payload is `ok=false` while the scheduler verdict is `reduce_only`, even though execution artifacts were emitted successfully.
+- Impact:
+  - Portfolio recommendation no longer fails just because upstream candidate frames omit optional columns.
+  - The research -> recommendation -> release -> simulation execution -> feedback -> next planning loop is now operationally verified in a bounded run.
+  - Operators should read execution artifacts, not only process exit code, when simulation execution ends under a `reduce_only` verdict.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\engine\outer_intelligence.py src\ashare\engine\portfolio\runtime.py src\ashare\engine\portfolio\lifecycle_engine.py src\ashare\engine\portfolio\admission_engine.py`
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe launch_canonical.py --skip-preflight --mode release_only --profile quick_test`
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe launch_canonical.py --skip-preflight --mode execution_only --profile quick_test --execution-mode simulation --precision-trade on`
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe launch_canonical.py --skip-preflight --mode plan_only --profile quick_test`
+- Compatibility:
+  - The fixes preserve existing artifact formats; they only harden missing-column handling inside the portfolio recommendation and V2A path.
+  - `execution_only` exit-code semantics are unchanged and still need separate cleanup if callers want process status to reflect successful simulation artifact emission under `reduce_only`.
+- Rollback:
+  - Revert the four engine files and the doc set to restore the earlier stricter column assumptions and remove the documented end-to-end smoke result.
+
+### CDL-20260410-021
+- Local time: `2026-04-10 13:05:00`
+- Type: `research-protocol`
+- Scope: `v5.1 codegen single-chain intent -> spec contract`
+- Touched paths:
+  - `src\ashare\research_brain\hub\codegen.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Refactored each V5.1 provider attempt so it no longer jumps straight from raw context to final spec.
+  - Each provider attempt now first requests a lightweight structured `intent`, then requests the final executable `spec` using that intent plus the original context.
+  - Kept the runtime/output surface simple: no new sidecar pipeline or parallel creativity branch was introduced; the extra intent stays inside the existing candidate validation record.
+  - Added the selected provider intent into `workspace_validation.json` so higher-level ideas are preserved without changing runtime loaders.
+- Impact:
+  - Higher-tier or more creative models can express research intent before the final schema-compressed step, reducing the chance that creativity is lost purely because the final spec must stay strict.
+  - The system remains a single execution chain (`intent -> spec -> compile -> run`) instead of branching into multiple side channels.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\research_brain\hub\codegen.py`
+  - smoke workspace `outputs\codegen_smoke_tiered_intent_v1`
+- Compatibility:
+  - Runtime consumers are unchanged; only internal codegen sequencing and validation metadata changed.
+- Rollback:
+  - Revert `codegen.py` and the doc set to return to the earlier direct `context -> spec` flow.
+
+### CDL-20260410-020
+- Local time: `2026-04-10 12:50:00`
+- Type: `schema-hardening`
+- Scope: `v5.1 train-override prompt tightening and canonicalization`
+- Touched paths:
+  - `src\ashare\research_brain\hub\codegen.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Tightened the `train_override_spec` prompt so low-cost models are explicitly told the only legal values and shown concrete valid examples.
+  - Added canonicalization for the most common low-cost-tier drifts before train-override legality checks:
+    - `sample_weight_mode` aliases such as `balanced` / `uniform` -> `none`
+    - ratio-style `feature_cap` values like `0.95` -> context-derived integer caps
+    - pair-style `clip_label_quantile` values like `[0.05, 0.95]` -> single local quantile values
+  - Passed lightweight context through the train-override validation path so normalization can use candidate feature-pool size when needed.
+- Impact:
+  - `train_override` no longer needs OpenAI simply because local/DeepSeek used natural-but-noncanonical names for the same idea.
+  - More cheap-tier outputs are now captured locally instead of escalating for avoidable schema mismatches.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\research_brain\hub\codegen.py`
+  - direct normalization probe covering `balanced`, `uniform`, ratio `feature_cap`, and pair `clip_label_quantile`
+  - tiered smoke workspace `outputs\codegen_smoke_tiered_injected_v3`
+- Compatibility:
+  - External contract stays `train_override_spec_v1`; only the local legality gate became more tolerant of common low-cost-tier aliases.
+- Rollback:
+  - Revert `codegen.py` and the doc set to restore the stricter pre-canonicalization train-override validation path.
+
+### CDL-20260410-019
+- Local time: `2026-04-10 12:35:00`
+- Type: `llm-hardening`
+- Scope: `local Ollama cooldown guardrails and V5.1 model-spec canonicalization`
+- Touched paths:
+  - `src\ashare\engine\llm_router.py`
+  - `src\ashare\engine\local_ollama_worker.py`
+  - `src\ashare\research_brain\hub\codegen.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added cached local-Ollama health checks plus short cooldown behavior to the shared local client so repeated timeout/unreachable states return fast `service_unavailable` / `service_cooldown` errors instead of blocking every call site.
+  - Added the same timeout cooldown pattern to the event-extract-specific Ollama worker so announcement/title extraction no longer keeps hammering an unhealthy local daemon.
+  - Expanded V5.1 generated-model validation with canonicalization for common tree-model aliases and xgboost-flavored params before legality checks.
+  - Added family correction so tree-style `hist_gbdt` specs carrying `min_child_weight` can normalize into supported `extra_trees` params instead of failing straight into fallback.
+- Impact:
+  - Local Ollama remains the cheapest tier, but unhealthy local service now degrades quickly and predictably instead of creating long stalls across multiple LLM surfaces.
+  - V5.1 generated-model specs are materially less brittle against realistic LLM outputs such as `n_estimators`, `num_trees`, `eta`, and `min_child_weight`.
+  - OpenAI escalation is now reserved more for real reasoning/schema misses instead of avoidable parameter-alias mismatches.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\engine\llm_router.py src\ashare\engine\local_ollama_worker.py src\ashare\research_brain\hub\codegen.py`
+  - canonicalization probe for `_validate_model_spec(...)` covering `n_estimators`, `num_trees`, `eta`, and `min_child_weight`
+  - tiered smoke workspace `outputs\codegen_smoke_tiered_injected_v2`
+  - bad-endpoint cooldown probe on `LocalOllamaChatClient` showing first `service_unavailable`, then `service_cooldown`
+- Compatibility:
+  - Existing local-Ollama configs keep working; the new cooldown/healthcheck behavior defaults on and requires no config migration.
+  - V5.1 model-spec output remains the same external contract (`model_spec_v1`), but more incoming aliases now normalize into supported local families/params.
+- Rollback:
+  - Revert the three code files and doc set to remove local cooldown behavior and restore the stricter pre-canonicalization V5.1 model validation.
+
+### CDL-20260410-018
+- Local time: `2026-04-10 11:10:00`
+- Type: `research-routing`
+- Scope: `v5.1 codegen legality gate with tiered local/deepseek/openai escalation`
+- Touched paths:
+  - `src\ashare\research_brain\hub\codegen.py`
+  - `src\ashare\research_brain\configs\hub_config.v5_1.example.json`
+  - `src\ashare\research_brain\configs\hub_config.v5_1.integrated_gpu.json`
+  - `src\ashare\research_brain\configs\hub_config.v5_1.local.json`
+  - `src\ashare\research_brain\configs\hub_config.v5_1.sandbox.json`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added a tiered provider router inside V5.1 structured codegen so spec generation now escalates by cost/quality tier: `local_ollama` first, then `deepseek`, then `openai`.
+  - Kept legality checks fully local: each raw spec must pass schema validation and deterministic compiled-module validation before it is accepted.
+  - Added provider-tier metadata to repair history so each candidate workspace records which provider/model produced or failed each attempt.
+  - Added `provider_tiers` examples to the V5.1 config files so future runs can control provider order, attempts, models, and timeouts explicitly.
+  - Verified the tier path with a smoke workspace: local Ollama could satisfy a simple feature-spec case, DeepSeek still violated schema on some artifact types, and the OpenAI tier only works when `OPENAI_API_KEY` is actually visible in the active process environment.
+- Impact:
+  - V5.1 codegen now has explicit cost control and escalation behavior instead of implicitly betting on a single provider.
+  - Bad specs are judged by deterministic local rules, reducing the chance that a higher-tier model silently approves an invalid artifact.
+  - Repair diagnostics are more operationally useful because they now show provider-by-provider failure patterns.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\research_brain\hub\codegen.py`
+  - Smoke workspace `outputs\codegen_smoke_tiered`
+  - Prior OpenAI-only smoke workspace `outputs\codegen_smoke_openai`
+- Compatibility:
+  - Existing single-provider `llm_brain` configs still work; if `provider_tiers` is omitted, the codegen router uses its default local/deepseek/openai sequence.
+  - If `llm_brain.enabled=false`, codegen still bypasses provider calls and uses deterministic fallback specs.
+- Rollback:
+  - Revert `codegen.py` and the V5.1 config files to return to the earlier non-tiered structured-spec flow.
+
+### CDL-20260410-017
+- Local time: `2026-04-10 10:40:00`
+- Type: `research-architecture`
+- Scope: `v5.1 candidate codegen moved from free-form Python to structured specs plus deterministic compilation`
+- Touched paths:
+  - `src\ashare\research_brain\hub\codegen.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Replaced direct LLM generation of `feature_pack.py`, `train_override.py`, and `generated_model.py` with structured JSON specs for each artifact type.
+  - Added local schema validation for feature specs, training-override specs, and generated-model specs, including allowed helper names, feature-name constraints, numeric bounds, and per-family model parameter whitelists.
+  - Added a deterministic local compiler that turns validated specs into the corresponding Python modules so runtime loading contracts remain stable while free-form code emission is eliminated.
+  - Kept bounded repair attempts, but they now repair invalid specs rather than repairing arbitrary broken Python source.
+  - Candidate lab output now includes both spec files and compiled Python files plus per-attempt validation history in `workspace_validation.json`.
+- Impact:
+  - LLM creativity is preserved at the research-design/spec layer while syntax fragility is moved out of the model and into deterministic local compilers.
+  - Candidate codegen failures should now cluster around explicit schema violations or unsupported helpers instead of random truncated Python modules.
+  - Existing runtime loaders can keep consuming Python module paths, so this improves safety without requiring a broader launcher/runtime cutover.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\research_brain\hub\codegen.py`
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\research_brain\hub\training_engine.py`
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\research_brain\hub\candidate_factory.py`
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\research_brain\hub\model_families.py`
+- Compatibility:
+  - Candidate lab metadata now includes spec-file paths in addition to compiled module paths.
+  - Downstream runtime consumers still use the compiled module paths, so no caller contract changed.
+- Rollback:
+  - Revert `codegen.py` and the doc set to restore direct free-form Python generation.
+
+### CDL-20260410-016
+- Local time: `2026-04-10 10:20:00`
+- Type: `research-runtime`
+- Scope: `v5.1 generated candidate code repair and invalid-code gate`
+- Touched paths:
+  - `src\ashare\research_brain\hub\codegen.py`
+  - `src\ashare\research_brain\hub\training_engine.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Root-caused the `candidate_004_d848cbc8` failure to invalid LLM-generated `feature_pack.py` / `train_override.py` code that was already failing compile validation before training, but was still being passed downstream.
+  - Reworked `CodegenLab` so generated candidate modules now go through bounded self-repair: when compile/import validation fails, the traceback is fed back to the LLM for up to 2 repair attempts instead of only recording the failure.
+  - Added repair-attempt history and exhaustion state into the stored validation payload so candidate workspaces show the original failure plus each repair result.
+  - Added a training-time gate in `training_engine.py` so unresolved invalid generated modules are skipped as `budget_action=skip_invalid_codegen` before training begins, preventing one bad candidate from crashing the full V5.1 batch.
+- Impact:
+  - V5.1 generated-candidate failures now have a direct correction path instead of a passive validation log.
+  - If codegen is still invalid after repair attempts, the affected candidate is isolated and recorded as skipped rather than terminating the batch run.
+  - Workspace diagnostics are richer for future root-cause analysis because the validation payload now includes per-attempt repair history.
+- Validation:
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\research_brain\hub\codegen.py`
+  - `F:\quant_data\AshareC#\.venv\Scripts\python.exe -m py_compile src\ashare\research_brain\hub\training_engine.py`
+- Compatibility:
+  - No launcher/profile contract changed.
+  - Existing candidate lab payloads without `repair_attempts` remain readable; only new workspaces include the richer validation metadata.
+- Rollback:
+  - Revert `codegen.py` and `training_engine.py` to restore the previous single-pass validation-only behavior.
+
+### CDL-20260410-015
+- Local time: `2026-04-10 09:55:00`
+- Type: `broker-runtime`
+- Scope: `gmtrade precision bridge import failure on configured Python39 interpreter`
+- Touched paths:
+  - `src\ashare\live_execution_bridge\brokers\gmtrade_sim_broker.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Root-caused the 掘金 / Gmtrade outage to the broker interpreter itself: `C:\Users\Administrator\AppData\Local\Programs\Python\Python39\python.exe` did not have the `gmtrade` package, so `run_gmtrade_health_probe.py` failed at `import gmtrade.api as gm` before any login or account checks.
+  - Installed `gmtrade 3.0.6` into that configured Python 3.9 interpreter and re-ran the health probe successfully.
+  - Hardened `gmtrade_sim_broker.py` so future missing-package incidents raise a clear runtime error instead of failing during module import with a less actionable stack trace.
+  - Refreshed `latest_account_health.json` through `probe_account_health(..., force_refresh=True)` so the broker snapshot is fresh again.
+- Impact:
+  - 掘金 precision health probing is live again on this machine; the bridge now reaches account/balance/order inspection instead of dying before login.
+  - Future failures from a missing `gmtrade` install will point directly at `GMTRADE_PYTHON_EXECUTABLE` package readiness.
+- Validation:
+  - `python -m pip install gmtrade` on `C:\Users\Administrator\AppData\Local\Programs\Python\Python39\python.exe`
+  - `python -m py_compile src\ashare\live_execution_bridge\brokers\gmtrade_sim_broker.py` via workspace `.venv`
+  - `run_gmtrade_health_probe.py --config src\ashare\configs\generated_runtime\gmtrade_runtime_config.autogen_20260410_053111_fd3ea4c4.json` returned `ok: true`
+  - `probe_account_health(..., force_refresh=True)` returned `status: fresh` and wrote `data\trade_clock\latest_account_health.json`
+- Compatibility:
+  - No execution policy or account-routing contract changed.
+  - Machines using a different dedicated Gmtrade interpreter still need `gmtrade` installed in that exact interpreter.
+- Rollback:
+  - Uninstall `gmtrade` from the configured Python39 interpreter and revert `gmtrade_sim_broker.py` only if you intentionally want package readiness to fail fast at import time again.
+
+### CDL-20260410-014
+- Local time: `2026-04-10 06:30:00`
+- Type: `bugfix`
+- Scope: `integrated thesis daily CSV trade_date typing`
+- Touched paths:
+  - `src\ashare\engine\integrated_thesis\runtime.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - `research_only` run `20260410_053248_a8a690f9` failed in `build_integrated_thesis_artifacts` when appending `integrated_thesis_daily.csv`: pandas `sort_values("trade_date")` hit mixed `str` and `int` cells after `read_csv` + new row concat.
+  - Added `_normalize_integrated_thesis_trade_date` (compact `YYYYMMDD`) and apply it to the payload trade_date plus the whole frame before dedupe/sort.
+- Impact:
+  - V6 integrated-thesis stage can complete past market-state handoff without `TypeError: '<' not supported between instances of 'str' and 'int'`.
+- Validation:
+  - `python -m py_compile` on `integrated_thesis\runtime.py` via workspace `.venv`.
+- Compatibility:
+  - `integrated_thesis_daily.csv` trade_date values are normalized to `YYYYMMDD` strings when rewritten; consumers should treat the column as that canonical form.
+- Rollback:
+  - Revert `runtime.py` if downstream tooling required mixed legacy shapes in that CSV.
+
+### CDL-20260410-013
+- Local time: `2026-04-10 06:05:00`
+- Type: `runtime-config`
+- Scope: `PYTHON_EXECUTABLE points at workspace .venv instead of bare Python 3.14 install`
+- Touched paths:
+  - `src\ashare\engine\local_settings.example.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Corrected `PYTHON_EXECUTABLE` to `REPO_ROOT / .venv / Scripts / python.exe` because the system `Python314` directory lacks packages such as `pypdf` while the repo virtualenv is Python 3.14 with `requirements_v6_runtime` installed.
+  - Refreshed the stable known-issue wording to distinguish the venv from the bare interpreter.
+- Impact:
+  - `launch_canonical.py` and registered runs invoke `main_research_runner.py` with the same interpreter that already passed prior research dependency checks.
+- Validation:
+  - `python -c "import requests,pypdf"` on the `.venv` interpreter; `py_compile` not required for a string path change.
+- Compatibility:
+  - Clones without `.venv` must create it and install `src\ashare\requirements_v6_runtime.txt` or override `PYTHON_EXECUTABLE` in a private overlay.
+- Rollback:
+  - Restore the prior absolute `Python314` path only if operators intentionally maintain all deps on the global install.
+
+### CDL-20260410-012
+- Local time: `2026-04-10 05:45:00`
+- Type: `runtime-config`
+- Scope: `research interpreter split and SQLite contention on enriched daily sync`
+- Touched paths:
+  - `src\ashare\engine\local_settings.example.py`
+  - `src\ashare\engine\sql_store.py`
+  - `src\ashare\engine\market_pipeline.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Set `PYTHON_EXECUTABLE` to the operator Python 3.14 path (full research stack) and `GMTRADE_PYTHON_EXECUTABLE` to Python 3.9 in `local_settings.example.py`, with comments separating the main stack from the 掘金/Gmtrade adapter.
+  - Hardened `sqlite_connection` with WAL, `busy_timeout`, and a 60-second connect busy wait.
+  - Refactored `sync_enriched_daily_from_tushare` so all `_upsert_enriched_rows_sql` calls share one SQLite connection per sync instead of opening a new connection per symbol.
+- Impact:
+  - `launch_canonical.py` / registered runs spawn `main_research_runner.py` with the 3.14 interpreter instead of a bare `PATH` python missing `pypdf`.
+  - Concurrent writers to `research_data_v1.sqlite3` should see fewer `database is locked` failures during enriched daily sync.
+- Validation:
+  - `python -m py_compile` on `market_pipeline.py`, `sql_store.py`, and `local_settings.example.py` using Python 3.14.
+- Compatibility:
+  - Operators with a real `gmtrade39` venv should point `GMTRADE_PYTHON_EXECUTABLE` at that `Scripts\python.exe` instead of the system 3.9 exe.
+- Rollback:
+  - Revert the three engine files and remove the new stable known-issue bullets if the interpreter split or SQLite pragmas are undesirable.
+
+### CDL-20260410-011
+- Local time: `2026-04-10 04:22:00`
+- Type: `operational-stability`
+- Scope: `trade clock autostart, hot reload, and research interpreter readiness`
+- Touched paths:
+  - `scripts\start_trade_clock.ps1`
+  - `src\ashare\engine\clock_supervisor.py`
+  - `src\ashare\engine\config_builder.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Pointed `start_trade_clock.ps1` at `src\ashare\engine\local_settings.py` instead of deleted repacked `hub_v6` paths so Python resolution works in this workspace layout.
+  - Fixed hot-reload candidate `project_root` in `clock_supervisor` (removed the erroneous doubled `src\ashare` segment) and excluded `__pycache__` from hot-reload fingerprints.
+  - Defaulted generated `trade_clock.runtime_hot_reload.enabled` to off when the setting is absent and set `TRADE_CLOCK_RUNTIME_HOT_RELOAD_ENABLED=False` in `local_settings.example.py` so long-lived clock processes are not continuously recycled by filesystem churn.
+  - On the operator machine, installed `xgboost` and `requirements_v6_runtime.txt` into the PATH `Python39` interpreter after research failed early on missing deps; documented the PATH-fallback risk in the stable snapshot.
+- Impact:
+  - `Start-Process` launched trade-clock supervisors can stay alive across heartbeats instead of exiting after hot-reload/exec loops.
+  - Night-before trading automation is operable without resurrecting removed directory names.
+- Validation:
+  - `python -m py_compile` on touched `clock_supervisor.py` and `config_builder.py`.
+  - Verified a launched trade-clock PID remained running after ~35s and `manual research_only` continued running on the provisioned interpreter.
+- Compatibility:
+  - Operators who relied on hot reload can re-enable it explicitly via `TRADE_CLOCK_RUNTIME_HOT_RELOAD_ENABLED=True` in their private settings overlay.
+- Rollback:
+  - Revert the four code files and restore the prior `TRADE_CLOCK_RUNTIME_HOT_RELOAD_ENABLED` example value if always-on hot reload must return.
+
+### CDL-20260410-010
+- Local time: `2026-04-10 03:56:34`
+- Type: `documentation-security`
+- Scope: `separate secure ops notes for ssh and credential workflow memory`
+- Touched paths:
+  - `CODEX_SECURE_OPS.md`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added `CODEX_SECURE_OPS.md` as a separate operational-memory file for SSH, Git credential, remote env, and other secret-adjacent workflow notes.
+  - Kept the new file free of raw secret values and limited it to locations, readiness checks, dependency points, and handling rules.
+  - Added explicit pointers from the stable snapshot and index so future sessions do not lose SSH/credential workflow memory again.
+- Impact:
+  - SSH deployment and credential workflow knowledge is no longer squeezed out of the stable runtime snapshot.
+  - Sensitive operational memory now has a dedicated place without encouraging secret sprawl into normal docs.
+  - Future sessions have a clearer boundary between stable runtime truth and secret-adjacent operator setup.
+- Validation:
+  - Targeted file inspection of SSH- and credential-dependent scripts under `scripts\`.
+  - No runtime execution required.
+- Compatibility:
+  - Existing dev-log flow remains unchanged; this is an additive document split.
+- Rollback:
+  - Remove `CODEX_SECURE_OPS.md` and fold its non-sensitive notes back into the stable snapshot if the split is rejected.
+
+### CDL-20260410-009
+- Local time: `2026-04-10 03:47:28`
+- Type: `runtime-state-consumers`
+- Scope: `oms lifecycle ledgers and residual doctor probes unified`
+- Touched paths:
+  - `python_rpc_bridge.py`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.PythonBridge\PythonRpcBridge.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Execution\RuntimeStateQueryService.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Execution\OmsLifecycleService.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\Program.cs`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Expanded `/runtime-state` again so it now includes `intent_ledger_latest.csv`, `order_ledger_latest.csv`, and `fill_ledger_latest.csv` metadata with row counts.
+  - Extended `RuntimeStateQueryService` to surface those ledger artifacts as authority snapshots and fall back to local CSV reads only when RPC data is missing.
+  - Changed `OmsLifecycleService` to use the authority snapshot for ledger availability and row counts instead of directly reading ledger CSVs as its primary path.
+  - Removed the remaining `doctor` file-existence probes for clock/safety and made them reflect the aggregated state paths instead.
+- Impact:
+  - OMS lifecycle capture is now aligned with the same RPC-first state authority as status and reconciliation.
+  - The last high-value execution-state consumers no longer depend primarily on ad hoc local CSV scanning.
+  - `doctor`, `status`, `gap-report`, desired-state loading, gap reconciliation, and OMS lifecycle now all share the same runtime-state authority layer.
+- Validation:
+  - `python -m py_compile python_rpc_bridge.py`
+  - `dotnet build csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\Ashare.RuntimeSkeleton.OperatorCli.csproj`
+  - `dotnet csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\bin\Debug\net8.0\Ashare.RuntimeSkeleton.OperatorCli.dll doctor --workspace-root F:\quant_data\AshareC#`
+  - `dotnet csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\bin\Debug\net8.0\Ashare.RuntimeSkeleton.OperatorCli.dll gap-report --workspace-root F:\quant_data\AshareC#`
+- Compatibility:
+  - Local file fallback still exists for ledger metadata if RPC is unavailable.
+  - No CLI syntax changed.
+- Rollback:
+  - Revert the ledger fields from `/runtime-state`, restore `OmsLifecycleService` local CSV counting, and revert the `doctor` path-status simplification.
+
+### CDL-20260410-008
+- Local time: `2026-04-10 03:40:58`
+- Type: `runtime-state-consumers`
+- Scope: `desired state gap report and oms lifecycle unified on query layer`
+- Touched paths:
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Execution\DesiredStateService.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Execution\GapReportService.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Execution\OmsLifecycleService.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\Program.cs`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added authority-snapshot-aware overloads to `DesiredStateService` and wired it to `RuntimeStateQueryService`.
+  - Changed `GapReportService` to prefer the same runtime authority snapshot for desired state and OMS actual state instead of directly re-reading release/OMS files as its primary path.
+  - Changed `OmsLifecycleService` to consume the same query layer for desired/actual state capture before writing lifecycle artifacts.
+  - Updated the main `OperatorCli` composition root so those services all receive the same `RuntimeStateQueryService`.
+- Impact:
+  - The remaining high-value C# status and reconciliation consumers now share one authority layer.
+  - `status`, `doctor`, `gap-report`, and OMS lifecycle capture are aligned on the same RPC-first runtime truth instead of each maintaining their own file-reading graph.
+  - Direct local files remain fallback, but they are no longer the primary integration boundary for these services.
+- Validation:
+  - `dotnet build csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\Ashare.RuntimeSkeleton.OperatorCli.csproj`
+  - `dotnet csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\bin\Debug\net8.0\Ashare.RuntimeSkeleton.OperatorCli.dll doctor --workspace-root F:\quant_data\AshareC#`
+  - `dotnet csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\bin\Debug\net8.0\Ashare.RuntimeSkeleton.OperatorCli.dll gap-report --workspace-root F:\quant_data\AshareC#`
+- Compatibility:
+  - Service interfaces remain backward compatible because the original `Read(registry)` / `Build(registry)` entrypoints still exist.
+  - Fallback file behavior remains intact if the runtime-state RPC path is unavailable.
+- Rollback:
+  - Revert the query-service-aware overloads and restore direct release/OMS reads inside the consumer services.
+
+### CDL-20260410-007
+- Local time: `2026-04-10 03:31:52`
+- Type: `runtime-state-transport`
+- Scope: `release clock safety oms moved under runtime-state rpc`
+- Touched paths:
+  - `python_rpc_bridge.py`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.PythonBridge\PythonRpcBridge.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Execution\RuntimeStateQueryService.cs`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Expanded `/runtime-state` so it now returns release pointer, release manifest, target-positions existence, clock state, safety state, OMS summary, actual portfolio state, and the two control-plane JSON artifacts.
+  - Changed `RuntimeStateQueryService` to build `ReleaseContractSnapshot`, `ClockState`, `SafetySnapshot`, and `OmsSnapshot` from RPC payloads when available, instead of using RPC only for the control-plane pair.
+  - Updated transport labeling so status aggregation now reports `rpc_runtime_state+file_fallback` when the full runtime-state RPC bundle is used.
+- Impact:
+  - The C# status/gating path now depends far less on direct `latest_*.json` file reads across release, clock, safety, and OMS surfaces.
+  - One loopback RPC call can supply nearly the whole runtime authority set used by `RuntimeStateAggregator`.
+  - Local file access remains as fallback, so the system is still tolerant of a missing or outdated bridge process.
+- Validation:
+  - `python -m py_compile python_rpc_bridge.py`
+  - `dotnet build csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\Ashare.RuntimeSkeleton.OperatorCli.csproj`
+  - `dotnet csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\bin\Debug\net8.0\Ashare.RuntimeSkeleton.OperatorCli.dll doctor --workspace-root F:\quant_data\AshareC#`
+  - Manual POST to `http://127.0.0.1:8765/runtime-state` confirmed all of these returned `exists: true`: release pointer, release manifest, target positions, clock state, safety state, OMS summary, actual state, operator runtime context, control-plane snapshot
+- Compatibility:
+  - Existing fallback behavior is preserved if `/runtime-state` is unavailable.
+  - No user-facing CLI syntax changed.
+- Rollback:
+  - Revert the `/runtime-state` payload expansion and restore `RuntimeStateQueryService` to the earlier control-plane-only RPC usage.
+
+### CDL-20260410-006
+- Local time: `2026-04-10 03:16:44`
+- Type: `runtime-state-transport`
+- Scope: `control-plane status query over rpc`
+- Touched paths:
+  - `python_rpc_bridge.py`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.PythonBridge\PythonRpcBridge.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Execution\RuntimeStateQueryService.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Execution\RuntimeStateAggregator.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Contracts\RuntimeStateContracts.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\Program.cs`
+  - `csharp_runtime_skeleton\README.md`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added `/runtime-state` to `python_rpc_bridge.py` so the loopback host can return control-plane runtime JSON artifacts on request.
+  - Extended `PythonRpcBridge` with `ReadRuntimeStateAsync(...)` to start or reuse the bridge host and query that new endpoint.
+  - Changed `RuntimeStateQueryService` to prefer RPC for `operator_runtime_context.json` and `control_plane_snapshot.json`, with local file fallback if RPC is unavailable.
+  - Injected the query service into `RuntimeStateAggregator` and added `state_query_transport` visibility to `status` / `doctor`.
+- Impact:
+  - C# runtime status is no longer file-only for the highest-level control-plane state surfaces.
+  - Operator commands can now show whether status truth came from RPC-assisted control-plane reads or file-only fallback.
+  - This reduces direct coupling between status aggregation and local control-plane file scanning without disturbing lower-level fallback artifacts.
+- Validation:
+  - `python -m py_compile python_rpc_bridge.py`
+  - `dotnet build csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\Ashare.RuntimeSkeleton.OperatorCli.csproj`
+  - `dotnet csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\bin\Debug\net8.0\Ashare.RuntimeSkeleton.OperatorCli.dll doctor --workspace-root F:\quant_data\AshareC#`
+  - `Invoke-WebRequest http://127.0.0.1:8765/runtime-state` with the two control-plane paths after restarting the bridge host
+- Compatibility:
+  - If the RPC host is absent or stale, the query layer falls back to direct file reads.
+  - Lower-level release / clock / safety / OMS status still uses the existing file-based services.
+- Rollback:
+  - Remove `/runtime-state` from `python_rpc_bridge.py`, revert `PythonRpcBridge.cs`, and restore `RuntimeStateQueryService` to file-only control-plane reads.
+
+### CDL-20260410-005
+- Local time: `2026-04-10 02:58:12`
+- Type: `runtime-state`
+- Scope: `unified query layer for csharp runtime status`
+- Touched paths:
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Execution\RuntimeStateQueryService.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Execution\RuntimeStateAggregator.cs`
+  - `csharp_runtime_skeleton\README.md`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added `RuntimeStateQueryService` as a centralized query surface for release, clock, safety, OMS, operator runtime context, and control-plane snapshot state.
+  - Changed `RuntimeStateAggregator` to consume that service instead of directly reading scattered runtime files itself.
+  - Added authority resolution helpers so runtime status fields prefer `operator_runtime_context.json`, then `control_plane_snapshot.json`, then lower-level release/clock artifacts.
+- Impact:
+  - Status aggregation no longer hardcodes its own file-reading graph.
+  - Future migration of runtime truth from files to SQLite or RPC can happen behind the query-service boundary instead of touching every caller.
+  - Aggregated status is less tied to `latest_*` style paths because higher-level runtime summaries are now checked first.
+- Validation:
+  - `dotnet build csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\Ashare.RuntimeSkeleton.OperatorCli.csproj`
+  - `dotnet csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\bin\Debug\net8.0\Ashare.RuntimeSkeleton.OperatorCli.dll status --workspace-root F:\quant_data\AshareC#`
+- Compatibility:
+  - No CLI contract changes.
+  - Existing lower-level file artifacts remain supported as fallback sources.
+- Rollback:
+  - Remove `RuntimeStateQueryService.cs` and restore direct file reads in `RuntimeStateAggregator.cs`.
+
+### CDL-20260410-004
+- Local time: `2026-04-10 02:45:20`
+- Type: `operator-cli`
+- Scope: `workspace-root parsing and rpc smoke verification`
+- Touched paths:
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\Program.cs`
+  - `csharp_runtime_skeleton\README.md`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Replaced the Operator CLI assumption that `args[1]` is always `workspaceRoot` with a parsed command context that supports both positional paths and explicit `--workspace-root` / `-w`.
+  - Switched `canonical-run`, `clock-run`, `guarded-run`, `phase-run`, `scheduler-*`, and `clock-host` to consume the parsed command arguments instead of raw positional offsets.
+  - Added `rpc_used` output for direct Python-launch commands so bridge selection is visible during smoke tests.
+- Impact:
+  - Python passthrough flags such as `--preflight-only`, `--profile`, and `--mode` no longer get misread as the workspace root.
+  - RPC bridge verification is now observable from the CLI without inspecting code or attaching a debugger.
+  - Legacy positional workspace-root invocations still remain compatible.
+- Validation:
+  - `dotnet build csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\Ashare.RuntimeSkeleton.OperatorCli.csproj`
+  - `dotnet run --project csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\Ashare.RuntimeSkeleton.OperatorCli.csproj -- canonical-run --workspace-root F:\quant_data\AshareC# --preflight-only --profile quick_test --mode execution_only`
+  - Direct Python comparison: `python launch_canonical.py --preflight-only --profile quick_test --mode execution_only`
+  - Smoke result matched on failure semantics; CLI printed `rpc_used: True`, and the non-zero exit was due to Python preflight failure rather than CLI/RPC transport failure.
+- Compatibility:
+  - Existing positional `workspaceRoot` invocations continue to work when the first non-option token is path-like.
+  - Commands that never took a workspace root remain unchanged.
+- Rollback:
+  - Revert `Program.cs` to the old positional parsing and remove the `rpc_used` console output.
+
+### CDL-20260410-003
+- Local time: `2026-04-10 02:31:17`
+- Type: `runtime-transport`
+- Scope: `csharp-python rpc bridge`
+- Touched paths:
+  - `python_rpc_bridge.py`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Contracts\ExecutionContracts.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.PythonBridge\PythonProcessBridge.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.PythonBridge\PythonRpcBridge.cs`
+  - `csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.Execution\ExecutionBackendService.cs`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+  - `README.md`
+  - `csharp_runtime_skeleton\README.md`
+- What changed:
+  - Added a local loopback Python RPC host with `/health` and `/invoke`.
+  - Changed the C# Python bridge to prefer RPC transport and fall back to direct process launch only if RPC is unavailable.
+  - Extended invocation results so structured payloads can be returned directly from RPC instead of being reconstructed only from stdout markers.
+  - Updated execution backend parsing to consume structured RPC payloads first.
+- Impact:
+  - Active C# -> Python calls are less tightly coupled to stdout parsing.
+  - The transport layer is now explicit request/response instead of only process + stdout scraping.
+  - Existing audit files remain intact because this change does not remove artifact writes.
+- Validation:
+  - `python -m py_compile python_rpc_bridge.py`
+  - `dotnet build csharp_runtime_skeleton\src\Ashare.RuntimeSkeleton.OperatorCli\Ashare.RuntimeSkeleton.OperatorCli.csproj`
+  - Manually started `python_rpc_bridge.py` and verified `http://127.0.0.1:8765/health`
+- Compatibility:
+  - Direct process execution remains as fallback, so environments without the RPC host still run.
+  - Existing CLI commands do not need new flags to benefit from the bridge.
+- Rollback:
+  - Remove `python_rpc_bridge.py` and revert `PythonProcessBridge.cs`, `PythonRpcBridge.cs`, `ExecutionContracts.cs`, and `ExecutionBackendService.cs`.
+
+### CDL-20260410-002
+- Local time: `2026-04-10 02:20:42`
+- Type: `code-and-config-governance`
+- Scope: `strategy activation weight governance`
+- Touched paths:
+  - `src\ashare\engine\strategy_activation.py`
+  - `src\ashare\engine\config_builder.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Replaced the hard-coded strategy-activation signal, meta, overlay, and priority weights with named runtime-config sections under `strategy_activation`.
+  - Added normalization helpers so signal and meta weight groups stay valid even if edited later.
+  - Made the LLM overlay bounds and cash/risk multipliers config-backed instead of scattered literals.
+  - Extended the activation summary to write the effective weight set used for the run.
+- Impact:
+  - The highest-power activation constants are now centrally governed and auditable.
+  - Future tuning can happen through config review instead of editing score formulas inline.
+  - Activation output now explains what weights were actually applied.
+- Validation:
+  - `python -m py_compile src\ashare\engine\strategy_activation.py src\ashare\engine\config_builder.py`
+- Compatibility:
+  - Default runtime behavior is preserved because the new config defaults match the previous hard-coded values.
+  - Existing callers still use the same `strategy_activation` section name.
+- Rollback:
+  - Revert the config-builder additions and restore the previous inline weights in `strategy_activation.py`.
+
+### CDL-20260410-001
+- Local time: `2026-04-10 02:00:36`
+- Type: `documentation-restructure`
+- Scope: `dev-log split, stable snapshot rewrite, README reset, doc sync maintenance`
+- Touched paths:
+  - `CODEX_DEV_LOG.md`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+  - `AGENTS.md`
+  - `README.md`
+  - `csharp_runtime_skeleton\README.md`
+  - `src\ashare\docs\README.md`
+  - `src\ashare\research_brain\README.md`
+  - `docs\SYSTEM_OPERATOR_DAILY_LOOP_GUIDE_CN.md`
+  - `scripts\sync_codex_dev_log_to_gdrive.py`
+  - `scripts\start_codex_dev_log_sync.ps1`
+- What changed:
+  - Split the oversized single dev log into a landing page, a stable-truth file, and a historical update file.
+  - Rebuilt the stable snapshot from current workspace files instead of inherited historical prose.
+  - Added an explicit indexed-entry rule for future updates.
+  - Rewrote the primary repository README and key sub-readmes to point at the real runtime chain and current workspace boundaries.
+  - Reframed the daily operator guide around the current launcher, trade clock, artifacts, and lightweight validation policy.
+  - Expanded the Google Drive sync helper from one file to the whole dev-log document set.
+- Impact:
+  - Future sessions can read current truth without scanning a monolithic mixed history file.
+  - Historical changes remain searchable and indexed.
+  - README-level guidance now matches current runtime root and launcher flow.
+  - Dev-log mirroring is aligned with the multi-file structure.
+- Validation:
+  - Read current contents of `launch_canonical.py`, `main_research_runner.py`, `trade_clock_service.py`, `SYSTEM_MANIFEST.yaml`, `RUN_PROFILES.yaml`, `ashare_control\control_plane.py`, and the current document set.
+  - Performed targeted file inspection only; no full runtime execution.
+- Compatibility:
+  - `CODEX_DEV_LOG.md` remains as the legacy entry filename so existing instructions do not break.
+  - New canonical reading order is now `CODEX_DEV_LOG.md` -> `CODEX_DEV_STABLE.md` -> `CODEX_DEV_LOG_INDEX.md` -> `CODEX_DEV_UPDATES.md`.
+- Rollback:
+  - Restore the previous `CODEX_DEV_LOG.md` monolithic file and revert the README/doc changes if the split workflow is rejected.
+### CDL-20260411-037
+- Local time: `2026-04-11 23:20:00`
+- Type: `data-refresh-observability`
+- Scope: `unified source fetch log + industry hard-factor root-cause isolation`
+- Touched paths:
+  - `src\ashare\engine\research_fact_store.py`
+  - `src\ashare\engine\industry_router\core\source_ingest.py`
+  - `src\ashare\engine\market_pipeline.py`
+  - `scripts\update_affordable_data_bundle.py`
+  - `scripts\update_external_research_feeds.py`
+  - `scripts\build_event_fact_layer.py`
+  - `scripts\build_industry_hard_factor_layer.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added a unified per-source fetch journal table `source_fetch_run_log` to `research_fact_layers_v1.sqlite3`.
+  - Wired the main refresh producers (`affordable`, `external`, `event_fact`, `industry_hard_factor`, `market_pipeline`) to write per-run source fetch rows with status, rows written, publish date, freshness, and messages.
+  - Investigated why `industry_factor_operation_daily` stayed old and confirmed the root cause was not scheduler drift anymore but static article URLs plus weak official-page discovery rules in the industry-router source chain.
+  - Added bounded official-page discovery logic in `industry_router.core.source_ingest` so industry hard-factor refreshes no longer rely only on the fixed article URL in `source_contracts.json`.
+- Impact:
+  - Daily source freshness is now queryable from SQL instead of only from scattered stdout/stderr logs.
+  - Refresh observability is centralized enough to tell whether stale data came from orchestration, source freshness, or source-specific fetch quality.
+  - `industry_factor_operation_daily` is no longer opaque: the system now records which official sources are stale, failed, or only producing zero rows.
+- Validation:
+  - `python -m py_compile src\ashare\engine\research_fact_store.py src\ashare\engine\industry_router\core\source_ingest.py scripts\build_industry_hard_factor_layer.py scripts\update_affordable_data_bundle.py scripts\update_external_research_feeds.py scripts\build_event_fact_layer.py src\ashare\engine\market_pipeline.py`
+  - `python scripts\build_industry_hard_factor_layer.py`
+  - `python scripts\update_external_research_feeds.py`
+  - `python scripts\build_event_fact_layer.py`
+  - `python scripts\update_affordable_data_bundle.py --dataset stock_basic --dataset daily --dataset adj_factor --dataset daily_basic --dataset customs_summary --dataset ppi_market_digest`
+  - `python -c "from engine.config_builder import build_runtime_config; from engine.market_pipeline import run_market_pipeline; ..."`
+  - Direct SQLite inspection of `source_fetch_run_log` and `industry_factor_operation_daily`
+- Compatibility:
+  - Existing fact tables remain intact; the new journal is additive.
+  - `industry_hard_factor` still needs more source-specific discovery hardening for several official pages, but those remaining defects are now explicit in the SQL journal instead of silent.
+- Rollback:
+  - Revert the journal table/helper additions and the per-script logging hooks if the unified fetch log surface is rejected.
+### CDL-20260411-038
+- Local time: `2026-04-11 23:30:00`
+- Type: `industry-router-llm-adjudication`
+- Scope: `official-page discovery fallback`
+- Touched paths:
+  - `src\ashare\engine\config_builder.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `src\ashare\engine\industry_router\core\source_ingest.py`
+  - `scripts\build_industry_hard_factor_layer.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added `industry_router.source_fetch.llm_*` config knobs so ambiguous official-page discovery can escalate to a configured LLM provider instead of relying only on regex/keyword heuristics.
+  - `resolve_official_page(...)` now performs a bounded LLM adjudication pass over the top candidate pages when rule-based ranking is ambiguous or not trustworthy.
+  - Logged LLM-selected metadata into `source_fetch_run_log.extra_json` for auditability.
+- Impact:
+  - Ambiguous official-page sources no longer have to choose between a weak heuristic pick and total blindness; they can now ask the model to reject or pick among the shortlisted candidate pages.
+  - The acceptance gate remains conservative, so the system still prefers missing rows over likely-wrong rows.
+- Validation:
+  - `python -m py_compile src\ashare\engine\config_builder.py src\ashare\engine\industry_router\core\source_ingest.py scripts\build_industry_hard_factor_layer.py src\ashare\engine\local_settings.example.py`
+  - `python scripts\build_industry_hard_factor_layer.py`
+- Compatibility:
+  - The LLM fallback is additive and config-backed; if disabled, discovery keeps using rule-based ranking only.
+  - Existing refresh logs remain valid; new LLM fields only populate when the model path is actually used.
+- Rollback:
+  - Revert the `industry_router.source_fetch.llm_*` config additions and the LLM adjudication branch in `resolve_official_page(...)`.
+### CDL-20260509-045
+- Local time: `2026-05-09 12:55:00`
+- Type: `data-frontline-repair`
+- Scope: `derived alpha refresh + strategy activation evidence handling`
+- Touched paths:
+  - `src\ashare\engine\derived_alpha_refresh.py`
+  - `src\ashare\engine\strategy_activation.py`
+  - `src\ashare\engine\clock_supervisor.py`
+  - `src\ashare\engine\config_builder.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added `derived_alpha_refresh`, a lightweight bridge from `affordable_data_v1.sqlite3` into the runtime alpha tables that `strategy_activation.py` reads.
+  - Wired the derived-alpha refresh into `run_pre_research_refresh_bundle` after affordable/external/fact/market refreshes.
+  - Added runtime config knobs `ENABLE_DERIVED_ALPHA_REFRESH`, `DERIVED_ALPHA_REFRESH_RUN_BEFORE_RESEARCH`, and `DERIVED_ALPHA_REFRESH_FAIL_OPEN`.
+  - Changed strategy activation normalization so missing or constant feature columns no longer manufacture neutral `0.5` evidence; all-zero rows become `activation_alpha_family=unclassified`.
+  - Dropped stale pre-existing activation feature columns from candidate pools before merging fresh SQL features, preventing empty CSV columns from shadowing newly refreshed database features.
+- Impact:
+  - The latest direct derived refresh updated `research_data_v1.sqlite3` with `valuation_daily` and `crowding_daily` through `2026-05-08`, plus affordable forecast/express-derived `expectation_revision_daily` rows through `2026-05-07`.
+  - Replaying strategy activation on the existing 139-row candidate pool with LLM disabled changed the diagnostic from zero feature coverage / all revision to `pe_pct_industry=139`, `turnover_pct_rank=139`, `revision_score=139`, and alpha-family counts `valuation=116`, `liquidity=19`, `revision=4`.
+  - Event/order/industry evidence remains sparse (`fact_contract_count=1`, `positive_supply_signals=1`, `qianzhan_relevance=0` in the same probe), so the repair improves market/valuation/liquidity grounding but does not make event-driven deployment evidence sufficient.
+- Validation:
+  - `.venv313\Scripts\python.exe -m py_compile src\ashare\engine\derived_alpha_refresh.py src\ashare\engine\strategy_activation.py src\ashare\engine\clock_supervisor.py src\ashare\engine\config_builder.py`
+  - `.venv313\Scripts\python.exe src\ashare\engine\derived_alpha_refresh.py --affordable-db data\sql_store\affordable_data_v1.sqlite3 --runtime-db data\sql_store\research_data_v1.sqlite3`
+  - Direct SQLite freshness check of `valuation_daily`, `crowding_daily`, and `expectation_revision_daily`.
+  - Lightweight activation probe on `data\portfolio_recommendation_v6\candidate_pool.csv` with `strategy_activation.llm_enabled=false`.
+- Compatibility:
+  - The derived refresh is additive and uses upsert semantics; it does not delete historical runtime alpha rows.
+  - Existing generated runtime configs without a `derived_alpha_refresh` section still default to enabled when paths are present.
+  - No full integrated pipeline was run for this repair.
+- Rollback:
+  - Disable `ENABLE_DERIVED_ALPHA_REFRESH` or revert `derived_alpha_refresh.py` plus the clock/config wiring if the affordable-to-runtime alpha bridge is rejected.
+  - Revert the normalization and feature-column-drop changes in `strategy_activation.py` if downstream consumers require the old neutral-fill semantics.
+### CDL-20260509-046
+- Local time: `2026-05-09 13:35:00`
+- Type: `llm-boundary-redesign`
+- Scope: `small-pool evidence audit + LLM ranking-overlay de-risking`
+- Touched paths:
+  - `src\ashare\engine\evidence_audit.py`
+  - `src\ashare\engine\portfolio_recommendation.py`
+  - `src\ashare\engine\config_builder.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added `evidence_audit.py`, a small-pool non-structured evidence audit layer. It selects top candidates from `candidate_pool.csv`, searches/fetches source pages, stores source IDs / URLs / content hashes, and asks the configured LLM to output A/B/C/D/F evidence grades with source-backed positive and negative claims.
+  - Portfolio recommendation now calls `apply_evidence_gate(...)`, which reads the latest evidence audit artifact and applies grade-based weight multipliers. If no latest audit exists, the gate is an explicit no-op.
+  - Default LLM usage was narrowed: `ENABLE_PORTFOLIO_CANDIDATE_LLM_REVIEW=False` and `ENABLE_STRATEGY_ACTIVATION_LLM=False` in the runtime defaults, so LLMs no longer directly favor symbols or alpha families in the active ranking path unless intentionally re-enabled.
+  - The intended LLM role is now evidence review of externally fetched material, not alpha discovery, family selection, or direct weight authority.
+- Impact:
+  - The system no longer needs full-market industry-chain / consensus-expectation coverage to use non-structured evidence. It can first form a hard-data candidate pool, then run opportunistic source-backed review on a small set.
+  - DeepSeek can be used as the cheap first-pass evidence auditor; OpenAI or manual review can later be reserved for conflict cases / final candidates without changing the portfolio interface.
+  - Non-structured evidence is auditable: every LLM claim must carry input `source_id`s, and portfolio construction consumes only the grade/verdict fields.
+- Validation:
+  - `.venv313\Scripts\python.exe -m py_compile src\ashare\engine\evidence_audit.py src\ashare\engine\portfolio_recommendation.py src\ashare\engine\config_builder.py src\ashare\engine\local_settings.example.py`
+  - Runtime-config probe confirmed `portfolio_candidate_llm_review.enabled=False`, `strategy_activation.llm_enabled=False`, and `evidence_audit.enabled=True`.
+  - Direct `apply_evidence_gate(...)` probe on a one-row frame returned `no_latest_evidence_reviews`, confirming portfolio builds do not live-crawl or fail when audit artifacts are absent.
+  - No full integrated pipeline and no full web audit run were executed in this change.
+- Compatibility:
+  - Existing portfolio runs remain valid; evidence gating is additive and no-op until `data\portfolio_recommendation_v6\evidence_audit_v1\latest\evidence_audit_reviews.json` exists.
+  - Existing LLM overlay modules are still available behind explicit config flags, but they are no longer default authority paths.
+- Rollback:
+  - Re-enable `ENABLE_PORTFOLIO_CANDIDATE_LLM_REVIEW` / `ENABLE_STRATEGY_ACTIVATION_LLM` if direct LLM overlay is deliberately needed.
+  - Disable `EVIDENCE_AUDIT_PORTFOLIO_GATE_ENABLED` or revert `evidence_audit.py` plus the portfolio/config wiring if the evidence-audit boundary is rejected.
+### CDL-20260509-047
+- Local time: `2026-05-09 13:50:00`
+- Type: `strategy-scope-contraction`
+- Scope: `hard-data candidate pool + non-structured evidence handoff`
+- Touched paths:
+  - `src\ashare\engine\portfolio_recommendation.py`
+  - `src\ashare\engine\config_builder.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `src\ashare\engine\evidence_audit.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added `PORTFOLIO_HARD_DATA_CANDIDATE_POOL_ENABLED=True` and hard-data candidate weights for seed weight, model prediction score, valuation signal, and liquidity signal.
+  - Changed portfolio candidate-pool scoring so the default structural pool no longer uses `integrated_thesis_score`, `router_final_score`, or `event_fact_backed` as core selection inputs.
+  - Disabled the intelligent outer allocator by default (`PORTFOLIO_ENABLE_INTELLIGENT_OUTER_ALLOCATOR=False`, `PORTFOLIO_INTELLIGENT_OUTER_ALLOCATOR_REPLACES_INTERNAL_GATES=False`) because it blended thesis/router/event-style signals back into priority.
+  - Tightened default strategy-activation meta weights: valuation `0.56`, liquidity `0.36`, revision `0.08`, and order-flow / event-drive / industry `0.0`.
+  - Added explicit evidence-audit query templates for the non-structured search layer: earnings preview/flash, annual/quarterly hard financials, contracts/orders, reductions/pledges/investigations/lawsuits, ST/delisting/accounting risks, and price/capacity/product events.
+- Impact:
+  - The hard-data structure pool now comes from reliable market/model/valuation/liquidity signals.
+  - Unreliable or hard-to-cover signals such as industry chain, order flow, news, and broad event claims are no longer default structural alpha inputs; they are routed to source-backed web evidence audit.
+  - Revision remains only a small structural contribution and should be promoted only when it comes from clear announcement evidence or later evidence-audit support.
+- Validation:
+  - `.venv313\Scripts\python.exe -m py_compile src\ashare\engine\portfolio_recommendation.py src\ashare\engine\config_builder.py src\ashare\engine\local_settings.example.py src\ashare\engine\evidence_audit.py`
+  - Runtime-config probe confirmed hard-data pool enabled, outer allocator disabled, conservative strategy meta weights, and evidence-audit query templates present.
+  - No full integrated pipeline and no full web audit run were executed.
+- Compatibility:
+  - The old mixed thesis/router/event selection path can be restored by setting `PORTFOLIO_HARD_DATA_CANDIDATE_POOL_ENABLED=False` and re-enabling the outer allocator.
+  - Existing evidence-audit and portfolio artifact formats remain additive.
+- Rollback:
+  - Revert the hard-data candidate-pool scoring block and restore the previous config defaults if broader thesis/router/event blending is intentionally desired.
+### CDL-20260509-048
+- Local time: `2026-05-09 13:51:00`
+- Type: `automation-surface-alignment`
+- Scope: `evidence audit runtime mode + supervisor optional stage + portal/release artifacts`
+- Touched paths:
+  - `main_research_runner.py`
+  - `RUN_PROFILES.yaml`
+  - `ashare_control\control_plane.py`
+  - `src\ashare\engine\supervisor.py`
+  - `src\ashare\engine\config_builder.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `src\ashare\engine\portfolio_recommendation.py`
+  - `src\ashare\engine\portfolio_release.py`
+  - `src\ashare\engine\evidence_audit.py`
+  - `scripts\run_evidence_audit_once.py`
+  - `scripts\build_audit_site_index.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Added first-class `evidence_audit_only` mode to `main_research_runner.py`, `RUN_PROFILES.yaml`, and control-plane stage preview.
+  - Added `scripts\run_evidence_audit_once.py` as a bounded manual wrapper around `run_evidence_audit(...)`.
+  - Added explicit config knobs for optional integrated-supervisor evidence audit after portfolio recommendation: `EVIDENCE_AUDIT_RUN_AFTER_PORTFOLIO_RECOMMENDATION`, `EVIDENCE_AUDIT_REBUILD_PORTFOLIO_AFTER_AUDIT`, and `EVIDENCE_AUDIT_BLOCK_EXECUTION_ON_FAILURE`; all default to `False` to avoid surprise web/LLM runtime.
+  - Wired the integrated supervisor to run the evidence-audit stage when the explicit post-portfolio knob is enabled, with optional portfolio rebuild after fresh audit grades.
+  - Portfolio summaries now include latest evidence-audit artifact paths, and release publishing copies evidence summary/reviews/sources into release directories and latest mirrors when present.
+  - The audit-site builder now reads latest evidence-audit artifacts and shows a strategy-page evidence card alongside candidate-pool diagnostics.
+  - Evidence-audit summaries now include grade and verdict counts.
+- Impact:
+  - The new hard-data-first strategy is no longer only a portfolio-code change; the runtime launcher, supervisor, release package, and portal can now see the small-pool evidence layer.
+  - Default daily/integrated runs still do not automatically crawl the web or call LLMs unless the explicit automation knob is enabled or `evidence_audit_only` / the script is run.
+  - Published releases can carry the source-backed evidence audit snapshot used by the portfolio gate.
+- Validation:
+  - Read-only syntax compile using `compile(source, path, "exec")` passed for all touched Python files after `py_compile` hit a Windows `__pycache__` permission error on `ashare_control\control_plane.py`.
+  - `main_research_runner.py --mode evidence_audit_only --help` showed the new mode and `--candidate-pool-path` / `--evidence-limit` options.
+  - Runtime-config probe confirmed the new supervisor evidence-audit automation knobs default to `False` and hard-data candidate-pool mode remains enabled.
+  - No full integrated pipeline and no web evidence audit run were executed.
+- Compatibility:
+  - Existing integrated and research-only runs keep their previous behavior unless `EVIDENCE_AUDIT_RUN_AFTER_PORTFOLIO_RECOMMENDATION=True`.
+  - `evidence_audit_only` can be run manually against an explicit candidate pool without changing the research/release chain.
+- Rollback:
+  - Remove `evidence_audit_only` from mode/profile surfaces and disable the supervisor stage knobs if evidence audit should remain purely library-level.
+  - Revert release/site artifact copying if evidence audit should not be exposed in published runtime artifacts.
+### CDL-20260509-049
+- Local time: `2026-05-09 13:58:00`
+- Type: `automation-default-change`
+- Scope: `evidence audit default API automation`
+- Touched paths:
+  - `src\ashare\engine\config_builder.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Changed evidence-audit automation defaults to enabled:
+    - `EVIDENCE_AUDIT_RUN_AFTER_PORTFOLIO_RECOMMENDATION=True`
+    - `EVIDENCE_AUDIT_REBUILD_PORTFOLIO_AFTER_AUDIT=True`
+    - `EVIDENCE_AUDIT_BLOCK_EXECUTION_ON_FAILURE=True`
+  - Runtime config now defaults to post-portfolio web/source evidence audit, then immediately rebuilds the portfolio so the same run can consume fresh audit grades.
+  - If the evidence-audit stage fails, downstream execution is blocked instead of silently falling back to an un-audited portfolio.
+- Impact:
+  - Default automated research/release behavior now calls the configured evidence-audit LLM provider API after building the candidate pool.
+  - This increases runtime, network dependency, and API cost by design.
+  - Release/execution semantics are stricter: a failed evidence audit should stop the chain rather than bypass the new evidence boundary.
+- Validation:
+  - Runtime-config probe confirmed all three evidence-audit automation defaults resolve to `True`.
+  - Read-only syntax compile passed for `src\ashare\engine\config_builder.py` and `src\ashare\engine\local_settings.example.py`.
+  - No full integrated pipeline and no live web/API evidence audit run were executed in this change.
+- Compatibility:
+  - Operators can still disable the behavior locally by setting any of the three `EVIDENCE_AUDIT_*` knobs to `False` in `local_settings.py`.
+- Rollback:
+  - Set the three evidence-audit automation defaults back to `False` in `config_builder.py` / `local_settings.example.py` if API-backed audit should return to manual-only operation.

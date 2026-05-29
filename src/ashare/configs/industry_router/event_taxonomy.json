@@ -1,0 +1,236 @@
+﻿{
+  "contract_version": "industry_router_unified_phase1",
+  "mechanism_groups": [
+    {
+      "event_type": "financial_report",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "follow_report",
+      "half_life_days": 10,
+      "strength_rule": "importance_score + profit_direction_bias",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.55,
+      "spillover_policy": "none",
+      "description": "定期财报默认先继承股票所属机制。"
+    },
+    {
+      "event_type": "policy_industry_event",
+      "mechanism_group": "router_required",
+      "direction_default": "positive",
+      "half_life_days": 20,
+      "strength_rule": "importance_score + policy_keyword_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.70,
+      "spillover_policy": "same_mechanism",
+      "description": "行业政策类事件先走机制路由，再决定是否向同机制扩散。"
+    },
+    {
+      "event_type": "contract_award",
+      "mechanism_group": "trend_capex",
+      "direction_default": "positive",
+      "half_life_days": 20,
+      "strength_rule": "importance_score + contract_keyword_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.72,
+      "spillover_policy": "same_subchain",
+      "description": "中标/订单事件优先归入 trend_capex。"
+    },
+    {
+      "event_type": "major_contract",
+      "mechanism_group": "trend_capex",
+      "direction_default": "positive",
+      "half_life_days": 20,
+      "strength_rule": "importance_score + contract_keyword_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.75,
+      "spillover_policy": "same_subchain",
+      "description": "重大合同事件优先归入 trend_capex。"
+    },
+    {
+      "event_type": "business_development",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "positive",
+      "half_life_days": 15,
+      "strength_rule": "importance_score + progress_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.60,
+      "spillover_policy": "limited",
+      "description": "业务拓展优先继承股票机制。"
+    },
+    {
+      "event_type": "investment",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "positive",
+      "half_life_days": 15,
+      "strength_rule": "importance_score + capex_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.58,
+      "spillover_policy": "limited",
+      "description": "投资类公告默认继承股票机制。"
+    },
+    {
+      "event_type": "investment_progress",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "positive",
+      "half_life_days": 12,
+      "strength_rule": "importance_score + progress_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.54,
+      "spillover_policy": "limited",
+      "description": "投资进展默认继承股票机制。"
+    },
+    {
+      "event_type": "strategic_cooperation",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "positive",
+      "half_life_days": 10,
+      "strength_rule": "importance_score + partnership_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.48,
+      "spillover_policy": "none",
+      "description": "战略合作事件保守处理。"
+    },
+    {
+      "event_type": "market_movement",
+      "mechanism_group": "price_inventory",
+      "direction_default": "follow_price",
+      "half_life_days": 5,
+      "strength_rule": "importance_score + price_move_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.52,
+      "spillover_policy": "same_mechanism",
+      "description": "价格波动类事件优先归入 price_inventory。"
+    },
+    {
+      "event_type": "price_change",
+      "mechanism_group": "price_inventory",
+      "direction_default": "follow_price",
+      "half_life_days": 5,
+      "strength_rule": "importance_score + price_move_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.50,
+      "spillover_policy": "same_mechanism",
+      "description": "价格变动类事件优先归入 price_inventory。"
+    },
+    {
+      "event_type": "buyback_dividend",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "positive",
+      "half_life_days": 8,
+      "strength_rule": "importance_score + shareholder_return_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.42,
+      "spillover_policy": "none",
+      "description": "回购/分红对 macro_style 更敏感。"
+    },
+    {
+      "event_type": "share_buyback_completion",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "positive",
+      "half_life_days": 8,
+      "strength_rule": "importance_score + shareholder_return_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.45,
+      "spillover_policy": "none",
+      "description": "回购完成对 macro_style 更敏感。"
+    },
+    {
+      "event_type": "shareholder_reduction",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "negative",
+      "half_life_days": 8,
+      "strength_rule": "importance_score + selling_pressure_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.50,
+      "spillover_policy": "none",
+      "description": "减持默认继承股票机制但方向偏负。"
+    },
+    {
+      "event_type": "shareholder_share_reduction",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "negative",
+      "half_life_days": 8,
+      "strength_rule": "importance_score + selling_pressure_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.52,
+      "spillover_policy": "none",
+      "description": "减持默认继承股票机制但方向偏负。"
+    },
+    {
+      "event_type": "management_trade",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "negative",
+      "half_life_days": 7,
+      "strength_rule": "importance_score + insider_signal_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.46,
+      "spillover_policy": "none",
+      "description": "管理层交易事件保守偏负。"
+    },
+    {
+      "event_type": "regulatory_action",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "negative",
+      "half_life_days": 25,
+      "strength_rule": "importance_score + regulatory_penalty_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.80,
+      "spillover_policy": "none",
+      "description": "监管处罚强负向。"
+    },
+    {
+      "event_type": "litigation_arbitration",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "negative",
+      "half_life_days": 18,
+      "strength_rule": "importance_score + legal_risk_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.68,
+      "spillover_policy": "none",
+      "description": "诉讼仲裁偏负。"
+    },
+    {
+      "event_type": "legal_action",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "negative",
+      "half_life_days": 18,
+      "strength_rule": "importance_score + legal_risk_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.64,
+      "spillover_policy": "none",
+      "description": "法律行动偏负。"
+    },
+    {
+      "event_type": "legal_proceeding",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "negative",
+      "half_life_days": 18,
+      "strength_rule": "importance_score + legal_risk_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.64,
+      "spillover_policy": "none",
+      "description": "法律程序偏负。"
+    },
+    {
+      "event_type": "financial_risk",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "negative",
+      "half_life_days": 20,
+      "strength_rule": "importance_score + distress_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.82,
+      "spillover_policy": "none",
+      "description": "财务风险强负向。"
+    },
+    {
+      "event_type": "termination_risk",
+      "mechanism_group": "inherit_stock_mechanism",
+      "direction_default": "negative",
+      "half_life_days": 25,
+      "strength_rule": "importance_score + distress_bonus",
+      "confidence_rule": "structured_or_default",
+      "event_weight": 0.90,
+      "spillover_policy": "none",
+      "description": "退市风险强负向。"
+    }
+  ]
+}

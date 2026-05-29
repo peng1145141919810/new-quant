@@ -1,0 +1,241 @@
+系统日常使用说明（AshareC# 混合架构版）
+
+一、先用一句话理解当前架构
+
+当前不是 “C# 已经替代 Python 运行时”。
+当前真实结构是：
+
+1. Python 仍然负责正式研究、release、执行、trade clock。
+2. `launch_canonical.py` 仍是正式入口。
+3. `main_research_runner.py` 仍是业务根入口。
+4. `trade_clock_service.py` 仍是自动调度主进程。
+5. `csharp_runtime_skeleton` 目前只是治理 / 编排 / 边界建模骨架，不直接替代研究与下单。
+
+
+二、当前最重要的入口
+
+1. 正式包装入口
+   `H:\Ashare\launch_canonical.py`
+
+2. 业务根入口
+   `H:\Ashare\main_research_runner.py`
+
+3. 自动调度入口
+   `H:\Ashare\trade_clock_service.py`
+
+4. 调度器启动脚本
+   `H:\Ashare\scripts\start_trade_clock.ps1`
+
+5. 调度器停止脚本
+   `H:\Ashare\scripts\stop_trade_clock.ps1`
+
+6. 调度器状态脚本
+   `H:\Ashare\scripts\show_trade_clock_status.ps1`
+
+
+三、当前真正推荐的使用方式
+
+日常正式链路不要理解成 “一个脚本一次跑完全部事情”。
+当前稳定操作方式是分层：
+
+1. 研究层
+   `research_only`
+   负责跑研究，生成组合建议，并发布对应 release。
+
+2. 发布层
+   `release_only`
+   负责把现有组合建议重新冻结成正式 release。
+
+3. 执行层
+   `execution_only`
+   负责读取 release，经过时间门禁和 safety 后进入 OMS / bridge。
+
+4. 调度层
+   `trade_clock_service.py`
+   负责按时间触发 research / release / preopen_gate / simulation / midday_review / afternoon_execution / summary。
+
+
+四、你平时最常用的命令
+
+1. 跑轻量预检
+
+```powershell
+python H:\Ashare\launch_canonical.py --preflight-only --profile quick_test --mode integrated_supervisor
+```
+
+2. 跑一次轻量联调
+
+```powershell
+python H:\Ashare\launch_canonical.py --profile quick_test
+```
+
+3. 跑正式研究链
+
+```powershell
+python H:\Ashare\launch_canonical.py --mode research_only --profile daily_production
+```
+
+4. 重发 release
+
+```powershell
+python H:\Ashare\launch_canonical.py --mode release_only --profile daily_production
+```
+
+5. 只做执行门禁检查
+
+```powershell
+python H:\Ashare\launch_canonical.py --mode execution_only --profile daily_production --gate-only
+```
+
+6. 盘中正式执行
+
+```powershell
+python H:\Ashare\launch_canonical.py --mode execution_only --profile daily_production --execution-mode precision --precision-trade on --execution-namespace simulation
+```
+
+7. 午间复盘
+
+```powershell
+python H:\Ashare\launch_canonical.py --mode midday_review_only --profile daily_production --release-id <release_id>
+```
+
+8. 下午二次执行
+
+```powershell
+python H:\Ashare\launch_canonical.py --mode execution_only --profile daily_production --execution-mode precision --precision-trade on --execution-namespace <上午真实namespace> --allow-unfinished-orders-reconcile on --ignore-market-panic-reduce-only on
+```
+
+9. 手动启动调度器
+
+```powershell
+powershell -ExecutionPolicy Bypass -File H:\Ashare\scripts\start_trade_clock.ps1 -Profile daily_production
+```
+
+10. 查看调度器状态
+
+```powershell
+powershell -ExecutionPolicy Bypass -File H:\Ashare\scripts\show_trade_clock_status.ps1
+```
+
+
+五、当前 profile 怎么选
+
+1. `quick_test`
+   最轻量的真实集成联调档。
+   不是秒级 smoke test。
+
+2. `daily_production`
+   当前日常自动主链默认档。
+   研究时长受控，适合每天自动研究 + 次日执行准备。
+
+3. `overnight`
+   更重的夜间研究档。
+   适合你明确接受更长运行时间时使用。
+
+
+六、当前 phase 图怎么理解
+
+当前自动调度主链是：
+
+1. `research`
+2. `release`
+3. `preopen_gate`
+4. `simulation`
+5. `midday_review`
+6. `afternoon_execution`
+7. `summary`
+
+说明：
+
+1. `shadow`
+   当前默认自动关闭。
+   原因不是代码没入口，而是它还没有 broker-isolated 的真 shadow 语义。
+
+2. `afternoon_shadow`
+   当前默认也关闭。
+
+3. `summary`
+   负责把 phase 状态、release、market posture、OMS 汇总和 gap 诊断打包到 `outputs\automation_runs\YYYYMMDD\`。
+
+
+七、现在最该看哪些输出
+
+1. wrapper 运行追踪
+   `H:\Ashare\outputs\canonical_runs\<run_id>\run_manifest.json`
+
+2. 调度 heartbeat
+   `H:\Ashare\data\trade_clock\clock_state.json`
+
+3. 调度 phase 状态
+   `H:\Ashare\data\trade_clock\phase_state\YYYYMMDD.json`
+
+4. safety 真相
+   `H:\Ashare\data\trade_clock\system_safety_state.json`
+
+5. 最新 release 指针
+   `H:\Ashare\data\trade_release_v1\latest_release.json`
+
+6. simulation OMS 汇总
+   `H:\Ashare\data\live_execution_bridge\oms_v1\simulation\snapshots\oms_summary.json`
+
+7. 自动化日报包
+   `H:\Ashare\outputs\automation_runs\YYYYMMDD\`
+
+8. gap 归因
+   `H:\Ashare\outputs\automation_runs\YYYYMMDD\gap_analysis_simulation.json`
+
+
+八、当前关于 shadow 的真实规则
+
+这个部分很重要。
+
+1. shadow 不是坏了，而是默认故意不自动运行。
+
+2. 过去日报里会把旧 shadow OMS 快照误当成当天结果。
+   这个汇总问题已经修正；现在如果当天 shadow 没跑，日报会明确把它标成不可用 / 未运行，而不是继续拿旧快照装成新结果。
+
+3. 在没有 broker no-submit 隔离前，不建议把 shadow 当成正式盘中并行对照线。
+
+
+九、当前关于 simulation gap 的理解
+
+当前最该盯的不是短期收益，而是 simulation 的 desired vs actual gap。
+
+新的自动化日报会额外给出 gap 的主因归类，优先识别：
+
+1. `turnover_budget_truncation`
+   组合想动，但被日内换手 / 预算约束截断。
+
+2. `oms_continuity_carryover`
+   上一轮未完成意图、延续单、carry/reconcile 还没收口。
+
+3. `execution_fill_friction`
+   有派单，但成交跟不上。
+
+4. `residual_portfolio_gap`
+   仍有剩余目标偏差，但前三类不显著。
+
+
+十、当前新库和老库的关系
+
+1. 老库 `F:\quant_data\Ashare`
+   仍是当前稳定运行中的 live Python 系统。
+
+2. 新库 `H:\Ashare`
+   是迁移工作区。
+   这里已经有本地 `data` 镜像，但仍依赖本机私有 `local_settings.py`。
+
+3. Gmtrade Python 仍保持在老库环境
+   `F:\quant_data\Ashare\venvs\gmtrade39\Scripts\python.exe`
+
+4. 新库的 C# skeleton 目前用于边界治理、命令生成、状态诊断，不直接替代研究和下单。
+
+
+十一、最后的操作原则
+
+1. 正式运行优先走 `launch_canonical.py`。
+2. `integrated_supervisor` 主要用于联调，不是正式精确交易主路径。
+3. 正式精确交易优先走：
+   `research_only -> release_only -> execution_only`
+4. 不要把 `quick_test` 当成秒级 smoke test。
+5. 不要把 shadow 当前状态理解成“自动并行对照线已经可用”。

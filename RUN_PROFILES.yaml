@@ -1,0 +1,50 @@
+{
+  "default_profile": "quick_test",
+  "allowed_profiles": {
+    "quick_test": {
+      "description": "Minimal full-chain debug profile. Still a real integrated run.",
+      "mode_default": "integrated_supervisor",
+      "v6_plan_reuse_hours": 24,
+      "signal_plan_reuse_hours": 24,
+      "v5_cycles": 1,
+      "research_cycles": 1,
+      "operator_use": "debugging the integrated chain with lower runtime cost"
+    },
+    "daily_production": {
+      "description": "Stable daily production profile for scheduled nightly research and next-day execution preparation.",
+      "mode_default": "research_only",
+      "v6_plan_reuse_hours": 24,
+      "signal_plan_reuse_hours": 24,
+      "v5_cycles": 3,
+      "research_cycles": 3,
+      "operator_use": "daily automated research/release chain with bounded runtime"
+    },
+    "overnight": {
+      "description": "Heavy nightly profile for deeper V5 research.",
+      "mode_default": "integrated_supervisor",
+      "v6_plan_reuse_hours": 24,
+      "signal_plan_reuse_hours": 24,
+      "v5_cycles": 8,
+      "research_cycles": 8,
+      "operator_use": "nightly research when long runtime is acceptable"
+    }
+  },
+  "allowed_modes": [
+    "integrated_supervisor",
+    "research_only",
+    "release_only",
+    "execution_only",
+    "midday_review_only",
+    "resume_downstream",
+    "oms_validate",
+    "full_cycle",
+    "ingest_only",
+    "extract_only",
+    "gap_only",
+    "industry_router_only",
+    "plan_only",
+    "bridge_only",
+    "intraday_tactics_only",
+    "evidence_audit_only"
+  ]
+}

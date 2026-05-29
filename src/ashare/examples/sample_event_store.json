@@ -1,0 +1,28 @@
+{
+  "event_id": "evt_20260318_0001",
+  "publish_time": "2026-03-18 20:10:00",
+  "crawl_time": "2026-03-18 20:12:03",
+  "source_type": "announcement",
+  "source_name": "exchange_disclosure",
+  "security_code": "000001.SZ",
+  "company_name": "示例股份",
+  "industry_tags": [
+    "银行"
+  ],
+  "event_type": "financial_report",
+  "event_direction": "positive",
+  "impact_scope": "single_name",
+  "impact_horizon": "1_4w",
+  "confidence": 0.82,
+  "novelty_score": 0.67,
+  "importance_score": 0.79,
+  "raw_title": "2025年年度报告摘要",
+  "raw_text": "公司披露年度报告，归母净利润同比增长，资产质量改善……",
+  "structured_facts": {
+    "revenue_yoy": 0.12,
+    "net_profit_yoy": 0.18,
+    "npl_ratio_change": -0.002
+  },
+  "extract_model": "deepseek_worker",
+  "review_status": "auto_approved"
+}

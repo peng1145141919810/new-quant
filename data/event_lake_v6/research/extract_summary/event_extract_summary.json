@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-05-09 00:26:03",
+  "raw_events": 1377,
+  "selected_for_run": 6,
+  "llm_events": 6,
+  "fallback_events": 0,
+  "backend": "local_ollama",
+  "model": "qwen2.5:7b",
+  "avg_evidence_quality": 0.8244,
+  "avg_anti_overfit_weight": 0.92
+}

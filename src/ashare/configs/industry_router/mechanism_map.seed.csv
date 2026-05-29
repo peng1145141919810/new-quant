@@ -1,0 +1,15 @@
+﻿symbol,mechanism_primary,subchain_primary,core_driver_type,pricing_anchor,secondary_exposures,mapping_confidence,customer_anchor,benefit_mode,spec_upgrade_level,global_vs_domestic_exposure,resource_exposure,elasticity_bucket,cost_pass_through,direct_resource_link,inventory_sensitivity,commodity_primary,downstream_pricing_power,style_bucket,duration_sensitivity,yield_sensitivity,macro_beta_bucket,credit_sensitivity,risk_appetite_sensitivity,defensive_vs_offensive,notes
+688618.SH,trend_capex,工业通信,订单与行业数字化支出,工业通信订单,工业互联网|边缘通信,0.93,operator,direct_order,mid,domestic_dominant,,,,,,,,,,,,,trend mapping
+688380.SH,trend_capex,半导体设计,产品渗透与国产替代,芯片产品放量,MCU|车规芯片,0.90,terminal_brand,spec_upgrade,high,dual_engine,,,,,,,,,,,,,trend mapping
+600050.SH,trend_capex,算力网络,算力资本开支与IDC建设,算力网络需求,IDC|云通信,0.86,operator,capacity_pull,mid,domestic_dominant,,,,,,,,,,,,,trend mapping
+002463.SZ,trend_capex,高速互连,服务器与交换机升级,高速PCB需求,AI服务器|交换机,0.92,global_cloud,direct_order,high,dual_engine,,,,,,,,,,,,,trend mapping
+300308.SZ,trend_capex,光模块,AI互联升级,光模块价格与出货,800G|AI光互连,0.95,global_cloud,spec_upgrade,high,global_dominant,,,,,,,,,,,,,trend mapping
+600309.SH,price_inventory,化工景气,价格库存周期,MDI价格与库存,化工品价格|库存周期,0.90,,,,,high,high,strong,midstream_material,high,mdi,strong,,,,,,,,price mapping
+600111.SH,price_inventory,稀土,供需与库存周期,稀土价格与指标库存,氧化镨钕|库存,0.91,,,,,high,extreme,strong,direct_resource,high,rare_earth,mid,,,,,,,,price mapping
+603799.SH,price_inventory,有色资源,资源价格周期,钴镍价格与库存,钴价|镍价|库存,0.88,,,,,high,extreme,mid,midstream_material,high,cobalt_nickel,mid,,,,,,,,price mapping
+000878.SZ,price_inventory,铜,工业金属周期,铜价与库存,铜价|库存,0.89,,,,,high,high,strong,direct_resource,mid,copper,mid,,,,,,,,price mapping
+002460.SZ,price_inventory,锂,新能源金属周期,锂价与库存,锂价|库存,0.87,,,,,high,extreme,mid,direct_resource,high,lithium,weak,,,,,,,,price mapping
+600036.SH,macro_style,银行股息,信用扩张与股息风格,社融与红利偏好,红利|社融,0.94,,,,,,,,,,,,financial,high,high,mid,high,low,defensive,macro mapping
+601398.SH,macro_style,银行股息,信用扩张与股息风格,社融与红利偏好,红利|社融,0.95,,,,,,,,,,,,dividend,high,high,low,high,low,defensive,macro mapping
+601688.SH,macro_style,券商Beta,流动性与风险偏好,成交额与风格,流动性|风险偏好,0.90,,,,,,,,,,,,financial,low,low,high,mid,high,offensive,macro mapping
+601318.SH,macro_style,保险股息,利率与长期资金风格,利率与红利风格,红利|利率,0.89,,,,,,,,,,,,dividend,high,high,mid,mid,mid,balanced,macro mapping

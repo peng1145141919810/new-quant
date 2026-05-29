@@ -1,0 +1,137 @@
+{
+  "generated_at": "2026-03-18 21:10:00",
+  "event_summary": {
+    "total_events": 18,
+    "high_importance_events": 5,
+    "top_event_types": [
+      "financial_report",
+      "policy_industry_event",
+      "regulatory_action"
+    ]
+  },
+  "priority_events": [
+    {
+      "event_id": "evt_20260318_0001",
+      "publish_time": "2026-03-18 20:10:00",
+      "crawl_time": "2026-03-18 20:12:03",
+      "source_type": "announcement",
+      "source_name": "exchange_disclosure",
+      "security_code": "000001.SZ",
+      "company_name": "示例股份",
+      "industry_tags": [
+        "银行"
+      ],
+      "event_type": "financial_report",
+      "event_direction": "positive",
+      "impact_scope": "single_name",
+      "impact_horizon": "1_4w",
+      "confidence": 0.82,
+      "novelty_score": 0.67,
+      "importance_score": 0.79,
+      "raw_title": "2025年年度报告摘要",
+      "raw_text": "公司披露年度报告，归母净利润同比增长，资产质量改善……",
+      "structured_facts": {
+        "revenue_yoy": 0.12,
+        "net_profit_yoy": 0.18,
+        "npl_ratio_change": -0.002
+      },
+      "extract_model": "deepseek_worker",
+      "review_status": "auto_approved"
+    }
+  ],
+  "data_gap_report": {
+    "generated_at": "2026-03-18 21:00:00",
+    "summary": "公告事件已更新，但 daily_basic 与指数成分状态滞后；业绩预告类特征建议重算。",
+    "datasets": [
+      {
+        "dataset_name": "trade_calendar",
+        "freshness_status": "fresh",
+        "missing_ratio": 0.0,
+        "action": "none"
+      },
+      {
+        "dataset_name": "daily_basic",
+        "freshness_status": "stale",
+        "missing_ratio": 0.01,
+        "action": "refresh"
+      },
+      {
+        "dataset_name": "index_weight",
+        "freshness_status": "warning",
+        "missing_ratio": 0.03,
+        "action": "refresh"
+      }
+    ],
+    "refresh_tasks": [
+      {
+        "task_id": "refresh_daily_basic_20260318",
+        "task_type": "refresh_dataset",
+        "priority": "high",
+        "reason": "表已过期",
+        "dataset_name": "daily_basic"
+      },
+      {
+        "task_id": "refresh_index_weight_20260318",
+        "task_type": "refresh_dataset",
+        "priority": "medium",
+        "reason": "指数成分状态临近过期",
+        "dataset_name": "index_weight"
+      }
+    ],
+    "recompute_tasks": [
+      {
+        "task_id": "recompute_earnings_surprise_20260318",
+        "task_type": "recompute_feature",
+        "priority": "high",
+        "reason": "业绩预告事件密集",
+        "feature_name": "earnings_surprise_proxy"
+      }
+    ],
+    "new_feature_candidates": [
+      {
+        "feature_name": "earnings_event_density_20d",
+        "reason": "近期业绩预告密集，可能形成可交易事件簇",
+        "priority": "high"
+      }
+    ]
+  },
+  "market_state": {
+    "style_bias": "defensive",
+    "vol_regime": "elevated",
+    "breadth": "weak",
+    "turnover_regime": "normal"
+  },
+  "recent_experiments": [
+    {
+      "experiment_id": "exp_001",
+      "route": "feature",
+      "family": "xgboost_gpu",
+      "valid_ic": 0.036,
+      "test_ic": 0.024,
+      "sharpe": 0.82,
+      "max_drawdown": -0.16,
+      "diagnosis": "alpha weak but risk not catastrophic"
+    }
+  ],
+  "family_state": {
+    "champion_strategy_key": "xgb_baseline_5d_top20",
+    "champion_sharpe": 1.08,
+    "champion_drawdown": -0.18
+  },
+  "research_space": {
+    "feature_profiles": [
+      "baseline_plus",
+      "vol_liq_quality",
+      "generated_feature_pack"
+    ],
+    "model_families": [
+      "xgboost_gpu",
+      "ridge_ranker"
+    ],
+    "label_horizons": [
+      5,
+      10,
+      20
+    ]
+  }
+}

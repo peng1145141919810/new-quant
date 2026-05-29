@@ -1,0 +1,37 @@
+﻿{
+  "profile_weights": {
+    "mapping_confidence": 0.26,
+    "resource_exposure": 0.20,
+    "elasticity_bucket": 0.18,
+    "direct_resource_link": 0.16,
+    "inventory_sensitivity": 0.12,
+    "cost_pass_through": 0.08
+  },
+  "state_weights": {
+    "price_momentum": 0.30,
+    "inventory_tightness": 0.28,
+    "supply_demand_balance": 0.24,
+    "trade_flow_verification": 0.18
+  },
+  "signal_weights": {
+    "base": 0.12,
+    "state": 0.28,
+    "price_state": 0.18,
+    "inventory_state": 0.18,
+    "exposure": 0.16,
+    "event": 0.08
+  },
+  "mapping_weights": {
+    "security_code_direct": 1.0,
+    "same_subchain_spillover": 0.34,
+    "same_mechanism_spillover": 0.16,
+    "concept_cap": 0.48
+  },
+  "risk_thresholds": {
+    "overextension_start": 0.10,
+    "overextension_veto": 0.18,
+    "commodity_confirm": 1.08,
+    "inventory_reversal_floor": -0.12,
+    "elasticity_overheat": 0.09
+  }
+}

@@ -1,0 +1,36 @@
+﻿{
+  "profile_weights": {
+    "mapping_confidence": 0.22,
+    "style_bucket": 0.22,
+    "duration_sensitivity": 0.16,
+    "yield_sensitivity": 0.14,
+    "macro_beta_bucket": 0.12,
+    "defensive_vs_offensive": 0.14
+  },
+  "state_weights": {
+    "macro_regime": 0.34,
+    "style_rotation": 0.26,
+    "risk_appetite": 0.22,
+    "liquidity_condition": 0.18
+  },
+  "signal_weights": {
+    "base": 0.10,
+    "state": 0.28,
+    "macro_regime": 0.22,
+    "style_flow": 0.18,
+    "basket_fit": 0.16,
+    "event": 0.06
+  },
+  "mapping_weights": {
+    "security_code_direct": 1.0,
+    "same_subchain_spillover": 0.28,
+    "same_mechanism_spillover": 0.14,
+    "crowded_cap": 0.42
+  },
+  "risk_thresholds": {
+    "regime_gap": 0.35,
+    "crowding_runup": 0.10,
+    "risk_off_floor": -0.10,
+    "basket_confirm": 0.015
+  }
+}

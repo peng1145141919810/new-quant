@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "research_brief",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "generated_at",
+    "research_thesis",
+    "why_now",
+    "core_theses",
+    "priority_events",
+    "data_actions",
+    "feature_actions",
+    "label_actions",
+    "model_actions",
+    "portfolio_actions",
+    "risk_actions",
+    "candidate_experiments",
+    "stop_conditions",
+    "ban_items"
+  ],
+  "properties": {
+    "generated_at": { "type": "string" },
+    "research_thesis": { "type": "string" },
+    "why_now": { "type": "string" },
+    "core_theses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["thesis_id", "title", "hypothesis", "why_now", "required_features", "target_labels", "route_bias", "priority"],
+        "properties": {
+          "thesis_id": { "type": "string" },
+          "title": { "type": "string" },
+          "hypothesis": { "type": "string" },
+          "why_now": { "type": "string" },
+          "required_features": { "type": "array", "items": { "type": "string" } },
+          "target_labels": { "type": "array", "items": { "type": "string" } },
+          "route_bias": { "type": "array", "items": { "type": "string" } },
+          "priority": { "type": "string" }
+        }
+      }
+    },
+    "priority_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "event_type", "importance", "summary", "research_angle"],
+        "properties": {
+          "title": { "type": "string" },
+          "event_type": { "type": "string" },
+          "importance": { "type": "integer" },
+          "summary": { "type": "string" },
+          "research_angle": { "type": "string" }
+        }
+      }
+    },
+    "data_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action", "dataset_name", "priority", "reason"],
+        "properties": {
+          "action": { "type": "string" },
+          "dataset_name": { "type": "string" },
+          "priority": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "feature_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action", "feature_name", "priority", "reason", "source_dataset"],
+        "properties": {
+          "action": { "type": "string" },
+          "feature_name": { "type": "string" },
+          "priority": { "type": "string" },
+          "reason": { "type": "string" },
+          "source_dataset": { "type": "string" }
+        }
+      }
+    },
+    "label_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action", "label_horizon", "priority", "reason"],
+        "properties": {
+          "action": { "type": "string" },
+          "label_horizon": { "type": "integer" },
+          "priority": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "model_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action", "model_family", "priority", "reason"],
+        "properties": {
+          "action": { "type": "string" },
+          "model_family": { "type": "string" },
+          "priority": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "portfolio_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action", "top_k", "priority", "reason"],
+        "properties": {
+          "action": { "type": "string" },
+          "top_k": { "type": "integer" },
+          "priority": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "risk_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action", "priority", "reason"],
+        "properties": {
+          "action": { "type": "string" },
+          "priority": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "candidate_experiments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["experiment_id", "name", "hypothesis", "route", "features", "models", "labels", "top_k", "reason"],
+        "properties": {
+          "experiment_id": { "type": "string" },
+          "name": { "type": "string" },
+          "hypothesis": { "type": "string" },
+          "route": { "type": "string" },
+          "features": { "type": "array", "items": { "type": "string" } },
+          "models": { "type": "array", "items": { "type": "string" } },
+          "labels": { "type": "array", "items": { "type": "integer" } },
+          "top_k": { "type": "integer" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "ban_items": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

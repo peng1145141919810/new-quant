@@ -1,0 +1,976 @@
+{
+  "project_name": "quant_research_engine_lean_portfolio_integrated",
+  "project_root": "H:\\Ashare\\src\\ashare",
+  "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table_v1",
+  "hub_output_root": "H:\\Ashare\\data\\ml_runs\\research_engine",
+  "execution": {
+    "python_executable": "H:\\Ashare\\.venv313\\Scripts\\python.exe",
+    "mode": "integrated_supervisor",
+    "max_cycles": 1
+  },
+  "paths": {
+    "raw_event_root": "H:\\Ashare\\data\\event_lake_v6\\raw",
+    "event_store_root": "H:\\Ashare\\data\\event_lake_v6\\curated",
+    "inventory_root": "H:\\Ashare\\data\\event_lake_v6\\inventory",
+    "research_root": "H:\\Ashare\\data\\event_lake_v6\\research",
+    "bridge_root": "H:\\Ashare\\data\\event_lake_v6\\bridge",
+    "market_state_root": "H:\\Ashare\\data\\market_state_v6",
+    "daily_cache_root": "H:\\Ashare\\data\\daily_cache_v6",
+    "log_root": "H:\\Ashare\\data\\event_lake_v6\\logs",
+    "portfolio_output_root": "H:\\Ashare\\data\\portfolio_recommendation_v6",
+    "live_execution_root": "H:\\Ashare\\data\\live_execution_bridge",
+    "live_price_snapshot_path": "H:\\Ashare\\data\\live_execution_bridge\\daily_price_snapshot.csv",
+    "trade_release_root": "H:\\Ashare\\data\\trade_release_v1",
+    "trade_clock_root": "H:\\Ashare\\data\\trade_clock",
+    "automation_runs_root": "H:\\Ashare\\outputs\\automation_runs",
+    "trading_calendar_cache_path": "H:\\Ashare\\data\\market_state_v6\\trading_calendar_a_share.csv",
+    "industry_router_output_root": "H:\\Ashare\\data\\event_lake_v6\\research\\industry_router",
+    "technical_confirmation_root": "H:\\Ashare\\data\\event_lake_v6\\research\\technical_confirmation",
+    "oms_output_root": "H:\\Ashare\\data\\live_execution_bridge\\oms_v1",
+    "affordable_sqlite_path": "H:\\Ashare\\data\\sql_store\\affordable_data_v1.sqlite3",
+    "research_fact_sqlite_path": "H:\\Ashare\\data\\sql_store\\research_fact_layers_v1.sqlite3",
+    "affordable_snapshot_root": "H:\\Ashare\\data\\affordable_feeds\\latest",
+    "manual_event_proxy_path": "H:\\Ashare\\data\\event_lake_v6\\research\\manual_event_proxy\\manual_event_proxy.jsonl",
+    "external_research_root": "H:\\Ashare\\data\\external_research_feeds\\latest",
+    "data_sqlite_path": "H:\\Ashare\\data\\sql_store\\research_data_v1.sqlite3"
+  },
+  "data_store": {
+    "enabled": true,
+    "sqlite_path": "H:\\Ashare\\data\\sql_store\\research_data_v1.sqlite3",
+    "prefer_sql_for_router": false
+  },
+  "providers": {
+    "tushare": {
+      "enabled": true,
+      "token_env": "TUSHARE_TOKEN",
+      "token": "",
+      "rate_limit_sleep_seconds": 0.8,
+      "max_retry": 3,
+      "retry_sleep_seconds": 2.0,
+      "rate_limit_backoff_seconds": 12.0
+    },
+    "deepseek_worker": {
+      "enabled": true,
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "base_url": "https://api.deepseek.com",
+      "model": "deepseek-chat",
+      "research_models": [
+        "deepseek-chat",
+        "deepseek-reasoner"
+      ],
+      "temperature": 0.1,
+      "timeout_seconds": 90
+    },
+    "openai_research": {
+      "enabled": true,
+      "api_key_env": "OPENAI_API_KEY",
+      "base_url": "https://api.openai.com/v1",
+      "model": "gpt-5.4",
+      "fallback_models": [
+        "gpt-4.1",
+        "gpt-4o"
+      ],
+      "timeout_seconds": 180,
+      "reasoning_effort": "medium",
+      "store": false
+    }
+  },
+  "local_ollama": {
+    "research_enabled": true,
+    "base_url": "http://localhost:11434",
+    "model": "deepseek-r1:14b",
+    "research_models": [
+      "deepseek-r1:14b",
+      "qwen2.5:7b"
+    ],
+    "timeout_seconds": 120,
+    "research_timeout_seconds": 180,
+    "event_extract_model": "qwen2.5:7b",
+    "event_extract_timeout_seconds": 120,
+    "evidence_card_enabled": true,
+    "evidence_card_model": "deepseek-r1:14b",
+    "evidence_card_timeout_seconds": 180,
+    "evidence_card_max_items": 2,
+    "review_router_enabled": true,
+    "review_router_model": "qwen2.5:7b",
+    "review_router_timeout_seconds": 90,
+    "review_router_max_items": 6,
+    "runtime_explainer_enabled": true,
+    "runtime_explainer_model": "qwen2.5:7b",
+    "runtime_explainer_timeout_seconds": 45,
+    "runtime_explainer_stages": [
+      "v6_planning",
+      "v5_gpu",
+      "portfolio_recommendation",
+      "execution_bridge"
+    ],
+    "v5_review_enabled": true,
+    "v5_review_model": "deepseek-r1:14b",
+    "v5_review_timeout_seconds": 180
+  },
+  "eastmoney": {
+    "enabled": true,
+    "intraday_kline_base_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get",
+    "timeout_seconds": 8.0,
+    "sleep_seconds": 0.15,
+    "max_retry": 2
+  },
+  "llm_trace": {
+    "enabled": true,
+    "artifact_root": "H:\\Ashare\\data\\trade_clock\\llm_trace",
+    "prompt_char_cap": 4000,
+    "raw_response_char_cap": 4000,
+    "store_prompts": true,
+    "store_raw_response": true
+  },
+  "llm_operating_brain": {
+    "enabled": true,
+    "provider": "deepseek_worker",
+    "timeout_seconds": 45,
+    "max_candidate_items": 10,
+    "artifact_root": "H:\\Ashare\\data\\trade_clock\\llm_operating_brain"
+  },
+  "event_ingest": {
+    "enabled_sources": [
+      "announcements",
+      "news"
+    ],
+    "lookback_hours": 24,
+    "save_raw_text": true,
+    "max_single_text_chars": 40000,
+    "max_pdf_fetch_per_run": 6,
+    "download_pdf_for_high_value_announcements": true,
+    "max_cninfo_pages_per_market": 3,
+    "enable_cninfo": true,
+    "enable_sse": true,
+    "enable_szse": true,
+    "enable_tushare_news": true,
+    "enable_tushare_major_news": true,
+    "news_sources": [
+      "sina",
+      "cls",
+      "wallstreetcn"
+    ],
+    "major_news_sources": [
+      "新浪财经",
+      "华尔街见闻",
+      "财联社"
+    ],
+    "max_tushare_news_sources_per_run": 1,
+    "max_tushare_major_news_sources_per_run": 3,
+    "tushare_news_rate_window_seconds": 60,
+    "tushare_news_rate_max_calls": 1,
+    "tushare_major_news_rate_window_seconds": 3600,
+    "tushare_major_news_rate_max_calls": 4,
+    "high_value_title_keywords": [
+      "业绩预告",
+      "业绩快报",
+      "年度报告",
+      "半年度报告",
+      "一季度报告",
+      "三季度报告",
+      "回购",
+      "分红",
+      "权益分派",
+      "增持",
+      "减持",
+      "定向增发",
+      "发行股份",
+      "可转债",
+      "并购",
+      "重组",
+      "重大合同",
+      "中标",
+      "停牌",
+      "复牌",
+      "风险提示",
+      "问询函",
+      "处罚",
+      "诉讼",
+      "仲裁",
+      "要约收购",
+      "股份解除限售"
+    ]
+  },
+  "event_extract": {
+    "enabled": true,
+    "low_confidence_threshold": 0.55,
+    "manual_review_threshold": 0.45,
+    "max_events_per_run": 12,
+    "batch_size": 4,
+    "llm_min_score": 1.35,
+    "max_content_chars_per_event": 1800,
+    "save_extract_summary": true
+  },
+  "data_gap_engine": {
+    "enabled": true,
+    "stale_hours_hard_refresh": 36,
+    "missing_ratio_warn": 0.05,
+    "missing_ratio_hard": 0.15,
+    "event_trigger_recompute": true,
+    "max_new_feature_candidates_per_day": 8
+  },
+  "research_context_pack": {
+    "recent_event_days": 7,
+    "max_priority_events": 8,
+    "include_market_state": true,
+    "include_family_state": true,
+    "include_data_gap_report": true
+  },
+  "market_state": {
+    "enabled": true,
+    "config_path": "H:\\Ashare\\src\\ashare\\configs\\market_state\\default.json",
+    "use_router_bias": true
+  },
+  "integrated_thesis": {
+    "enabled": true,
+    "output_root": "H:\\Ashare\\data\\event_lake_v6\\research\\integrated_thesis",
+    "portfolio_budget_overlay": true,
+    "soft_gate_admission": true
+  },
+  "industry_router": {
+    "enabled": true,
+    "contract_root": "H:\\Ashare\\src\\ashare\\configs\\industry_router",
+    "output_root": "H:\\Ashare\\data\\event_lake_v6\\research\\industry_router",
+    "history_lookback_days": 14,
+    "enable_context_pack": true,
+    "enable_backtest": true,
+    "source_fetch": {
+      "enabled": true,
+      "timeout_seconds": 8,
+      "cache_hours": 12,
+      "max_sources_per_run": 9,
+      "llm_discovery_enabled": true,
+      "llm_provider": "deepseek_worker",
+      "llm_timeout_seconds": 20,
+      "llm_max_candidates": 5
+    },
+    "backtest": {
+      "horizons": [
+        1,
+        2
+      ],
+      "top_k": 3
+    }
+  },
+  "research_brain": {
+    "project_root": "H:\\Ashare\\src\\ashare\\research_brain",
+    "hub_output_root": "H:\\Ashare\\data\\research_hub_integrated",
+    "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table_v1",
+    "bridge_input_root": "H:\\Ashare\\data\\event_lake_v6\\bridge",
+    "python_executable": "H:\\Ashare\\.venv313\\Scripts\\python.exe"
+  },
+  "supervisor": {
+    "token_plan_min_interval_hours": 24.0,
+    "run_forever": false,
+    "max_ticks": 1,
+    "sleep_seconds": 300,
+    "v5_gpu_max_cycles_per_tick": 3,
+    "v5_gpu_dry_run": false,
+    "require_gpu": true
+  },
+  "dynamic_strategy": {
+    "enabled": true,
+    "lookback_days": 5,
+    "defensive_daily_return_threshold": -0.02,
+    "defensive_three_day_return_threshold": -0.03,
+    "aggressive_daily_return_threshold": 0.015,
+    "aggressive_three_day_return_threshold": 0.02
+  },
+  "market_pipeline": {
+    "enabled": true,
+    "enriched_dir": "H:\\Ashare\\data\\enriched_daily_csv_qfq",
+    "flags_path": "H:\\Ashare\\data\\auxiliary_data\\tradability_flags.csv",
+    "hs300_path": "H:\\Ashare\\data\\index_daily_csv\\000300_HS300.csv",
+    "hs300_membership_history_path": "H:\\Ashare\\data\\auxiliary_data\\hs300_membership_history.csv",
+    "listing_master_path": "H:\\Ashare\\data\\auxiliary_data\\listing_date_master.csv",
+    "stock_universe_path": "H:\\Ashare\\data\\auxiliary_data\\stock_universe_clean.csv",
+    "price_snapshot_path": "H:\\Ashare\\data\\live_execution_bridge\\daily_price_snapshot.csv",
+    "realtime_quote_enabled": true,
+    "realtime_quote_source": "sina",
+    "realtime_quote_batch_size": 200,
+    "realtime_list_enabled": true,
+    "realtime_list_source": "dc",
+    "realtime_list_limit": 120,
+    "realtime_tick_enabled": true,
+    "realtime_tick_source": "sina",
+    "realtime_tick_symbol_limit": 6,
+    "rt_min_enabled": true,
+    "rt_min_provider": "eastmoney",
+    "rt_min_fallback_provider": "tushare",
+    "rt_min_freq": "1MIN",
+    "rt_min_symbol_limit": 12,
+    "rapid_refresh_require_trade_session": true,
+    "rapid_refresh_symbol_limit": 8,
+    "rapid_refresh_skip_list": true,
+    "rapid_refresh_skip_tick": true,
+    "rapid_refresh_rt_min_enabled": true,
+    "intraday_proxy_root": "H:\\Ashare\\data\\trade_clock\\intraday_proxy",
+    "train_append_lookback_rows": 160,
+    "train_append_prefix": "part_live_append",
+    "sync_tushare_missing_days": true
+  },
+  "global_objective": {
+    "enabled": true,
+    "minimum_evidence_score": 0.35,
+    "maximum_harvest_risk": 0.85,
+    "maximum_family_concentration": 0.6,
+    "minimum_execution_score": 0.3,
+    "minimum_candidate_count": 3,
+    "maximum_guardrail_penalty": 0.78,
+    "minimum_incremental_value_score": 0.28,
+    "outcome_weight": 0.22,
+    "evidence_weight": 0.24,
+    "diversity_weight": 0.18,
+    "execution_weight": 0.18,
+    "adversarial_weight": 0.18,
+    "guardrail_weight": 0.12,
+    "exploration_budget": 0.15,
+    "max_cycles": 3
+  },
+  "affordable_data_bundle": {
+    "enabled": true,
+    "run_before_research": true,
+    "fail_open": true,
+    "script_path": "H:\\Ashare\\scripts\\update_affordable_data_bundle.py",
+    "sqlite_path": "H:\\Ashare\\data\\sql_store\\affordable_data_v1.sqlite3",
+    "snapshot_root": "H:\\Ashare\\data\\affordable_feeds\\latest",
+    "daily_lookback": 3,
+    "announcement_lookback": 30,
+    "timeout_minutes": 120,
+    "datasets": [
+      "stock_basic",
+      "daily",
+      "adj_factor",
+      "daily_basic",
+      "forecast",
+      "express",
+      "dividend",
+      "stk_holdertrade",
+      "ggt_daily",
+      "moneyflow_hsgt",
+      "hk_hold",
+      "margin",
+      "margin_detail",
+      "moneyflow",
+      "stk_limit",
+      "customs_summary"
+    ]
+  },
+  "research_fact_refresh": {
+    "enabled": true,
+    "run_before_research": true,
+    "fail_open": true,
+    "event_script_path": "H:\\Ashare\\scripts\\build_event_fact_layer.py",
+    "hard_factor_script_path": "H:\\Ashare\\scripts\\build_industry_hard_factor_layer.py",
+    "sqlite_path": "H:\\Ashare\\data\\sql_store\\research_fact_layers_v1.sqlite3",
+    "event_lookback_days": 60,
+    "hard_factor_lookback_days": 5,
+    "timeout_minutes": 90
+  },
+  "external_research_refresh": {
+    "enabled": true,
+    "run_before_research": true,
+    "fail_open": true,
+    "script_path": "H:\\Ashare\\scripts\\update_external_research_feeds.py",
+    "sqlite_path": "H:\\Ashare\\data\\sql_store\\research_fact_layers_v1.sqlite3",
+    "artifact_root": "H:\\Ashare\\data\\external_research_feeds\\latest",
+    "seed_path": "H:\\Ashare\\configs\\external_sources\\qianzhan_seed_urls.json",
+    "fetch_timeout_seconds": 20,
+    "qianzhan_enabled": true,
+    "qianzhan_cookie_header_path": "H:\\Ashare\\data\\private\\qianzhan_cookie_map.json",
+    "qianzhan_daily_page_budget": 24,
+    "ggzy_enabled": true,
+    "ggzy_max_notices_per_run": 36,
+    "llm_enrichment_enabled": true,
+    "llm_provider": "deepseek_worker",
+    "llm_timeout_seconds": 30
+  },
+  "t_audit": {
+    "enabled": true,
+    "artifact_root": "H:\\Ashare\\data\\audit_v1",
+    "policy_path": "H:\\Ashare\\src\\ashare\\configs\\t_overlay\\t_audit_policy.json"
+  },
+  "audit_site_publish": {
+    "enabled": true,
+    "run_after_summary": true,
+    "fail_open": true,
+    "script_path": "H:\\Ashare\\scripts\\publish_audit_report_to_site.ps1",
+    "powershell_executable": "powershell.exe",
+    "python_executable": "H:\\Ashare\\.venv313\\Scripts\\python.exe",
+    "remote_user": "ubuntu",
+    "remote_host": "43.129.28.141",
+    "remote_root": "/var/www/peng1145141919810.xyz/site",
+    "domain": "peng1145141919810.xyz",
+    "timeout_minutes": 20
+  },
+  "operator_runtime_publish": {
+    "enabled": true,
+    "fail_open": true,
+    "script_path": "H:\\Ashare\\scripts\\publish_operator_runtime_context_to_site.ps1",
+    "powershell_executable": "powershell.exe",
+    "python_executable": "H:\\Ashare\\.venv313\\Scripts\\python.exe",
+    "remote_user": "ubuntu",
+    "remote_host": "43.129.28.141",
+    "remote_root": "/var/www/peng1145141919810.xyz/site",
+    "timeout_minutes": 5,
+    "min_interval_seconds": 300
+  },
+  "intraday_state_machine": {
+    "enabled": true,
+    "shadow_mode": true,
+    "afternoon_overlay_respect_shadow_mode": false,
+    "fail_open": true,
+    "enable_afternoon_overlay": true,
+    "stale_order_minutes": 20,
+    "strict_pre_execution_gate": false,
+    "artifact_root": "H:\\Ashare\\data\\trade_clock\\intraday_state",
+    "refresh_on_phase_completion": [
+      "preopen_gate",
+      "simulation",
+      "shadow",
+      "midday_review",
+      "afternoon_execution",
+      "afternoon_shadow",
+      "summary",
+      "intraday_tactical_0940",
+      "intraday_tactical_1010",
+      "intraday_tactical_1040",
+      "intraday_tactical_1310",
+      "intraday_tactical_1350",
+      "intraday_tactical_1420"
+    ],
+    "timing_layer": {
+      "enabled": true,
+      "window_config": {
+        "open_noise_window": {
+          "start": "09:30:00",
+          "end": "09:40:00",
+          "allow_trim": true,
+          "allow_exit": true
+        },
+        "morning_primary_window": {
+          "start": "09:40:00",
+          "end": "10:30:00",
+          "allow_new_entry": true,
+          "allow_build_entry": true,
+          "allow_trim": true,
+          "allow_exit": true,
+          "allow_t_first_leg": true
+        },
+        "mid_morning_low_speed_window": {
+          "start": "10:30:00",
+          "end": "11:20:00",
+          "allow_trim": true,
+          "allow_exit": true,
+          "allow_reconcile": true
+        },
+        "afternoon_primary_window": {
+          "start": "13:00:00",
+          "end": "14:20:00",
+          "allow_new_entry": true,
+          "allow_build_entry": true,
+          "allow_trim": true,
+          "allow_exit": true,
+          "allow_t_second_leg": true
+        },
+        "late_afternoon_reconcile_window": {
+          "start": "14:20:00",
+          "end": "14:50:00",
+          "allow_trim": true,
+          "allow_exit": true,
+          "allow_reconcile": true,
+          "allow_t_second_leg": true
+        },
+        "post_1450_close_only_window": {
+          "start": "14:50:00",
+          "end": "15:00:00",
+          "allow_exit": true,
+          "allow_reconcile": true
+        }
+      },
+      "buy_score_threshold": 0.58,
+      "sell_score_threshold": 0.62,
+      "require_oms_clean_state": false,
+      "require_flow_confirmation": false,
+      "enable_afternoon_second_leg": true
+    },
+    "t_overlay": {
+      "enabled": true,
+      "max_rounds_per_symbol_per_day": 1,
+      "max_ratio_per_symbol": 0.2,
+      "disable_on_panic": false,
+      "disable_on_major_event": true,
+      "concentration_guard": {
+        "high_risk_max_proxy_spread": 0.015,
+        "elevated_max_proxy_spread": 0.018,
+        "high_risk_max_ratio_multiplier": 0.65,
+        "elevated_max_ratio_multiplier": 0.82
+      }
+    }
+  },
+  "intraday_tactics": {
+    "enabled": true,
+    "artifact_root": "H:\\Ashare\\data\\trade_clock\\intraday_tactics",
+    "max_daily_turnover_ratio": 0.12,
+    "max_symbol_add_ratio": 0.06,
+    "max_symbol_reduce_ratio": 0.25,
+    "buy_cooldown_minutes": 18,
+    "sell_cooldown_minutes": 5,
+    "allow_add_on_snapshot_degraded": true,
+    "allow_reduce_on_snapshot_degraded": true,
+    "enable_time_stop": true,
+    "enable_take_profit": true,
+    "enable_stop_loss": true,
+    "enable_t_overlay": true,
+    "enable_tactical_add": true,
+    "reason_thresholds": {
+      "take_profit_soft_pct": 0.035,
+      "take_profit_hard_pct": 0.08,
+      "stop_loss_soft_pct": 0.025,
+      "stop_loss_hard_pct": 0.06,
+      "time_stop_minutes": 120
+    },
+    "scheduler_phases": {
+      "intraday_tactical_0940": {
+        "enabled": true,
+        "time": "09:40:00",
+        "timeout_minutes": 8
+      },
+      "intraday_tactical_1010": {
+        "enabled": true,
+        "time": "10:10:00",
+        "timeout_minutes": 8
+      },
+      "intraday_tactical_1040": {
+        "enabled": true,
+        "time": "10:40:00",
+        "timeout_minutes": 8
+      },
+      "intraday_tactical_1310": {
+        "enabled": true,
+        "time": "13:10:00",
+        "timeout_minutes": 8
+      },
+      "intraday_tactical_1350": {
+        "enabled": true,
+        "time": "13:50:00",
+        "timeout_minutes": 8
+      },
+      "intraday_tactical_1420": {
+        "enabled": true,
+        "time": "14:20:00",
+        "timeout_minutes": 8
+      }
+    }
+  },
+  "portfolio_recommendation": {
+    "enabled": true,
+    "max_names": 20,
+    "single_name_cap": 0.1,
+    "total_exposure_cap": 1.0,
+    "simulation_ready_need_gate": false,
+    "market_state_aware_sizing": true,
+    "technical_confirmation_gate": false,
+    "enable_post_filter_reweight": true,
+    "min_exposure_fill_ratio": 0.75,
+    "enforce_executable_universe": true,
+    "executable_allowed_suffixes": [
+      ".SH",
+      ".SZ"
+    ],
+    "require_tradable_basic": true,
+    "account_size_aware_sizing": true,
+    "account_size_slot_budget_ratio": 0.96,
+    "account_size_min_weight_buffer": 1.05,
+    "account_size_max_single_name_cap": 0.35,
+    "broad_candidate_pool_limit": 48,
+    "llm_candidate_weak_accept_threshold": 6,
+    "enable_intelligent_outer_allocator": true,
+    "intelligent_outer_allocator_replaces_internal_gates": true,
+    "pre_release_intraday_proxy_objective_enabled": true,
+    "pre_release_proxy_max_spread_pct": 0.028,
+    "pre_release_proxy_turnover_enforce": true,
+    "pre_release_proxy_diversification_flatten": true,
+    "pre_release_proxy_cash_headroom_floor": 0.04,
+    "pre_release_proxy_hhi_trigger": 0.18,
+    "pre_release_proxy_flatten_gamma": 0.94,
+    "pre_release_proxy_fail_open": true
+  },
+  "portfolio_candidate_llm_review": {
+    "enabled": true,
+    "provider": "deepseek_worker",
+    "timeout_seconds": 45,
+    "max_input_rows": 18,
+    "artifact_root": "H:\\Ashare\\data\\trade_clock\\candidate_pool_llm_review",
+    "llm_symbol_boost": 0.1,
+    "llm_mechanism_boost": 0.05,
+    "llm_event_boost": 0.04,
+    "llm_blocked_penalty": 0.25
+  },
+  "strategy_activation": {
+    "enabled": true,
+    "blend_weight": 0.32,
+    "llm_enabled": true,
+    "llm_provider": "deepseek_worker",
+    "llm_timeout_seconds": 40,
+    "llm_max_input_rows": 16,
+    "artifact_root": "H:\\Ashare\\data\\trade_clock\\strategy_activation_llm",
+    "signal_weights": {
+      "valuation": {
+        "pe_pct_industry": 0.35,
+        "pb_pct_industry": 0.35,
+        "ps_pct_industry": 0.3
+      },
+      "revision": {
+        "revision_score": 0.6,
+        "eps_revision_7d": 0.2,
+        "eps_revision_30d": 0.2
+      },
+      "order_flow": {
+        "recent_contract_count": 0.18,
+        "recent_contract_amount": 0.22,
+        "backlog_amount": 0.24,
+        "contract_liability": 0.14,
+        "has_major_contract": 0.12,
+        "has_bid_award": 0.1
+      },
+      "event_drive": {
+        "fact_contract_count": 0.25,
+        "fact_contract_amount": 0.25,
+        "fact_government_contracts": 0.1,
+        "positive_supply_signals": 0.25,
+        "total_supply_signals": 0.05,
+        "negative_supply_signals_inverted": 0.1
+      },
+      "industry": {
+        "qianzhan_relevance": 0.45,
+        "qianzhan_direction_bias": 0.2,
+        "inventory_direction_bias": 0.2,
+        "operation_direction_bias": 0.15
+      },
+      "liquidity": {
+        "turnover_pct_rank": 0.34,
+        "crowding_score_inverted": 0.22,
+        "fund_exposure_proxy": 0.18,
+        "northbound_holding_change": 0.13,
+        "margin_balance_change": 0.13
+      }
+    },
+    "meta_weights": {
+      "valuation_signal_score": 0.14,
+      "revision_signal_score": 0.2,
+      "order_flow_signal_score": 0.23,
+      "event_drive_signal_score": 0.21,
+      "industry_signal_score": 0.12,
+      "liquidity_signal_score": 0.1
+    },
+    "priority_weights": {
+      "selection_score_base": 0.66,
+      "selection_score_risk_budget_bonus": 0.12,
+      "data_activation_score": 0.34
+    },
+    "llm_overlay": {
+      "favored_symbol_boost": 0.09,
+      "favored_family_boost": 0.05,
+      "blocked_symbol_penalty": 0.16,
+      "aggressiveness_min": 0.85,
+      "aggressiveness_max": 1.35
+    },
+    "risk_budget_bounds": {
+      "min": 0.35,
+      "max": 1.6,
+      "priority_bonus_cap": 1.0
+    },
+    "cash_multipliers": {
+      "high_cash_threshold": 0.15,
+      "mid_cash_threshold": 0.08,
+      "high_cash_multiplier": 1.0,
+      "mid_cash_multiplier": 0.94,
+      "low_cash_multiplier": 0.88
+    }
+  },
+  "portfolio": {
+    "enabled": true,
+    "lifecycle_state_machine_enabled": true,
+    "admission_replacement_enabled": true,
+    "soft_crowding_penalty_enabled": true,
+    "rich_audit_enabled": true,
+    "output_root": "H:\\Ashare\\data\\portfolio_recommendation_v6\\portfolio",
+    "pilot_max_weight": 0.04,
+    "build_speed": 1.25,
+    "trim_speed": 0.72,
+    "replacement_improvement_threshold": 0.08,
+    "soft_crowding_penalty_strength": 0.08
+  },
+  "technical_confirmation": {
+    "enabled": true,
+    "config_path": "H:\\Ashare\\src\\ashare\\configs\\technical_confirmation\\default.json"
+  },
+  "portfolio_control": {
+    "enabled": true,
+    "drift_threshold": 0.005,
+    "max_daily_turnover_ratio": 0.45,
+    "dynamic_account_scaling_enabled": true,
+    "dynamic_account_max_turnover_ratio": 0.9,
+    "dynamic_account_max_single_buy_nav_ratio_cap": 0.45,
+    "dynamic_account_max_single_buy_cash_ratio_cap": 0.5,
+    "enable_execution_feedback": true,
+    "enable_dev_log_snapshot": true,
+    "dev_log_top_holdings": 8,
+    "allow_odd_lot_exit": true,
+    "bootstrap_diversification_enabled": true,
+    "bootstrap_max_current_exposure_ratio": 0.05,
+    "bootstrap_min_names": 8,
+    "bootstrap_slot_budget_ratio": 0.95,
+    "small_account_slicing_enabled": true,
+    "small_account_nav_threshold": 50000.0,
+    "small_account_max_single_buy_nav_ratio": 0.22,
+    "small_account_max_single_buy_cash_ratio": 0.28,
+    "llm_blocked_symbols": [],
+    "llm_favored_symbols": [],
+    "llm_favored_score_boost": 75.0,
+    "reduce_only": false
+  },
+  "oms": {
+    "enabled": true,
+    "output_root": "H:\\Ashare\\data\\live_execution_bridge\\oms_v1",
+    "use_broker_truth_for_v2a_continuity": true,
+    "intent_expiry_days": 3,
+    "control_feedback_lookback_runs": 20,
+    "research_meta_lookback_runs": 60,
+    "compat_write_latest_account_state": true,
+    "enable_broker_cancel": true
+  },
+  "safety": {
+    "enabled": true,
+    "health_probe_interval_seconds": 300,
+    "account_state_max_age_seconds": 900,
+    "position_sync_max_age_seconds": 900,
+    "release_max_age_seconds": 172800,
+    "fail_on_unfinished_orders": true,
+    "fail_on_unknown_order_status": true,
+    "degraded_reduce_only": true,
+    "caution_turnover_multiplier": 0.5,
+    "market_caution_mean_pct_chg": -1.0,
+    "market_panic_mean_pct_chg": -2.2,
+    "market_caution_hs300_return_pct": -1.5,
+    "market_panic_hs300_return_pct": -3.0,
+    "market_caution_limit_down_ratio": 0.05,
+    "market_panic_limit_down_ratio": 0.12,
+    "execution_fail_ratio_degraded": 0.35,
+    "execution_fail_ratio_halt": 0.75,
+    "execution_fail_min_orders": 3
+  },
+  "execution_policy": {
+    "account_mode": "precision",
+    "precision_trade_enabled": true,
+    "allow_integrated_precision_execution": true,
+    "ignore_market_panic_reduce_only": false,
+    "allow_unfinished_orders_reconcile": false,
+    "namespace": "main",
+    "shadow_run": false
+  },
+  "execution_management": {
+    "enabled": true,
+    "max_child_order_ratio": 0.2,
+    "staged_entry_delay_seconds": 45,
+    "allow_cancel_replace": true
+  },
+  "execution_llm_review": {
+    "enabled": true,
+    "provider": "deepseek_worker",
+    "timeout_seconds": 45,
+    "max_target_items": 8,
+    "max_blocked_symbols": 3,
+    "allow_reduce_only": true,
+    "turnover_multiplier_floor": 0.6,
+    "turnover_multiplier_cap": 1.15,
+    "artifact_root": "H:\\Ashare\\data\\trade_clock\\llm_execution_review"
+  },
+  "trade_release": {
+    "enabled": true,
+    "valid_after_time": "09:30:30",
+    "expires_at_time": "15:00:00",
+    "calendar_lookback_days": 7,
+    "calendar_forward_days": 45
+  },
+  "trade_clock": {
+    "enabled": true,
+    "timezone": "Asia/Shanghai",
+    "poll_seconds": 30,
+    "remote_delegate": {
+      "enabled": false,
+      "remote_user": "ubuntu",
+      "remote_host": "43.129.28.141",
+      "remote_repo_root": "/opt/ashare_runtime",
+      "python_executable": "/usr/bin/python3",
+      "phases": [
+        "research_refresh",
+        "release_refresh",
+        "summary"
+      ],
+      "fallback_to_local": true,
+      "ssh_options": [
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=8"
+      ]
+    },
+    "account_snapshot": {
+      "enabled": true,
+      "concentration_top1_high": 0.35,
+      "concentration_top1_elevated": 0.22,
+      "concentration_hhi_high": 0.22,
+      "concentration_hhi_elevated": 0.15
+    },
+    "runtime_hot_reload": {
+      "enabled": false,
+      "check_interval_seconds": 20,
+      "watch_scripts_root": "H:\\Ashare\\scripts",
+      "watch_hub_root": "H:\\Ashare\\src\\ashare\\engine",
+      "watch_bridge_root": "H:\\Ashare\\src\\live_execution_bridge",
+      "watch_csharp_root": "H:\\Ashare\\csharp_runtime_skeleton"
+    },
+    "execution_windows": [
+      {
+        "label": "morning_primary",
+        "start": "09:30:30",
+        "end": "10:00:00"
+      },
+      {
+        "label": "afternoon_primary",
+        "start": "13:00:00",
+        "end": "14:50:00"
+      }
+    ],
+    "scheduler": {
+      "enabled": true,
+      "profile": "daily_production",
+      "log_tail_lines": 30,
+      "research_refresh_profile": "daily_production",
+      "release_refresh_profile": "daily_production",
+      "fallback_max_portfolio_age_hours": 96,
+      "fallback_require_release": false,
+      "simulation_namespace": "precision",
+      "shadow_namespace": "shadow",
+      "shadow_enabled": false,
+      "afternoon_shadow_enabled": false,
+      "simulation_execution_mode": "precision",
+      "shadow_execution_mode": "precision",
+      "simulation_precision_trade": true,
+      "shadow_precision_trade": true,
+      "simulation_ignore_market_panic_reduce_only": true,
+      "shadow_ignore_market_panic_reduce_only": true,
+      "simulation_allow_unfinished_orders_reconcile": false,
+      "shadow_allow_unfinished_orders_reconcile": false,
+      "morning_research_refresh_enabled": true,
+      "morning_release_refresh_enabled": true,
+      "live_snapshot_refresh_enabled": true,
+      "live_snapshot_refresh_fail_open": true,
+      "live_snapshot_loop_enabled": true,
+      "live_snapshot_loop_interval_seconds": 3,
+      "live_snapshot_loop_market_stages": [
+        "morning_session",
+        "afternoon_session",
+        "closing_auction"
+      ],
+      "live_snapshot_refresh_phases": [
+        "preopen_gate",
+        "simulation",
+        "shadow",
+        "midday_review",
+        "afternoon_execution",
+        "afternoon_shadow",
+        "summary"
+      ],
+      "data_consistency_gate": {
+        "enabled": true,
+        "fail_open": false,
+        "max_market_age_days": 4,
+        "max_market_table_spread_days": 1,
+        "require_today_refresh_phases": [
+          "research_refresh",
+          "release_refresh",
+          "preopen_gate",
+          "simulation",
+          "midday_review",
+          "afternoon_execution",
+          "summary"
+        ],
+        "required_today_pipelines": [
+          "affordable_data_refresh",
+          "external_research_refresh",
+          "research_fact_refresh",
+          "industry_hard_factor_refresh"
+        ]
+      },
+      "phases": {
+        "research": {
+          "time": "15:05:00",
+          "timeout_minutes": 420
+        },
+        "release": {
+          "time": "15:10:00",
+          "timeout_minutes": 30
+        },
+        "research_refresh": {
+          "time": "08:35:00",
+          "timeout_minutes": 15
+        },
+        "release_refresh": {
+          "time": "08:55:00",
+          "timeout_minutes": 10
+        },
+        "preopen_gate": {
+          "time": "09:20:00",
+          "timeout_minutes": 15
+        },
+        "simulation": {
+          "time": "09:30:35",
+          "timeout_minutes": 45
+        },
+        "shadow": {
+          "time": "09:35:00",
+          "timeout_minutes": 30
+        },
+        "midday_review": {
+          "time": "11:35:00",
+          "timeout_minutes": 10
+        },
+        "afternoon_execution": {
+          "time": "13:05:00",
+          "timeout_minutes": 30
+        },
+        "afternoon_shadow": {
+          "time": "13:15:00",
+          "timeout_minutes": 20
+        },
+        "summary": {
+          "time": "15:20:00",
+          "timeout_minutes": 20
+        }
+      }
+    }
+  },
+  "execution_bridge": {
+    "enabled": false,
+    "mode": "gmtrade_sim",
+    "python_executable": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python39\\python.exe",
+    "config_template_path": "H:\\Ashare\\src\\ashare\\configs\\gmtrade_runtime_config.local.json",
+    "autogen_config_path": "H:\\Ashare\\src\\ashare\\configs\\gmtrade_runtime_config.autogen.json",
+    "script_path": "H:\\Ashare\\src\\ashare\\run_gmtrade_portfolio_bridge.py",
+    "health_probe_script_path": "H:\\Ashare\\src\\ashare\\run_gmtrade_health_probe.py"
+  },
+  "runtime_selection": {
+    "profile": "daily_production",
+    "default_mode": "integrated_supervisor",
+    "execution_mode": "precision",
+    "precision_trade_enabled": true,
+    "execution_namespace": "main",
+    "ignore_market_panic_reduce_only": false,
+    "allow_unfinished_orders_reconcile": false,
+    "shadow_run": false
+  }
+}

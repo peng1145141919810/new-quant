@@ -1,0 +1,30 @@
+from __future__ import annotations
+
+
+TECH_CONFIRMATION_FIELDS = [
+    "date",
+    "symbol",
+    "ts_code",
+    "code",
+    "is_existing_position",
+    "close",
+    "ma10",
+    "ma20",
+    "ma60",
+    "ret_3",
+    "ret_5",
+    "ret_20",
+    "amount_ratio_20",
+    "turnover_ratio_20",
+    "price_vs_ma20",
+    "volatility_10",
+    "tech_trend_score",
+    "tech_volume_score",
+    "tech_stretch_penalty",
+    "tech_hold_health",
+    "tech_final_score",
+    "tech_allow_entry",
+    "tech_gate_reason",
+    "tech_entry_style",
+    "tech_weight_multiplier",
+]

@@ -1,0 +1,11 @@
+theme_id,theme_name,theme_type,description,primary_chain,primary_data_sources,update_frequency,active_flag,mechanism_primary,default_shock_type,key_terms
+industrial_iot,工业互联,capex_demand,工业通信和工业互联网设备订单扩张,工业通信|工业互联网|边缘通信,official_page|price_snapshot|event_clue,weekly,1,trend_capex,demand_expansion,工业通信|工业互联网|边缘通信|数字化支出
+domestic_chip,芯片国产化,capex_demand,模拟芯片与车规 MCU 的国产替代和渗透提升,半导体设计|MCU|车规芯片,official_page|price_snapshot|event_clue,weekly,1,trend_capex,demand_expansion,芯片国产化|MCU|车规芯片|国产替代
+state_compute,央国企算力,capex_demand,运营商与国资体系的算力网络建设,算力网络|IDC|云通信,official_page|price_snapshot|event_clue,weekly,1,trend_capex,demand_expansion,算力网络|IDC|云通信|运营商
+ai_compute_chain,算力链,capex_demand,AI 服务器互连升级带来的 PCB 与光模块景气,AI服务器|交换机|800G|光互连,official_page|price_snapshot|event_clue,daily,1,trend_capex,demand_expansion,AI服务器|交换机|800G|光模块|高速互连
+chemical_cycle,化工景气,commodity_cycle,MDI 等化工品价格与库存周期修复,化工品价格|库存周期|MDI,official_page|price_snapshot|event_clue,daily,1,price_inventory,price_transmission,MDI|化工品价格|库存周期|价差
+strategic_metals,战略金属,commodity_cycle,稀土供给收缩与战略资源涨价,稀土|氧化镨钕|库存,official_page|price_snapshot|event_clue,daily,1,price_inventory,supply_cut,稀土|氧化镨钕|库存|配额
+new_energy_metals,新能源金属,commodity_cycle,锂钴镍库存反转和价格修复,锂价|钴价|镍价|库存,official_page|price_snapshot|event_clue,daily,1,price_inventory,inventory_reversal,锂价|钴价|镍价|库存|新能源金属
+industrial_metals,工业金属,commodity_cycle,铜价传导与工业金属补库,铜价|库存|工业金属,official_page|price_snapshot|event_clue,daily,1,price_inventory,price_transmission,铜价|库存|工业金属|补库
+dividend_financials,高股息,macro_style,银行保险高股息与低波防御风格,红利|社融|利率,official_page|price_snapshot|event_clue,monthly,1,macro_style,policy_shift,红利|社融|利率|高股息|防御
+capital_markets,资本市场,macro_style,券商对流动性和风险偏好的高弹性暴露,成交额|风险偏好|资本市场,official_page|price_snapshot|event_clue,daily,1,macro_style,policy_shift,成交额|风险偏好|券商|资本市场

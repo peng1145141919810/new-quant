@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "data_gap_report",
+  "type": "object",
+  "required": [
+    "generated_at",
+    "datasets",
+    "refresh_tasks",
+    "recompute_tasks",
+    "new_feature_candidates"
+  ],
+  "properties": {
+    "generated_at": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "datasets": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "refresh_tasks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "recompute_tasks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "new_feature_candidates": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

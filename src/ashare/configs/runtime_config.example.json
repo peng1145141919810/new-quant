@@ -1,0 +1,23 @@
+{
+  "portfolio_root": "H:\\Ashare\\data\\research_hub_integrated",
+  "portfolio_recommendation_root": "F:\\quant_data\\Ashare\\data\\portfolio_recommendation_v6",
+  "explicit_portfolio_path": "",
+  "price_snapshot_path": "F:\\quant_data\\Ashare\\data\\live_execution_bridge\\daily_price_snapshot.csv",
+  "output_dir": "F:\\quant_data\\Ashare\\data\\live_execution_bridge",
+  "broker": {
+    "type": "local_sim",
+    "account_id": "paper_a001",
+    "initial_cash": 1000000.0,
+    "cash_reserve_ratio": 0.02,
+    "lot_size": 100,
+    "min_trade_value": 2000.0,
+    "buy_fee_rate": 0.0003,
+    "sell_fee_rate": 0.0013,
+    "slippage_bp": 8.0
+  },
+  "portfolio": {
+    "max_names": 20,
+    "fallback_equal_weight": true,
+    "weight_sum_limit": 0.98
+  }
+}

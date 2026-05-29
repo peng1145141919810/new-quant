@@ -1,0 +1,11 @@
+{
+  "token": "在这里填你的 token",
+  "account_id": "在这里填你的仿真账户ID",
+  "account_alias": "paper_stock_01",
+  "endpoint": "api.myquant.cn:9000",
+  "probe_order": {
+    "symbol": "SHSE.600000",
+    "volume": 100,
+    "price": 10.00
+  }
+}

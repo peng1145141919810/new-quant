@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-03-18 21:00:00",
+  "summary": "公告事件已更新，但 daily_basic 与指数成分状态滞后；业绩预告类特征建议重算。",
+  "datasets": [
+    {
+      "dataset_name": "trade_calendar",
+      "freshness_status": "fresh",
+      "missing_ratio": 0.0,
+      "action": "none"
+    },
+    {
+      "dataset_name": "daily_basic",
+      "freshness_status": "stale",
+      "missing_ratio": 0.01,
+      "action": "refresh"
+    },
+    {
+      "dataset_name": "index_weight",
+      "freshness_status": "warning",
+      "missing_ratio": 0.03,
+      "action": "refresh"
+    }
+  ],
+  "refresh_tasks": [
+    {
+      "task_id": "refresh_daily_basic_20260318",
+      "task_type": "refresh_dataset",
+      "priority": "high",
+      "reason": "表已过期",
+      "dataset_name": "daily_basic"
+    },
+    {
+      "task_id": "refresh_index_weight_20260318",
+      "task_type": "refresh_dataset",
+      "priority": "medium",
+      "reason": "指数成分状态临近过期",
+      "dataset_name": "index_weight"
+    }
+  ],
+  "recompute_tasks": [
+    {
+      "task_id": "recompute_earnings_surprise_20260318",
+      "task_type": "recompute_feature",
+      "priority": "high",
+      "reason": "业绩预告事件密集",
+      "feature_name": "earnings_surprise_proxy"
+    }
+  ],
+  "new_feature_candidates": [
+    {
+      "feature_name": "earnings_event_density_20d",
+      "reason": "近期业绩预告密集，可能形成可交易事件簇",
+      "priority": "high"
+    }
+  ]
+}

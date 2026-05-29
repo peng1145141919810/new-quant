@@ -1,0 +1,3 @@
+from .schema import TECH_CONFIRMATION_FIELDS
+
+__all__ = ["TECH_CONFIRMATION_FIELDS"]

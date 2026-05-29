@@ -1,0 +1,409 @@
+{
+  "contract_version": "industry_router_unified_phase1_sources",
+  "mechanism_groups": {
+    "trend_capex": {
+      "description": "订单 / capex / 产业趋势驱动。",
+      "company_event_sources": [
+        {
+          "source_id": "cninfo_ann",
+          "source_name": "巨潮资讯",
+          "mode": "existing_event_ingest"
+        },
+        {
+          "source_id": "sse_ann",
+          "source_name": "上交所公告",
+          "mode": "existing_event_ingest"
+        },
+        {
+          "source_id": "szse_ann",
+          "source_name": "深交所公告",
+          "mode": "existing_event_ingest"
+        }
+      ],
+      "industry_state_sources": [
+        {
+          "source_id": "miit_electronics_ops",
+          "source_name": "工信部电子信息制造业运行情况",
+          "mode": "official_page",
+          "url": "https://www.miit.gov.cn/gxsj/tjfx/dzxx/art/2025/art_42557faec6b74d97804be723e4a376f0.html",
+          "source_weight": 1.0,
+          "positive_keywords": [
+            "电子信息制造业",
+            "增加值同比增长",
+            "出口回升",
+            "投资增长",
+            "集成电路产量增长",
+            "服务器",
+            "数据中心",
+            "算力"
+          ],
+          "negative_keywords": [
+            "利润下降",
+            "手机产量下降",
+            "效益下滑",
+            "出口下降",
+            "投资下降"
+          ]
+        },
+        {
+          "source_id": "caict_phone_market",
+          "source_name": "中国信通院手机市场运行分析",
+          "mode": "official_page",
+          "url": "https://gma.caict.ac.cn/plat/news/caict-release-china-mobile-phone-market-analysis-report-november-2024",
+          "source_weight": 0.92,
+          "positive_keywords": [
+            "国内市场手机出货量",
+            "5G手机",
+            "AI手机",
+            "同比增长",
+            "终端市场回暖"
+          ],
+          "negative_keywords": [
+            "出货量下降",
+            "同比下降",
+            "需求承压",
+            "智能手机下降"
+          ]
+        },
+        {
+          "source_id": "nbs_industrial_output",
+          "source_name": "国家统计局规上工业增加值",
+          "mode": "official_page",
+          "url": "https://www.stats.gov.cn/sj/zxfb/202503/t20250317_1959012.html",
+          "source_weight": 0.96,
+          "positive_keywords": [
+            "规模以上工业增加值",
+            "集成电路产量增长",
+            "出口交货值增长",
+            "高技术制造业增长"
+          ],
+          "negative_keywords": [
+            "下降",
+            "增速回落",
+            "产量下滑"
+          ]
+        },
+        {
+          "source_id": "nbs_capacity_utilization",
+          "source_name": "国家统计局全国规上工业产能利用率",
+          "mode": "official_page",
+          "url": "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202507/t20250715_1960404.html",
+          "source_weight": 0.98,
+          "positive_keywords": [
+            "产能利用率",
+            "制造业产能利用率",
+            "电子设备制造业"
+          ],
+          "negative_keywords": [
+            "产能利用率下降",
+            "季度回落"
+          ]
+        },
+        {
+          "source_id": "miit_lithium_battery_ops",
+          "source_name": "工信部锂离子电池行业运行情况",
+          "mode": "official_page",
+          "url": "https://www.miit.gov.cn/gyhxxhb/jgsj/dzxxs/dzjc/art/2025/art_d39a290e42b542b7a9a688355c52c768.html",
+          "source_weight": 0.92,
+          "positive_keywords": [
+            "锂离子电池",
+            "产量增长",
+            "行业运行情况",
+            "出口增长"
+          ],
+          "negative_keywords": [
+            "价格下跌",
+            "利润下滑",
+            "需求走弱"
+          ]
+        },
+        {
+          "source_id": "miit_electronics_ops_h1_2025",
+          "source_name": "工信部2025年上半年电子信息制造业运行情况",
+          "mode": "official_page",
+          "url": "https://www.miit.gov.cn/jgsj/yxj/xxfb/art/2025/art_a55ea74ca4384daa998a23858e82372b.html",
+          "source_weight": 0.98,
+          "positive_keywords": [
+            "电子信息制造业",
+            "生产快速增长",
+            "出口稳定向好",
+            "效益持续改善",
+            "集成电路",
+            "服务器"
+          ],
+          "negative_keywords": [
+            "投资略有下滑",
+            "利润下滑",
+            "出口下降",
+            "需求承压"
+          ]
+        }
+      ],
+      "macro_context_sources": [
+        {
+          "source_id": "gov_trade_goods_trade",
+          "source_name": "国务院转载海关总署货物贸易数据",
+          "mode": "official_page",
+          "url": "https://www.gov.cn/lianbo/bumen/202503/content_7011535.htm",
+          "source_weight": 0.88,
+          "category_weight": 0.85,
+          "positive_keywords": [
+            "机电产品出口增长",
+            "集成电路出口增长",
+            "自动数据处理设备",
+            "同比增长",
+            "出口增长"
+          ],
+          "negative_keywords": [
+            "同比下降",
+            "需求回落",
+            "出口下降",
+            "贸易摩擦"
+          ]
+        }
+      ]
+    },
+    "price_inventory": {
+      "description": "价格 / 库存 / 供需驱动。",
+      "company_event_sources": [
+        {
+          "source_id": "cninfo_ann",
+          "source_name": "巨潮资讯",
+          "mode": "existing_event_ingest"
+        },
+        {
+          "source_id": "sse_ann",
+          "source_name": "上交所公告",
+          "mode": "existing_event_ingest"
+        },
+        {
+          "source_id": "szse_ann",
+          "source_name": "深交所公告",
+          "mode": "existing_event_ingest"
+        }
+      ],
+      "industry_state_sources": [
+        {
+          "source_id": "shfe_home",
+          "source_name": "上期所库存仓单总览",
+          "mode": "official_page",
+          "url": "https://www.shfe.com.cn/",
+          "source_weight": 0.76,
+          "positive_keywords": [
+            "库存下降",
+            "去库",
+            "仓单下降",
+            "铜库存下降",
+            "铝库存下降"
+          ],
+          "negative_keywords": [
+            "库存增加",
+            "累库",
+            "仓单增加",
+            "铜库存增加",
+            "铝库存增加"
+          ]
+        },
+        {
+          "source_id": "nbs_ppi",
+          "source_name": "国家统计局工业生产者价格数据",
+          "mode": "official_page",
+          "url": "https://www.stats.gov.cn/sj/zxfb/202503/t20250309_1958914.html",
+          "source_weight": 1.0,
+          "positive_keywords": [
+            "工业生产者出厂价格同比上涨",
+            "环比上涨",
+            "采掘工业价格上涨",
+            "原材料工业价格上涨"
+          ],
+          "negative_keywords": [
+            "工业生产者出厂价格同比下降",
+            "环比下降",
+            "原材料工业价格下降"
+          ]
+        },
+        {
+          "source_id": "nbs_material_prices",
+          "source_name": "国家统计局流通领域重要生产资料市场价格",
+          "mode": "official_page",
+          "url": "https://www.stats.gov.cn/sj/zxfb/202506/t20250613_1960154.html",
+          "source_weight": 1.0,
+          "positive_keywords": [
+            "价格上涨",
+            "电解铜",
+            "铝锭",
+            "螺纹钢",
+            "热轧板卷"
+          ],
+          "negative_keywords": [
+            "价格下跌",
+            "累库",
+            "承压"
+          ]
+        },
+        {
+          "source_id": "miit_petrochemical_growth_plan",
+          "source_name": "工信部石化化工行业稳增长工作方案解读",
+          "mode": "official_page",
+          "url": "https://wap.miit.gov.cn/jgsj/ycls/shhg/art/2025/art_7f127e56077a40f48f105217ad47f21c.html",
+          "source_weight": 0.9,
+          "positive_keywords": [
+            "石化化工行业",
+            "增加值年均增长5%以上",
+            "经济效益企稳回升",
+            "精细化延伸",
+            "化工园区"
+          ],
+          "negative_keywords": [
+            "承压",
+            "下滑",
+            "风险隐患"
+          ]
+        },
+        {
+          "source_id": "miit_aluminum_plan",
+          "source_name": "工信部铝产业高质量发展实施方案解读",
+          "mode": "official_page",
+          "url": "https://www.miit.gov.cn/jgsj/ycls/ysjs/art/2025/art_a25489f6687e49f9a9ad144ceea88c56.html",
+          "source_weight": 0.86,
+          "positive_keywords": [
+            "铝产业",
+            "资源量增长",
+            "再生铝产量",
+            "清洁能源使用比例",
+            "供应链韧性"
+          ],
+          "negative_keywords": [
+            "资源约束",
+            "供给风险",
+            "承压"
+          ]
+        }
+      ],
+      "macro_context_sources": [
+        {
+          "source_id": "gov_nea_power_stats",
+          "source_name": "国务院转载国家能源局电力工业统计数据",
+          "mode": "official_page",
+          "url": "https://www.gov.cn/lianbo/bumen/202503/content_7014731.htm",
+          "source_weight": 0.9,
+          "category_weight": 0.85,
+          "positive_keywords": [
+            "全社会用电量同比增长",
+            "发电装机容量同比增长",
+            "火电发电量增长",
+            "工业用电量增长"
+          ],
+          "negative_keywords": [
+            "同比下降",
+            "用电量下降",
+            "发电量下降"
+          ]
+        },
+        {
+          "source_id": "gov_trade_goods_trade",
+          "source_name": "国务院转载海关总署货物贸易数据",
+          "mode": "official_page",
+          "url": "https://www.gov.cn/lianbo/bumen/202503/content_7011535.htm",
+          "source_weight": 0.82,
+          "category_weight": 0.8,
+          "positive_keywords": [
+            "能源产品",
+            "出口增长",
+            "进口增长",
+            "工业品出口"
+          ],
+          "negative_keywords": [
+            "同比下降",
+            "需求回落",
+            "出口下降"
+          ]
+        }
+      ]
+    },
+    "macro_style": {
+      "description": "宏观 / 风格 / 流动性驱动。",
+      "company_event_sources": [
+        {
+          "source_id": "cninfo_ann",
+          "source_name": "巨潮资讯",
+          "mode": "existing_event_ingest"
+        },
+        {
+          "source_id": "sse_ann",
+          "source_name": "上交所公告",
+          "mode": "existing_event_ingest"
+        },
+        {
+          "source_id": "szse_ann",
+          "source_name": "深交所公告",
+          "mode": "existing_event_ingest"
+        }
+      ],
+      "industry_state_sources": [
+        {
+          "source_id": "pbc_social_financing",
+          "source_name": "人民银行社会融资规模增量统计报告",
+          "mode": "official_page",
+          "url": "https://www.pbc.gov.cn/diaochatongjisi/116219/116225/2025080618505035955/index.html",
+          "source_weight": 1.0,
+          "positive_keywords": [
+            "社会融资规模增量",
+            "人民币贷款增加",
+            "M2同比增长",
+            "流动性合理充裕",
+            "企业中长期贷款增加"
+          ],
+          "negative_keywords": [
+            "社融下降",
+            "贷款同比少增",
+            "M1同比下降",
+            "融资需求偏弱"
+          ]
+        },
+        {
+          "source_id": "pbc_financial_stats",
+          "source_name": "人民银行金融统计数据报告",
+          "mode": "official_page",
+          "url": "https://www.pbc.gov.cn/diaochatongjisi/116219/116225/2025080618505068053/index.html",
+          "source_weight": 0.94,
+          "positive_keywords": [
+            "金融统计数据",
+            "人民币贷款增加",
+            "存款余额",
+            "M2同比增长",
+            "社会融资规模"
+          ],
+          "negative_keywords": [
+            "贷款同比少增",
+            "M1同比下降",
+            "企业融资需求偏弱"
+          ]
+        }
+      ],
+      "macro_context_sources": [
+        {
+          "source_id": "nbs_pmi",
+          "source_name": "国家统计局制造业采购经理指数",
+          "mode": "official_page",
+          "url": "https://www.stats.gov.cn/sj/zxfb/202603/t20260304_1962699.html",
+          "source_weight": 0.9,
+          "category_weight": 0.88,
+          "positive_keywords": [
+            "制造业采购经理指数",
+            "高于临界点",
+            "生产指数回升",
+            "新订单指数回升",
+            "景气水平继续改善"
+          ],
+          "negative_keywords": [
+            "低于临界点",
+            "PMI回落",
+            "新订单指数下降",
+            "景气水平下降"
+          ]
+        }
+      ]
+    }
+  }
+}

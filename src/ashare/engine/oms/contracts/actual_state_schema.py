@@ -1,0 +1,28 @@
+VALID_ACTUAL_STATES = ["watch", "pilot", "build", "hold", "trim", "exit"]
+
+ACTUAL_STATE_FIELDS = [
+    "date",
+    "symbol",
+    "release_id",
+    "desired_state",
+    "raw_actual_state",
+    "actual_state",
+    "actual_state_override",
+    "actual_state_source",
+    "state_gap_reason",
+    "action_type",
+    "intent_status",
+    "reconcile_required",
+    "manual_override_reason",
+    "actual_shares",
+    "available_shares",
+    "target_shares",
+    "actual_weight",
+    "target_weight",
+    "gap_shares",
+    "gap_weight",
+    "gap_weight_abs",
+    "open_buy_shares",
+    "open_sell_shares",
+    "mechanism_primary",
+]

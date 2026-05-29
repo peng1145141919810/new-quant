@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "event_store_record",
+  "type": "object",
+  "required": [
+    "event_id",
+    "publish_time",
+    "source_type",
+    "source_name",
+    "event_type",
+    "event_direction",
+    "impact_scope",
+    "impact_horizon",
+    "confidence",
+    "importance_score",
+    "raw_title",
+    "raw_text",
+    "extract_model"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "publish_time": {
+      "type": "string"
+    },
+    "crawl_time": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_type": {
+      "type": "string"
+    },
+    "source_name": {
+      "type": "string"
+    },
+    "security_code": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "company_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "industry_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "event_type": {
+      "type": "string"
+    },
+    "event_direction": {
+      "type": "string",
+      "enum": [
+        "positive",
+        "negative",
+        "neutral",
+        "mixed",
+        "uncertain"
+      ]
+    },
+    "impact_scope": {
+      "type": "string",
+      "enum": [
+        "single_name",
+        "industry",
+        "market",
+        "macro",
+        "unknown"
+      ]
+    },
+    "impact_horizon": {
+      "type": "string",
+      "enum": [
+        "1_3d",
+        "1_4w",
+        "1_3m",
+        "longer",
+        "unknown"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "novelty_score": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "importance_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "raw_title": {
+      "type": "string"
+    },
+    "raw_text": {
+      "type": "string"
+    },
+    "structured_facts": {
+      "type": "object"
+    },
+    "extract_model": {
+      "type": "string"
+    },
+    "review_status": {
+      "type": "string",
+      "enum": [
+        "auto_approved",
+        "review_required",
+        "rejected",
+        "chief_approved"
+      ]
+    }
+  }
+}
