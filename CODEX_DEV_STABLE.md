@@ -31,12 +31,18 @@
 - DROPPED: control-plane helper `ashare_control`, public portal source `site_portal`, site publish stage `outputs\site_publish_stage`, C# governance/orchestration skeleton (entire `csharp_runtime_skeleton`), Python RPC bridge `python_rpc_bridge.py`.
 - Runtime state on H: is empty by design: no live release, no OMS ledgers, no execution reports, no trade-clock runtime state. First H:-side runs must regenerate these from scratch.
 
-### Pending H: Workspace Setup (must be done before first runtime run)
-- Re-point `src/ashare/engine/local_settings.py` Python executable paths off F:-side venv hardcodes (`.venv313`, `gmtrade39`).
-- Decide whether to re-create the `D:\AshareHotData\research_hub_integrated\runs` NVMe junction or run the V5 hot path entirely on H:.
-- Audit hard-coded `F:\quant_data\AshareC#` path strings in source and configs; introduce env-var indirection or batch rewrite.
-- Reinstall Python venv(s) per `src/ashare/requirements_v6_runtime.txt`; venvs intentionally not copied.
-- Run lightweight preflight (`launch_canonical.py --preflight-only --profile quick_test`) before any real chain run.
+### H: Workspace Bootstrap Status (as of CDL-20260529-046)
+- **DONE** Venvs installed on H:
+  - `H:\Ashare\.venv313\Scripts\python.exe` (Python 3.13.12 + research deps)
+  - `H:\Ashare\.venv\gmtrade39\Scripts\python.exe` (Python 3.9.9 + gmtrade 3.0.6)
+- **DONE** `local_settings.py` rewritten — dead F: legacy overlay removed, H: venv paths set, cut modules disabled
+- **DONE** All hardcoded `F:\quant_data\AshareC#` paths in source / configs / SYSTEM_MANIFEST batch-rewritten to `H:\Ashare`
+- **DONE** Stale runtime artifacts purged (event_lake research state, generated_runtime configs)
+- **DONE** `git init -b main`, first commit `ad19272`, 381 tracked files
+- **DONE** Preflight green: `launch_canonical.py --preflight-only --profile quick_test` → exit 0, all 28 checks pass
+- **PENDING** `D:\AshareHotData\research_hub_integrated\runs` NVMe junction — not yet recreated; V5 will write under `H:\Ashare\data\` until/unless user re-creates the junction
+- **PENDING** No real chain run executed yet — first `research_only` will likely hit data-consistency gate due to 20-day-stale SQLite (`research_data_v1` last touched 2026-05-09)
+- **PENDING** `git remote add origin <url>` if user wants a remote; currently local-only repo
 
 ## Session Start Checklist
 1. Read `CODEX_DEV_LOG.md`, then this file, then `CODEX_DEV_LOG_INDEX.md`.

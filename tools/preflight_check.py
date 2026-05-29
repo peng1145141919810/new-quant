@@ -87,7 +87,7 @@ def run_preflight(repo_root: Path, profile: str, mode: str, explicit_config: str
         repo_root / "scripts" / "build_event_fact_layer.py",
         repo_root / "scripts" / "build_industry_hard_factor_layer.py",
         repo_root / "scripts" / "update_external_research_feeds.py",
-        repo_root / "scripts" / "build_audit_site_index.py",
+        # build_audit_site_index.py was dropped in the H:\Ashare slim fork (site_portal removed).
         runtime_root / "engine" / "local_settings.py",
         runtime_root / "engine" / "config_builder.py",
         runtime_root / "engine" / "supervisor.py",

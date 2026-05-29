@@ -8,6 +8,47 @@
 
 ## Change Log
 
+### CDL-20260529-046
+- Local time: `2026-05-29 21:30:00`
+- Type: `h-workspace-bootstrap-and-first-green-preflight`
+- Scope: `venvs created on H:, local_settings rewritten, F: paths batch-cleaned, git init, preflight green`
+- Author: `Claude (Opus 4.7)`
+- Touched paths:
+  - `H:\Ashare\.venv313\` (NEW — Python 3.13.12 + research deps from `requirements_v6_runtime.txt`)
+  - `H:\Ashare\.venv\gmtrade39\` (NEW — Python 3.9.9 + gmtrade 3.0.6)
+  - `H:\Ashare\src\ashare\engine\local_settings.py` (REWRITTEN — dropped dead F: legacy overlay, point Python paths at H: venvs, disable cut modules)
+  - `H:\Ashare\AGENTS.md` (REWRITTEN — all F: workspace paths replaced with H:, dropped GDrive/site/operator references)
+  - `H:\Ashare\.gitignore` (NEW)
+  - `H:\Ashare\.git\` (NEW — `git init -b main`, first commit `ad19272`)
+  - `H:\Ashare\outputs\canonical_runs\` (NEW empty dir — preflight requires parent to exist)
+  - `H:\Ashare\tools\preflight_check.py` (1-line edit — removed `build_audit_site_index.py` check since site_portal was cut)
+  - Batch path cleanup, 15 files: all source configs + 3 probe scripts + SYSTEM_MANIFEST.yaml + SYSTEM_DAILY_USAGE_GUIDE_CN.txt. All `F:\\quant_data\\AshareC#`, `F:/quant_data/AshareC#`, JSON-escaped `F:\\\\quant_data\\\\AshareC#` rewritten to `H:\\Ashare` / `H:/Ashare`.
+  - Runtime artifact purge: removed `data/event_lake_v6/{raw,curated,inventory,bridge,logs,research/{supervisor,context_pack,integrated_thesis,industry_router,evidence_cards}}/` and `src/ashare/configs/{generated_runtime,gmtrade_runtime_config.autogen.json}` (all stale state from F: copy that referenced old paths)
+- What changed (operator perspective):
+  - H:\Ashare is now self-contained. No code in the active path references F: any more.
+  - Both venvs live on H:; base interpreters remain at `C:\Users\Administrator\AppData\Local\Programs\Python\Python{313,39}\` (Windows installs not relocatable cleanly, but venvs do not need to live with the base).
+  - Secrets stay in user env vars (`TUSHARE_TOKEN`, `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`) — verified all 3 are SET. Nothing token-shaped lives in any file in H:\Ashare.
+  - Three flags forced off in `local_settings.py` due to dropped modules:
+    - `ENABLE_AUDIT_SITE_PUBLISH = False`
+    - `TRADE_CLOCK_RUNTIME_HOT_RELOAD_ENABLED = False`
+    - `ENABLE_TRADE_CLOCK_REMOTE_DELEGATE = False`
+  - First git commit is `ad19272` on branch `main`. 381 tracked files. No remote configured — `git push` will fail until user adds an origin.
+- Impact:
+  - The "Pending H: Workspace Setup" checklist from `CDL-20260529-045` is now closed.
+  - Preflight green is the first time the H: workspace has been proven runnable.
+  - Trade-clock `--once` boot was kicked off but had not yet completed at the time of this entry; user will see the result asynchronously.
+- Validation:
+  - `tools\preflight_check.py --profile quick_test --mode integrated_supervisor` → 28/28 checks pass, exit 0.
+  - `launch_canonical.py --preflight-only --profile quick_test --mode integrated_supervisor` → same 28/28 pass, exit 0.
+  - `import:engine.supervisor@canonical_python` passes, confirming the supervisor module loads under `H:\Ashare\.venv313\Scripts\python.exe`.
+  - `git status` clean after first commit.
+- Compatibility:
+  - The runtime config builder will regenerate `src/ashare/configs/runtime_config.<profile>.json` and `hub_config.v6.runtime.<profile>.json` on next real run, picking up the new H: paths.
+  - First real `research_only` run on H: will rebuild scheduler artifacts, runtime feedback bundles, and `outputs/canonical_runs/<run_id>/run_manifest.json` from scratch.
+  - The 20-day-old SQLite data (`research_data_v1.sqlite3` last touched 2026-05-09) is unchanged — first real research run will trigger data-consistency gate failure unless `daily_production` refresh is allowed to run first.
+- Rollback:
+  - To restart from a clean H: copy: `git reset --hard ad19272`. Venv directories are gitignored so they survive; SQLite/CSV data also gitignored and survive. Generated runtime configs and outputs are regenerable.
+
 ### CDL-20260529-045
 - Local time: `2026-05-29 19:30:00`
 - Type: `workspace-fork-and-slim`

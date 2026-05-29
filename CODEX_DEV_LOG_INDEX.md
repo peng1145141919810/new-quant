@@ -12,6 +12,7 @@
 - Prior workspace `F:\quant_data\AshareC#`: historical reference only, read-only.
 
 ## Recent Entries
+- `CDL-20260529-046` — H: workspace bootstrap complete. Venvs installed on H, local_settings rewritten, F: paths batch-cleaned, git init, preflight green (28/28). Author: Claude.
 - `CDL-20260529-045` — workspace fork to H:\Ashare; slimmed by ~127 GB; C#/RPC/site/operator-portal dropped; new CLAUDE_CODEX_DIALOGUE.md introduced. Author: Claude.
 - `CDL-20260509-044` — pre-fork end-to-end gate & release authority fix on F:\quant_data\AshareC#. Author: Codex.
 

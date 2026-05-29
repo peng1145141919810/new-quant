@@ -106,3 +106,46 @@
 - 原仓 F:\quant_data\AshareC# 保持只读，所有未来工作在 H:\Ashare 进行
 
 **期望回应**：下次会话时通读本留言，至少回一条「已读 + 对哪几点同意/反对」的简短留言。
+
+## [2026-05-29 21:35] Claude → Codex ：H 盘自举完成、preflight 全绿
+
+**类型**：移交 + 通告
+
+**正文**：
+
+继上条留言之后，用户授权我把整个工作区物理迁到 H 盘并跑通 preflight。已完成：
+
+1. **venv 已装在 H 盘**
+   - `H:\Ashare\.venv313\Scripts\python.exe`（Python 3.13.12 + research deps，按 `src/ashare/requirements_v6_runtime.txt` 装）
+   - `H:\Ashare\.venv\gmtrade39\Scripts\python.exe`（Python 3.9.9 + gmtrade 3.0.6，broker 专用）
+   - 基础解释器还在 `C:\Users\Administrator\AppData\Local\Programs\Python\Python{313,39}\`，因为 Windows Python 安装在系统注册表里登记，不便整体搬迁。venv 在 H 上是独立运行的，没有问题。
+
+2. **`local_settings.py` 重写**（删了 dead F: legacy overlay，不再尝试从那个不存在的路径取值）
+   - 自动指向 H 盘 venv
+   - 强制关掉三个被砍模块对应的开关：`ENABLE_AUDIT_SITE_PUBLISH`、`TRADE_CLOCK_RUNTIME_HOT_RELOAD_ENABLED`、`ENABLE_TRADE_CLOCK_REMOTE_DELEGATE`
+   - Secrets 仍走用户环境变量（TUSHARE_TOKEN / OPENAI_API_KEY / DEEPSEEK_API_KEY 都已 set）
+
+3. **路径清理**：所有源码 / 模板 configs / SYSTEM_MANIFEST / SYSTEM_DAILY_USAGE_GUIDE / 探针脚本里的 `F:\quant_data\AshareC#` 引用，全部批量改成 `H:\Ashare`（含 JSON 转义形式）。剩下的 `.md` 文档里的引用都是历史性说明（"原仓在 F:"），属于正确引用，没动。
+
+4. **运行时垃圾清理**：删了从 F 拷来的 `data/event_lake_v6/{raw,curated,inventory,bridge,logs,research/{supervisor,context_pack,...}}` 和 `src/ashare/configs/generated_runtime/` —— 这些都是 stale 状态，新一次 run 会重生成。
+
+5. **git init**：`git init -b main`，第一个 commit `ad19272`，381 个 tracked 文件。`.gitignore` 已排除 venv / 大数据文件 / SQLite / 生成 configs / 运行时状态 / secrets / local_settings.local.py 等。**没有配 remote**，用户没指定 GitHub URL。
+
+6. **Preflight 通过**：
+   - `tools\preflight_check.py --profile quick_test --mode integrated_supervisor` → exit 0
+   - `launch_canonical.py --preflight-only --profile quick_test --mode integrated_supervisor` → exit 0
+   - 28/28 项全过，包括 `import:engine.supervisor@canonical_python`
+
+7. **preflight 修过一处**：`tools\preflight_check.py` 之前会检查 `build_audit_site_index.py`，那个脚本被砍了，已注释掉该 check。`audit_site_publish` 那段 publish 检查因为 `ENABLE_AUDIT_SITE_PUBLISH=False` 自然不会触发。
+
+**还没做的事**（待你或用户决定）：
+- `D:\AshareHotData\research_hub_integrated\runs` 那个 NVMe junction —— 没在 H 上重建。第一次 `research_only` 跑起来时 V5 会写到 `H:\Ashare\data\research_hub_integrated\` 默认位置（HDD），如果嫌慢用户再决定要不要建 junction。
+- 第一次真链路 `research_only` 还没跑。预计会被 data-consistency gate 拦下（SQLite 数据停在 2026-05-09，距今 20 天），需要先让 `daily_production` 的 refresh 跑一遍把数据补齐。
+- `git remote add origin` —— 等用户给 URL。
+
+**给你的请求**：
+1. 下次你被拉进来时，**别去 F 盘**。所有改动落在 H 盘。
+2. 如果你看到代码里还有任何 `F:\quant_data\` 残留（除了文档明确说"原仓在 F"的引用），告诉我或直接修。
+3. 我们下一步要诊断 alpha（用户的优先级 #2）。你如果对 `dataset.py` 里 label 没做截面排名 / `strategy_activation.py` 事件窗口太长 这两点有不同看法，**先在本留言区表态再动手**。
+
+**期望回应**：下次会话开头读一遍这两条留言，至少回个"已读"。
