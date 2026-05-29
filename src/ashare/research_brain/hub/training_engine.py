@@ -80,6 +80,11 @@ def _resolve_label_horizon(candidate: Dict[str, Any]) -> int:
     return infer_label_horizon(str(candidate.get('label_col', 'future_ret_5')), default=5)
 
 
+def _normalize_policy_name(value: Any, default: str) -> str:
+    text = str(value or '').strip().lower()
+    return text or default
+
+
 def _derive_execution_aligned_label(
     df: pd.DataFrame,
     *,
@@ -110,6 +115,176 @@ def _derive_execution_aligned_label(
         "execution_lag_bars": int(execution_lag_bars),
         "derived_execution_label": True,
         "effective_label_non_null_ratio": round(non_null_ratio, 6),
+    }
+
+
+def _cross_section_rank(series: pd.Series) -> pd.Series:
+    numeric = pd.to_numeric(series, errors="coerce")
+    valid = numeric.notna()
+    if int(valid.sum()) <= 1:
+        return pd.Series(0.0, index=series.index, dtype=float)
+    ranked = numeric.rank(method="average", pct=True)
+    return (ranked * 2.0 - 1.0).fillna(0.0)
+
+
+def _cross_section_zscore(series: pd.Series) -> pd.Series:
+    numeric = pd.to_numeric(series, errors="coerce")
+    mean = numeric.mean()
+    std = numeric.std(ddof=0)
+    if not np.isfinite(std) or float(std) <= 1e-12:
+        return pd.Series(0.0, index=series.index, dtype=float)
+    return ((numeric - mean) / std).replace([np.inf, -np.inf], np.nan).fillna(0.0)
+
+
+def _derive_alpha_training_label(
+    df: pd.DataFrame,
+    *,
+    date_col: str,
+    industry_col: Optional[str],
+    realized_label_col: str,
+    label_mode: str,
+) -> Tuple[pd.DataFrame, str, Dict[str, Any]]:
+    mode = _normalize_policy_name(label_mode, "raw_return")
+    if mode in {"raw", "raw_return", "absolute_return"}:
+        return df, realized_label_col, {
+            "label_mode": "raw_return",
+            "realized_label_col": realized_label_col,
+            "training_label_col": realized_label_col,
+            "training_label_derived": False,
+        }
+
+    out = df.copy()
+    if mode in {"cross_section_rank", "cs_rank", "daily_rank"}:
+        training_label_col = f"{realized_label_col}__cs_rank"
+        out[training_label_col] = out.groupby(date_col, group_keys=False)[realized_label_col].apply(_cross_section_rank)
+        effective_mode = "cross_section_rank"
+    elif mode in {"cross_section_zscore", "cs_zscore", "daily_zscore"}:
+        training_label_col = f"{realized_label_col}__cs_zscore"
+        out[training_label_col] = out.groupby(date_col, group_keys=False)[realized_label_col].apply(_cross_section_zscore)
+        effective_mode = "cross_section_zscore"
+    elif mode in {"industry_neutral_rank", "industry_rank"} and industry_col and industry_col in out.columns:
+        training_label_col = f"{realized_label_col}__industry_rank"
+        out[training_label_col] = out.groupby([date_col, industry_col], group_keys=False)[realized_label_col].apply(_cross_section_rank)
+        effective_mode = "industry_neutral_rank"
+    else:
+        training_label_col = f"{realized_label_col}__cs_rank"
+        out[training_label_col] = out.groupby(date_col, group_keys=False)[realized_label_col].apply(_cross_section_rank)
+        effective_mode = "cross_section_rank_fallback"
+
+    non_null_ratio = float(pd.to_numeric(out[training_label_col], errors="coerce").notna().mean()) if len(out.index) else 0.0
+    return out, training_label_col, {
+        "label_mode": effective_mode,
+        "requested_label_mode": mode,
+        "realized_label_col": realized_label_col,
+        "training_label_col": training_label_col,
+        "training_label_derived": True,
+        "training_label_non_null_ratio": round(non_null_ratio, 6),
+    }
+
+
+def _is_market_beta_feature(name: str) -> bool:
+    text = str(name or "").strip().lower()
+    if not text:
+        return False
+    exact = {
+        "hs300_close",
+        "hs300_open",
+        "hs300_high",
+        "hs300_low",
+        "hs300_volume",
+        "hs300_amount",
+        "index_close",
+        "index_open",
+        "index_high",
+        "index_low",
+    }
+    if text in exact:
+        return True
+    return text.startswith(("hs300_", "index_ret_", "market_ret_", "market_beta_", "benchmark_"))
+
+
+def _apply_feature_beta_policy(selected: List[str], candidate: Dict[str, Any]) -> Tuple[List[str], Dict[str, Any]]:
+    policy = _normalize_policy_name(candidate.get("feature_market_policy"), "allow")
+    if policy in {"allow", "include", "none"}:
+        return list(selected), {
+            "feature_market_policy": policy,
+            "market_beta_features_excluded": 0,
+            "excluded_market_beta_feature_names": [],
+        }
+    if policy not in {"exclude_from_stock_ranker", "exclude", "stock_ranker_no_market_beta"}:
+        return list(selected), {
+            "feature_market_policy": f"{policy}_unknown_allow",
+            "market_beta_features_excluded": 0,
+            "excluded_market_beta_feature_names": [],
+        }
+    excluded = [c for c in selected if _is_market_beta_feature(c)]
+    kept = [c for c in selected if c not in set(excluded)]
+    if not kept:
+        return list(selected), {
+            "feature_market_policy": f"{policy}_fallback_allow_all",
+            "market_beta_features_excluded": 0,
+            "excluded_market_beta_feature_names": [],
+        }
+    return kept, {
+        "feature_market_policy": "exclude_from_stock_ranker",
+        "market_beta_features_excluded": int(len(excluded)),
+        "excluded_market_beta_feature_names": excluded[:50],
+    }
+
+
+def _is_liquidity_feature(name: str) -> bool:
+    """流动性特征：amount / 成交额 / 换手率 派生列。
+
+    用户优先级 #4：把流动性当 hard filter（已经在 portfolio_recommendation
+    _filter_executable_candidates 里），不要再作为 LightGBM 的 feature，
+    避免模型偏向"成交活跃 → 涨"这种伪 alpha；同时也减少小盘股污染。
+
+    保留：vol_* (波动率) — 波动率可能携带真实 alpha (低波异象)
+    """
+    text = str(name or "").strip().lower()
+    if not text:
+        return False
+    exact = {
+        "amount",
+        "turnover_rate",
+        "liquidity_amount_cny",
+    }
+    if text in exact:
+        return True
+    return text.startswith((
+        "amount_",
+        "turnover_mean_",
+        "turnover_z_",
+        "liquidity_amount_",
+    ))
+
+
+def _apply_feature_liquidity_policy(selected: List[str], candidate: Dict[str, Any]) -> Tuple[List[str], Dict[str, Any]]:
+    policy = _normalize_policy_name(candidate.get("feature_liquidity_policy"), "allow")
+    if policy in {"allow", "include", "none"}:
+        return list(selected), {
+            "feature_liquidity_policy": policy,
+            "liquidity_features_excluded": 0,
+            "excluded_liquidity_feature_names": [],
+        }
+    if policy not in {"exclude_from_stock_ranker", "exclude", "stock_ranker_no_liquidity"}:
+        return list(selected), {
+            "feature_liquidity_policy": f"{policy}_unknown_allow",
+            "liquidity_features_excluded": 0,
+            "excluded_liquidity_feature_names": [],
+        }
+    excluded = [c for c in selected if _is_liquidity_feature(c)]
+    kept = [c for c in selected if c not in set(excluded)]
+    if not kept:
+        return list(selected), {
+            "feature_liquidity_policy": f"{policy}_fallback_allow_all",
+            "liquidity_features_excluded": 0,
+            "excluded_liquidity_feature_names": [],
+        }
+    return kept, {
+        "feature_liquidity_policy": "exclude_from_stock_ranker",
+        "liquidity_features_excluded": int(len(excluded)),
+        "excluded_liquidity_feature_names": excluded[:50],
     }
 
 
@@ -424,6 +599,9 @@ def train_and_predict(
     selected = _select_features(df, feature_cols, candidate['feature_profile'])
     if candidate['feature_profile'] == 'interaction_sparse':
         df, selected = _apply_interaction_sparse(df, selected)
+    selected, feature_policy_meta = _apply_feature_beta_policy(selected, candidate)
+    selected, liquidity_policy_meta = _apply_feature_liquidity_policy(selected, candidate)
+    feature_policy_meta.update(liquidity_policy_meta)
 
     label_col = candidate['label_col']
     date_col = bundle.date_col
@@ -437,6 +615,14 @@ def train_and_predict(
         base_label_col=label_col,
         label_horizon=label_horizon,
         execution_lag_bars=execution_lag_bars,
+    )
+    realized_label_col = effective_label_col
+    df, training_label_col, alpha_label_meta = _derive_alpha_training_label(
+        df,
+        date_col=date_col,
+        industry_col=bundle.industry_col,
+        realized_label_col=realized_label_col,
+        label_mode=str(candidate.get("alpha_label_mode", "raw_return")),
     )
     split_embargo_days = max(label_horizon + execution_lag_bars, 0)
     train_df, valid_df, test_df = split_by_dates(df, date_col=date_col, embargo_days=split_embargo_days)
@@ -458,11 +644,11 @@ def train_and_predict(
     )
 
     X_train = _clean_feature_frame(train_df, selected)
-    y_train = train_df[effective_label_col].astype(float)
+    y_train = train_df[training_label_col].astype(float)
     X_valid = _clean_feature_frame(valid_df, selected)
-    y_valid = valid_df[effective_label_col].astype(float)
+    y_valid = valid_df[training_label_col].astype(float)
     X_test = _clean_feature_frame(test_df, selected)
-    y_test = test_df[effective_label_col].astype(float)
+    y_test = test_df[training_label_col].astype(float)
 
     if candidate['training_logic'] in {'weighted_recent', 'regularized_recent'} or train_plan.get('sample_weight_mode') == 'recent_exponential':
         sample_weight = _recent_exponential_weights(train_df[date_col])
@@ -499,9 +685,14 @@ def train_and_predict(
 
     pred_valid_df = valid_df[[date_col, code_col]].copy()
     pred_valid_df['pred_score'] = pred_valid
-    pred_valid_df[effective_label_col] = y_valid.to_numpy()
+    pred_valid_df[training_label_col] = y_valid.to_numpy()
+    if realized_label_col != training_label_col and realized_label_col in valid_df.columns:
+        pred_valid_df[realized_label_col] = valid_df[realized_label_col].to_numpy()
 
-    pred_test_df = _project_runtime_frame(test_df, code_col=code_col, label_col=label_col, extra_cols=[effective_label_col])
+    extra_cols = [realized_label_col]
+    if training_label_col != realized_label_col:
+        extra_cols.append(training_label_col)
+    pred_test_df = _project_runtime_frame(test_df, code_col=code_col, label_col=label_col, extra_cols=extra_cols)
     pred_test_df['pred_score'] = pred_test
 
     latest_date = df[date_col].max()
@@ -510,20 +701,24 @@ def train_and_predict(
     latest_df = _project_runtime_frame(latest_source_df, code_col=code_col, label_col=label_col)
     latest_df['pred_score'] = _predict_scores(model=model, X=X_latest, realized_family=realized_family)
 
-    valid_metrics = summarize_prediction_frame(pred_valid_df, date_col=date_col, pred_col='pred_score', label_col=effective_label_col)
-    test_metrics = summarize_prediction_frame(pred_test_df, date_col=date_col, pred_col='pred_score', label_col=effective_label_col)
+    valid_metrics = summarize_prediction_frame(pred_valid_df, date_col=date_col, pred_col='pred_score', label_col=training_label_col)
+    test_metrics = summarize_prediction_frame(pred_test_df, date_col=date_col, pred_col='pred_score', label_col=training_label_col)
+    realized_valid_metrics = summarize_prediction_frame(pred_valid_df, date_col=date_col, pred_col='pred_score', label_col=realized_label_col) if realized_label_col in pred_valid_df.columns else {}
+    realized_test_metrics = summarize_prediction_frame(pred_test_df, date_col=date_col, pred_col='pred_score', label_col=realized_label_col) if realized_label_col in pred_test_df.columns else {}
     overfit_diagnostics = build_overfit_diagnostics(
         pred_valid_df,
         pred_test_df,
         date_col=date_col,
         pred_col='pred_score',
-        label_col=effective_label_col,
+        label_col=training_label_col,
     )
 
     resource_meta.update(model_meta)
+    resource_meta.update(feature_policy_meta)
     resource_meta.update({
         'effective_model_family': realized_family,
-        'effective_label_col': effective_label_col,
+        'effective_label_col': training_label_col,
+        'realized_return_label_col': realized_label_col,
         'selected_feature_count': int(len(selected)),
         'latest_date': str(latest_date),
         'label_horizon': int(label_horizon),
@@ -533,14 +728,20 @@ def train_and_predict(
     train_summary = {
         'strategy_name': candidate['strategy_name'],
         'label_col': label_col,
-        'effective_label_col': effective_label_col,
+        'effective_label_col': training_label_col,
+        'training_label_col': training_label_col,
+        'realized_return_label_col': realized_label_col,
+        'alpha_label_meta': alpha_label_meta,
         'model_family': model_family,
         'effective_model_family': realized_family,
         'feature_profile': candidate['feature_profile'],
         'training_logic': candidate['training_logic'],
         'n_features': int(len(selected)),
+        'feature_policy_meta': feature_policy_meta,
         'valid_metrics': valid_metrics,
         'test_metrics': test_metrics,
+        'realized_valid_metrics': realized_valid_metrics,
+        'realized_test_metrics': realized_test_metrics,
         'overfit_diagnostics': overfit_diagnostics,
         'time_alignment': time_alignment,
         'resource_meta': resource_meta,

@@ -12,6 +12,8 @@
 - Prior workspace `F:\quant_data\AshareC#`: historical reference only, read-only.
 
 ## Recent Entries
+- `CDL-20260529-048` — tightened `CLAUDE_CODEX_DIALOGUE.md` into an active-thread board with 25-message / ~25KB archive triggers and compact archive rules. Author: Codex.
+- `CDL-20260529-047` — V5.1 stock-ranker now defaults to cross-sectional alpha labels and excludes direct market-beta features from training while preserving raw realized returns for backtests. Author: Codex.
 - `CDL-20260529-046` — H: workspace bootstrap complete. Venvs installed on H, local_settings rewritten, F: paths batch-cleaned, git init, preflight green (28/28). Author: Claude.
 - `CDL-20260529-045` — workspace fork to H:\Ashare; slimmed by ~127 GB; C#/RPC/site/operator-portal dropped; new CLAUDE_CODEX_DIALOGUE.md introduced. Author: Claude.
 - `CDL-20260509-044` — pre-fork end-to-end gate & release authority fix on F:\quant_data\AshareC#. Author: Codex.
@@ -69,6 +71,8 @@
 - LLM tracing: `src\ashare\engine\llm_trace.py`
 
 ## Update Index
+- `CDL-20260529-048`: made `CLAUDE_CODEX_DIALOGUE.md` an active-thread board, added archive triggers, compact archive format, and future session reading boundaries
+- `CDL-20260529-047`: changed V5.1 alpha training defaults to daily cross-sectional rank labels, excluded direct market-beta features from the stock-ranker, and preserved realized raw returns for portfolio backtests
 - `CDL-20260509-049`: made post-portfolio evidence audit default-on, portfolio rebuild after audit default-on, and audit-failure execution blocking default-on
 - `CDL-20260509-048`: aligned the evidence-audit strategy change with runtime automation by adding `evidence_audit_only`, an optional post-portfolio supervisor stage, release artifact copying, and portal evidence-audit display
 - `CDL-20260509-047`: contracted the structural candidate pool to hard data only by default, disabled the outer thesis/router/event allocator, reduced activation meta weights to valuation/liquidity plus small revision, and moved event/order/industry-style checks into explicit evidence-audit search templates
@@ -120,6 +124,11 @@
 - `CDL-20260410-001`: split dev log into stable/history/index, rewrote primary readmes and operator guide, updated doc sync tooling
 
 ## Retrieval Hints
+- Search `CDL-20260529-048` in `CODEX_DEV_UPDATES.md` and `维护规则` in `CLAUDE_CODEX_DIALOGUE.md` for the current cross-AI dialogue archive policy.
+- Archive closed cross-AI threads to `CLAUDE_CODEX_DIALOGUE_ARCHIVE.md` when the dialogue file exceeds 25 messages, about 25 KB, or when long entries already have CDL coverage.
+- Search `CDL-20260529-047` in `CODEX_DEV_UPDATES.md` for the alpha-label / market-beta separation patch.
+- Search `alpha_label_mode`, `feature_market_policy`, `realized_return_label_col`, and `_derive_alpha_training_label` in `src\ashare\research_brain\hub\training_engine.py` for the V5.1 stock-ranker training target and market-beta feature policy.
+- Search `alpha_label_mode` in `src\ashare\research_brain\configs\hub_config.v5_1.*.json` for the current default of `cross_section_rank`; set it to `raw_return` only for explicit A/B comparison.
 - Search `CDL-20260509-048` in `CODEX_DEV_UPDATES.md` for the `evidence_audit_only` mode, optional integrated-supervisor evidence-audit stage, release artifact propagation, and audit-site evidence card.
 - Search `CDL-20260509-049` in `CODEX_DEV_UPDATES.md` for the change that made evidence audit default-on in the automated portfolio chain.
 - Search `EVIDENCE_AUDIT_RUN_AFTER_PORTFOLIO_RECOMMENDATION` in `src\ashare\engine\config_builder.py`, `src\ashare\engine\local_settings.example.py`, and `src\ashare\engine\supervisor.py` for the default-on automation hook that runs web/LLM evidence audit after portfolio recommendation.

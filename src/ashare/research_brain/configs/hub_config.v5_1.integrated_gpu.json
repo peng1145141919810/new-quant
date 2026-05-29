@@ -13,6 +13,9 @@
     "train_output_subdir": "research_brain_v5_1",
     "label_col": "future_ret_5",
     "label_horizon": 5,
+    "alpha_label_mode": "cross_section_rank",
+    "feature_market_policy": "exclude_from_stock_ranker",
+    "feature_liquidity_policy": "exclude_from_stock_ranker",
     "top_k": 20,
     "portfolio_holding_days": 5,
     "portfolio_min_listed_days": 120,
@@ -123,7 +126,7 @@
     "cycle_candidate_budget": 12,
     "parent_pool_size": 4,
     "route_min_candidates": 1,
-    "max_cycles": 3,
+    "max_cycles": 1,
     "sleep_seconds": 0,
     "gpu_primary_family": "xgboost_gpu"
   },
@@ -137,9 +140,8 @@
       "generated_feature_pack"
     ],
     "model_families": [
-      "xgboost_gpu",
       "ridge_ranker",
-      "lightgbm_auto"
+      "lightgbm_gpu"
     ],
     "training_logics": [
       "baseline",

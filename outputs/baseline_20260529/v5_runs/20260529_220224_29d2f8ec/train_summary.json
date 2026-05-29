@@ -1,0 +1,64 @@
+{
+  "strategy_name": "autonomous_research_brain_v5_1__risk__c001_005_29d2f8ec",
+  "label_col": "future_ret_5",
+  "effective_label_col": "future_ret_5__entry_lag_1",
+  "model_family": "lightgbm_gpu",
+  "effective_model_family": "lightgbm_gpu",
+  "feature_profile": "baseline_plus",
+  "training_logic": "baseline",
+  "n_features": 31,
+  "valid_metrics": {
+    "pearson_corr": 0.048307376573153406,
+    "spearman_corr": 0.07420216773998935,
+    "daily_rank_ic_mean": 0.06361163445199343
+  },
+  "test_metrics": {
+    "pearson_corr": 0.022939664644063985,
+    "spearman_corr": 0.04135563613657951,
+    "daily_rank_ic_mean": 0.07107019674543227
+  },
+  "overfit_diagnostics": {
+    "risk_score": 0.15,
+    "risk_level": "low",
+    "flags": [
+      "valid_test_spearman_gap"
+    ],
+    "valid_daily_rank_ic_mean": 0.063612,
+    "test_daily_rank_ic_mean": 0.07107,
+    "valid_test_ic_gap": -0.007459,
+    "valid_test_spearman_gap": 0.032847,
+    "test_vs_valid_ic_ratio": 1.117252,
+    "test_rank_ic_negative_share": 0.289507,
+    "test_window_consistency": 1.0,
+    "valid_rank_ic_days": 789,
+    "test_rank_ic_days": 791
+  },
+  "time_alignment": {
+    "base_label_col": "future_ret_5",
+    "effective_label_col": "future_ret_5__entry_lag_1",
+    "label_horizon": 5,
+    "execution_lag_bars": 1,
+    "derived_execution_label": true,
+    "effective_label_non_null_ratio": 0.997563,
+    "split_embargo_days": 6
+  },
+  "resource_meta": {
+    "train_rows_before_sampling": 5013346,
+    "train_rows_after_sampling": 5013346,
+    "feature_count": 31,
+    "budget_action": "full_train",
+    "requested_model_family": "lightgbm_gpu",
+    "estimated_cost_units_before_sampling": 116.5602945,
+    "estimated_cost_units_after_sampling": 116.5602945,
+    "requested_family": "lightgbm_gpu",
+    "gpu_requested": true,
+    "gpu_used": true,
+    "backend": "lightgbm_gpu",
+    "effective_model_family": "lightgbm_gpu",
+    "effective_label_col": "future_ret_5__entry_lag_1",
+    "selected_feature_count": 31,
+    "latest_date": "2026-05-29 00:00:00",
+    "label_horizon": 5,
+    "execution_lag_bars": 1
+  }
+}

@@ -160,7 +160,7 @@ def execute_single_experiment_v5(
                 pred_test_df=train_result['pred_test_df'],
                 strategy=config['strategy'],
                 out_dir=run_dir,
-                label_col=str(train_result['train_summary'].get('effective_label_col', config['candidate']['label_col'])),
+                label_col=str(train_result['train_summary'].get('realized_return_label_col') or train_result['train_summary'].get('effective_label_col', config['candidate']['label_col'])),
             )
         if logger is not None:
             logger.info('组合回测完成。ann=%.4f sharpe=%.4f mdd=%.4f elapsed=%.1fs', float(portfolio_summary.get('annualized_ret', 0.0)), float(portfolio_summary.get('sharpe', 0.0)), float(portfolio_summary.get('max_drawdown', 0.0)), time.time() - bt_start)

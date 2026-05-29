@@ -1,0 +1,69 @@
+[2026-05-29 20:54:59] Supervisor: [1/8] 研究前数据刷新 开始。
+[2026-05-29 21:05:30] Supervisor: [1/8] 研究前数据刷新 开始。
+[2026-05-29 21:25:43] MarketPipeline: HS300 index sync done, updated_rows=15
+[2026-05-29 21:30:21] MarketPipeline: enriched sync done, updated_files=5510 updated_rows=82484 missing_trade_dates=15
+[2026-05-29 21:31:45] MarketPipeline: price snapshot done, trade_date=20260529 rows=5506
+[2026-05-29 21:32:56] MarketPipeline: train append done, appended_rows=71420
+[2026-05-29 21:33:11] Supervisor: [1/8] 研究前数据刷新 完成。 warnings=0 fail_open=none
+[2026-05-29 21:33:11] Supervisor: [2/8] 市场数据流水线 开始。
+[2026-05-29 21:33:11] Supervisor: [2/8] 市场数据流水线 完成。 {"enabled": true, "started_at": "2026-05-29 21:25:40", "hs300_sync": {"updated_rows": 15, "updated_sql_rows": 3981}, "enriched_sync": {"updated_files": 5510, "updated_rows": 82484, "updated_sql_rows": 82484, "missing_trade_dates": ["2026051
+[2026-05-29 21:33:11] Supervisor: [3/8] 策略信号刷新 开始。
+[2026-05-29 21:33:11] Supervisor: [3/8] 策略信号刷新 完成。 regime=neutral
+[2026-05-29 21:33:11] Supervisor: [4/8] 中枢研究预算决策 开始。
+[2026-05-29 21:33:11] Market State: 完成 date=20260529 regime=risk_off risk_budget=0.72 turnover=0.70
+[2026-05-29 21:33:11] Supervisor: [4/8] 中枢研究预算决策 完成。 max_cycles=1 budget=12
+[2026-05-29 21:33:47] Supervisor Note: 当前正在运行V6研究计划阶段v6_planning，需关注research_context_pack.json、research_brief_diagnostic.json和research_brief.json文件的状态。如果长时间无新日志，请检查research_brief_diagnostic.json是否卡在上游模型调用。 watch=data/event_lake_v6/research/context_pack/research_context_pack.json, data/event_lake_v6/research/briefs/research_brief_diagnostic.json
+[2026-05-29 21:33:47] Supervisor: [5/8] V6 研究计划 开始。
+[2026-05-29 21:33:47] V6: 进入单轮编排，mode=full_cycle stages=7
+[2026-05-29 21:33:47] V6: [1/7] 基础表刷新与事件抓取开始
+[2026-05-29 21:34:07] 基础表刷新完成：['trade_calendar', 'stock_basic', 'daily', 'daily_basic', 'adj_factor']
+[2026-05-29 21:34:15] 公告子源 cninfo 抓取完成，条数=270
+[2026-05-29 21:34:18] 公告子源 sse 抓取完成，条数=7
+[2026-05-29 21:34:20] 公告子源 szse 抓取完成，条数=9
+[2026-05-29 21:34:24] 免费公告抓取完成，条数=126
+[2026-05-29 21:34:40] Tushare 新闻抓取完成，条数=2112，明细={"short_news": {"sina": {"status": "ok", "rows": 1500}, "cls": {"status": "skipped_source_cap"}, "wallstreetcn": {"status": "skipped_source_cap"}}, "major_news": {"新浪财经": {"status": "ok", "rows": 612}, "华尔街见闻": {"status": "api_error", "error": "major_news: 抱歉，您访问接口(major_news)频率超限(1次/分钟)，具体频次详情：https://tushare.pro/document/1?doc_id=108。"}, "财联社": {"status": "api_error", "error": "major_news: 抱歉，您访问接口(major_news)频率超限(1次/分钟)，具体频次详情：https://tushare.pro/document/1?doc_id=108。"}}}
+[2026-05-29 21:34:40] 原始事件总条数=1193
+[2026-05-29 21:34:40] V6: 本地公告证据卡增强开始 selected=2
+[2026-05-29 21:37:33] V6: 本地公告证据卡完成 item=1/2 ok=True model=deepseek-r1:14b
+[2026-05-29 21:38:30] V6: 本地公告证据卡完成 item=2/2 ok=True model=deepseek-r1:14b
+[2026-05-29 21:38:30] V6: 本地公告证据卡增强完成 cards=2 path=H:\Ashare\data\event_lake_v6\research\evidence_cards\announcement_evidence_cards.json
+[2026-05-29 21:38:30] V6: [1/7] 公告证据卡摘要 selected=2 cards=2 path=H:\Ashare\data\event_lake_v6\research\evidence_cards\announcement_evidence_cards.json
+[2026-05-29 21:38:30] V6: [1/7] 基础表刷新与事件抓取完成 raw_items=1193 elapsed=282.8s
+[2026-05-29 21:38:30] V6: [2/7] 事件抽取开始 input_raw_items=1193
+[2026-05-29 21:38:30] 事件抽取进入本地模型：本地事件数=6 model=qwen2.5:7b
+[2026-05-29 21:38:34] Ollama 本地抽取完成：item=1/6 成功
+[2026-05-29 21:38:34] Ollama 本地抽取完成：item=2/6 成功
+[2026-05-29 21:38:34] Ollama 本地抽取完成：item=3/6 成功
+[2026-05-29 21:38:34] Ollama 本地抽取完成：item=4/6 成功
+[2026-05-29 21:38:34] Ollama 本地抽取完成：item=5/6 成功
+[2026-05-29 21:38:34] Ollama 本地抽取完成：item=6/6 成功
+[2026-05-29 21:38:34] V6: [2/7] 人工复核队列摘要 queue_size=0 path=H:\Ashare\data\event_lake_v6\research\extract_summary\manual_review_queue.json
+[2026-05-29 21:38:34] V6: [2/7] 事件抽取完成 structured_events=6 elapsed=4.8s
+[2026-05-29 21:38:34] V6: [3/7] 分行业研究骨架开始
+[2026-05-29 21:38:34] Industry Router: 开始构建三机制五轮统一研究产物
+[2026-05-29 21:44:52] Industry Router: 完成 deepened_mechanisms=3 event_instances=0 mappings=0 signal_rows=34 summary=H:\Ashare\data\event_lake_v6\research\industry_router\industry_router_summary.json
+[2026-05-29 21:44:52] V6: [3/7] 分行业研究骨架完成 thesis_count=0 signal_rows=34 summary=H:\Ashare\data\event_lake_v6\research\industry_router\industry_router_summary.json elapsed=377.4s
+[2026-05-29 21:44:52] V6: [4/7] 市场状态与资金面总阀门开始
+[2026-05-29 21:44:52] Market State: 完成 date=20260529 regime=neutral risk_budget=0.90 turnover=0.88
+[2026-05-29 21:44:52] V6: [4/7] 市场状态与资金面总阀门完成 regime=neutral style=defensive mechanism=macro_style elapsed=0.0s
+[2026-05-29 21:44:53] V6: integrated_thesis refreshed primary=multi_alpha_allocator symbols=7 path=H:\Ashare\data\event_lake_v6\research\integrated_thesis\integrated_thesis_state.json
+[2026-05-29 21:44:53] V6: [5/7] 数据清单与缺口分析开始
+[2026-05-29 21:44:53] V6: [5/7] 数据清单与缺口分析完成 datasets=7 refresh_tasks=1 recompute_tasks=0 elapsed=0.0s
+[2026-05-29 21:44:53] V6: [6/7] 研究证据包与研究计划开始
+[2026-05-29 21:44:53] V6: 研究证据包已合并公告证据卡 evidence_cards=2
+[2026-05-29 21:46:20] 研究计划生成完成，mode=openai_research provider=openai_research model=gpt-5.4-2026-03-05 theses=4 candidate_experiments=8
+[2026-05-29 21:46:20] V6: [6/7] 研究证据包与研究计划完成 elapsed=86.3s
+[2026-05-29 21:46:20] V6: [7/7] 桥接产物生成开始
+[2026-05-29 21:46:20] V6: [7/7] 桥接产物生成完成 feature_profiles=2 label_horizons=3 elapsed=0.0s
+[2026-05-29 21:46:20] Supervisor: [5/8] V6 研究计划 完成。 full_cycle_completed
+[2026-05-29 21:46:24] Supervisor Note: 当前在运行 V5.1 GPU 研究阶段，需关注 controller_state.json 是否成功推进至新周期。 watch=data/research_hub/controller_state.json, data/research_hub/registry/experiment_registry.csv
+[2026-05-29 21:46:24] Supervisor: [6/8] V5.1 GPU 研究 开始。
+[2026-05-29 21:46:24] Supervisor: V5.1 研究进程已启动，输出根=H:\Ashare\data\research_hub_integrated，可观察 controller_state.json / registry/experiment_registry.csv / cycles/*/cycle_summary.json
+[2026-05-29 22:12:30] Supervisor: V5 本地复盘已生成 cycle_id=cycle_001_20260529_214625 model=deepseek-r1:14b
+[2026-05-29 22:12:30] Supervisor: [6/8] V5.1 GPU 研究 完成。 hub_output_root=H:\Ashare\data\research_hub_integrated review=ok cycle_id=cycle_001_20260529_214625
+[2026-05-29 22:13:04] Supervisor Note: 当前正在生成持仓建议，请关注portfolio_recommendation.json和target_positions.csv文件的更新情况。注意检查组合文件是否已刷新，若未刷新请参考V5版本的cycle_summary.json。 watch=data/portfolio_recommendation_v6/portfolio_recommendation.json, data/portfolio_recommendation_v6/target_positions.csv
+[2026-05-29 22:13:04] Supervisor: [7/8] 持仓建议生成 开始。
+[2026-05-29 22:13:05] Supervisor: [7/8] 持仓建议生成 失败。'numpy.float64' object has no attribute 'fillna'
+[2026-05-29 22:13:05] Supervisor: 持仓建议生成失败：'numpy.float64' object has no attribute 'fillna'
+[2026-05-29 22:13:05] Supervisor: [8/8] small-pool evidence audit 开始。
+[2026-05-29 22:13:05] Supervisor: [8/8] small-pool evidence audit 跳过。 portfolio_recommendation_failed

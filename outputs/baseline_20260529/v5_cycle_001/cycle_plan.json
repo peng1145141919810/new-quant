@@ -1,0 +1,598 @@
+{
+  "cycle_id": "cycle_001_20260529_214625",
+  "cycle_index": 1,
+  "n_candidates": 12,
+  "budget": {
+    "feature": 2,
+    "data": 2,
+    "risk": 2,
+    "portfolio": 2,
+    "training": 1,
+    "model": 1,
+    "hybrid": 2
+  },
+  "diagnosis": {
+    "issues": [
+      "cold_start"
+    ],
+    "route_weights": {
+      "feature": 2,
+      "model": 2,
+      "training": 2,
+      "portfolio": 1,
+      "risk": 1,
+      "data": 1,
+      "hybrid": 1
+    },
+    "summary": {}
+  },
+  "llm_override": {
+    "route_weights": {
+      "feature": 4,
+      "data": 2,
+      "risk": 2,
+      "portfolio": 3,
+      "training": 1,
+      "model": 1,
+      "hybrid": 2
+    },
+    "new_feature_ideas": [
+      "Explore generated_feature_pack with interaction_sparse to capture non-linear relationships",
+      "Add volatility-adjusted momentum features to momentum_cross_section"
+    ],
+    "new_model_ideas": [
+      "Test LightGBM GPU with custom ranking objective for cold start",
+      "Implement ensemble of ridge_ranker and lightgbm_gpu"
+    ],
+    "new_training_ideas": [
+      "Use weighted_recent with decay factor tuned per feature profile",
+      "Apply feature_select with recursive elimination for generated_feature_pack"
+    ]
+  },
+  "bridge_inputs": {
+    "llm_route_override.json": {
+      "feature": 4,
+      "data": 2,
+      "risk": 2,
+      "portfolio": 3,
+      "training": 1,
+      "model": 1,
+      "hybrid": 2
+    },
+    "candidate_override.json": {
+      "feature_profiles": [
+        "generated_feature_pack",
+        "vol_liq_quality"
+      ],
+      "label_horizons": [
+        5,
+        10,
+        20
+      ],
+      "top_ks": [
+        10,
+        20
+      ],
+      "preferred_model_families": [
+        "ridge_ranker",
+        "xgboost_gpu"
+      ],
+      "ban_model_families": []
+    },
+    "enriched_context.json": {
+      "research_thesis": "今天主线是把高置信公告型单名事件做成可交易事件路由，并暂停事件向宏观风格股的错误扩散。",
+      "why_now": "本轮证据全为已确认公告，单名事件占比100%；但 fact_backed_candidates 为0、event_source 缺失、earnings_gate 全未通过，说明今天先补事件链路数据并收缩研究方向。",
+      "priority_events": [
+        {
+          "title": "关于2025年度权益分派实施公告",
+          "event_type": "buyback_dividend",
+          "importance": 7,
+          "summary": "300557 分红实施公告，正向，窗口1_4w。",
+          "research_angle": "做分红实施事件特征与5/10日标签回测。",
+          "source_type": "",
+          "event_direction": "uncertain",
+          "impact_scope": "",
+          "impact_horizon": "",
+          "evidence_quality": 0.0,
+          "research_priority": 0.0,
+          "corroboration_count": 1,
+          "source_diversity": 1,
+          "anti_overfit_weight": 1.0
+        },
+        {
+          "title": "关于回购注销部分限制性股票减资暨通知债权人的公告",
+          "event_type": "buyback_dividend",
+          "importance": 7,
+          "summary": "301387 回购注销并减资，正向，窗口1_4w。",
+          "research_angle": "提取注销比例与流通盘变化，测短中窗收益。",
+          "source_type": "",
+          "event_direction": "uncertain",
+          "impact_scope": "",
+          "impact_horizon": "",
+          "evidence_quality": 0.0,
+          "research_priority": 0.0,
+          "corroboration_count": 1,
+          "source_diversity": 1,
+          "anti_overfit_weight": 1.0
+        },
+        {
+          "title": "财通证券股份有限公司关于本次交易不构成《上市公司重大资产重组管理办法》第十三条规定的重组上市情形的核查意见",
+          "event_type": "mna_restructure",
+          "importance": 7,
+          "summary": "重组不构成借壳，属合规推进信号。",
+          "research_angle": "按重组阶段建强度分层，测10/20日表现。",
+          "source_type": "",
+          "event_direction": "uncertain",
+          "impact_scope": "",
+          "impact_horizon": "",
+          "evidence_quality": 0.0,
+          "research_priority": 0.0,
+          "corroboration_count": 1,
+          "source_diversity": 1,
+          "anti_overfit_weight": 1.0
+        },
+        {
+          "title": "财通证券股份有限公司关于本次交易符合《上市公司监管指引第9号——上市公司筹划和实施重大资产重组的监管要求》第四条规定的核查意见",
+          "event_type": "mna_restructure",
+          "importance": 7,
+          "summary": "交易符合监管要求，属进度确认。",
+          "research_angle": "合并多份核查意见为单次重组进度分数。",
+          "source_type": "",
+          "event_direction": "uncertain",
+          "impact_scope": "",
+          "impact_horizon": "",
+          "evidence_quality": 0.0,
+          "research_priority": 0.0,
+          "corroboration_count": 1,
+          "source_diversity": 1,
+          "anti_overfit_weight": 1.0
+        }
+      ],
+      "candidate_experiments": [
+        {
+          "experiment_id": "EXP01",
+          "name": "分红实施短窗基线",
+          "hypothesis": "分红实施公告对5至10日收益有稳定正贡献。",
+          "route": "feature",
+          "features": [
+            "dividend_impl_flag",
+            "cash_dividend_yield",
+            "ex_date_gap",
+            "liquidity_20d"
+          ],
+          "models": [
+            "ridge_ranker"
+          ],
+          "labels": [
+            5,
+            10
+          ],
+          "top_k": 2,
+          "reason": "证据质量最高，先做可解释基线。"
+        },
+        {
+          "experiment_id": "EXP02",
+          "name": "回购注销强度分层",
+          "hypothesis": "注销占流通盘比例越高，5至20日超额收益越强。",
+          "route": "feature",
+          "features": [
+            "share_cancel_flag",
+            "share_cancel_ratio_float",
+            "capital_reduction_flag",
+            "turnover_20d"
+          ],
+          "models": [
+            "ridge_ranker",
+            "xgboost_gpu"
+          ],
+          "labels": [
+            5,
+            20
+          ],
+          "top_k": 2,
+          "reason": "301387 为核心样本，需做强度分层。"
+        },
+        {
+          "experiment_id": "EXP03",
+          "name": "重组合规阶段评分",
+          "hypothesis": "重组核查意见聚合后的阶段分数可解释10至20日收益。",
+          "route": "portfolio",
+          "features": [
+            "mna_stage_score",
+            "regulatory_clearance_flag",
+            "deal_type_flag",
+            "volatility_20d"
+          ],
+          "models": [
+            "ridge_ranker",
+            "xgboost_gpu"
+          ],
+          "labels": [
+            10,
+            20
+          ],
+          "top_k": 2,
+          "reason": "mna 事件窗口更长，适合阶段化。"
+        },
+        {
+          "experiment_id": "EXP04",
+          "name": "事件源完整性过滤",
+          "hypothesis": "加入 source 完整性过滤后，样本数下降但命中率上升。",
+          "route": "feature",
+          "features": [
+            "event_source_class",
+            "event_source_confidence",
+            "fact_join_count",
+            "evidence_quality"
+          ],
+          "models": [
+            "ridge_ranker"
+          ],
+          "labels": [
+            5,
+            10
+          ],
+          "top_k": 2,
+          "reason": "当前 event_source 缺失，先验证过滤价值。"
+        },
+        {
+          "experiment_id": "EXP05",
+          "name": "盈利软门槛校准",
+          "hypothesis": "用 earnings_validation_score 过滤后，可去掉公告利好但基本面弱的样本。",
+          "route": "feature",
+          "features": [
+            "earnings_validation_score",
+            "cash_dividend_yield",
+            "share_cancel_ratio_float",
+            "mna_stage_score"
+          ],
+          "models": [
+            "ridge_ranker"
+          ],
+          "labels": [
+            10,
+            20
+          ],
+          "top_k": 2,
+          "reason": "当前所有候选卡在 earnings_soft_gate。"
+        },
+        {
+          "experiment_id": "EXP06",
+          "name": "跨路由泄漏拦截",
+          "hypothesis": "屏蔽 single_name 事件向 macro_style 股票扩散后，组合噪声显著下降。",
+          "route": "portfolio",
+          "features": [
+            "cross_route_leakage_flag",
+            "impact_scope",
+            "event_source_confidence",
+            "mechanism_fit_score"
+          ],
+          "models": [
+            "ridge_ranker"
+          ],
+          "labels": [
+            5,
+            10
+          ],
+          "top_k": 2,
+          "reason": "600036等 watch 可能来自路由错配。"
+        },
+        {
+          "experiment_id": "EXP07",
+          "name": "公告确认度加权",
+          "hypothesis": "confirmed 公告在5日窗口优于非确认或低权重事件。",
+          "route": "training",
+          "features": [
+            "anti_overfit_weight",
+            "corroboration_count",
+            "source_diversity",
+            "evidence_quality"
+          ],
+          "models": [
+            "ridge_ranker"
+          ],
+          "labels": [
+            5
+          ],
+          "top_k": 3,
+          "reason": "本轮 confirmed_ratio 为1，可测确认度权重。"
+        },
+        {
+          "experiment_id": "EXP08",
+          "name": "低广度环境下事件择时",
+          "hypothesis": "breadth_score 偏弱时，单名事件需更高流动性门槛才有效。",
+          "route": "feature",
+          "features": [
+            "breadth_score",
+            "liquidity_20d",
+            "event_quality",
+            "implementation_risk"
+          ],
+          "models": [
+            "xgboost_gpu"
+          ],
+          "labels": [
+            5,
+            10
+          ],
+          "top_k": 2,
+          "reason": "市场广度-0.7433，需检验择时约束。"
+        }
+      ],
+      "feature_actions": [
+        {
+          "action": "recompute",
+          "priority": "high",
+          "reason": "分红实施是今日核心事件。",
+          "feature_name": "dividend_impl_flag",
+          "source_dataset": "announcement_event_master"
+        },
+        {
+          "action": "build",
+          "priority": "high",
+          "reason": "需量化分红强度，不能只看公告标题。",
+          "feature_name": "cash_dividend_yield",
+          "source_dataset": "announcement_event_master"
+        },
+        {
+          "action": "build",
+          "priority": "high",
+          "reason": "回购注销强度取决于注销占流通盘比例。",
+          "feature_name": "share_cancel_ratio_float",
+          "source_dataset": "announcement_event_master"
+        },
+        {
+          "action": "build",
+          "priority": "high",
+          "reason": "多份核查意见需聚合为重组阶段分数。",
+          "feature_name": "mna_stage_score",
+          "source_dataset": "announcement_event_master"
+        },
+        {
+          "action": "build",
+          "priority": "high",
+          "reason": "当前 source_confidence 为0，先补过滤特征。",
+          "feature_name": "event_source_confidence",
+          "source_dataset": "event_source_mapping"
+        },
+        {
+          "action": "recompute",
+          "priority": "high",
+          "reason": "当前候选全部停在 earnings_soft_gate。",
+          "feature_name": "earnings_validation_score",
+          "source_dataset": "earnings_validation_panel"
+        },
+        {
+          "action": "build",
+          "priority": "medium",
+          "reason": "需区分单公告与多证据确认强度。",
+          "feature_name": "fact_join_count",
+          "source_dataset": "fact_backed_join_table"
+        },
+        {
+          "action": "build",
+          "priority": "medium",
+          "reason": "识别事件向宏观风格错误扩散。",
+          "feature_name": "cross_route_leakage_flag",
+          "source_dataset": "router_mapping_audit"
+        }
+      ],
+      "risk_actions": [
+        {
+          "action": "tighten_entry",
+          "priority": "high",
+          "reason": "new_position_policy 为 selective，执行更严入场。"
+        },
+        {
+          "action": "block_cross_name_propagation",
+          "priority": "high",
+          "reason": "单名公告不得外溢到无事件个股。"
+        },
+        {
+          "action": "require_source_fields",
+          "priority": "high",
+          "reason": "event_source_class 或 confidence 缺失时禁入。"
+        },
+        {
+          "action": "reduce_risk_budget",
+          "priority": "medium",
+          "reason": "risk_budget_reference 为0.9，维持降档。"
+        },
+        {
+          "action": "cap_turnover",
+          "priority": "medium",
+          "reason": "turnover_multiplier 为0.88，控制事件追价。"
+        }
+      ]
+    },
+    "performance_feedback.json": {
+      "generated_at": "2026-05-29 21:33:11",
+      "available": false,
+      "authority_role": "local_signal_only",
+      "regime": "neutral",
+      "metrics": {},
+      "signal_trace": [],
+      "route_weights": {
+        "feature": 0.18,
+        "model": 0.18,
+        "training": 0.16,
+        "portfolio": 0.16,
+        "risk": 0.14,
+        "data": 0.1,
+        "hybrid": 0.08
+      },
+      "route_budget": {
+        "feature": 2,
+        "model": 2,
+        "training": 2,
+        "portfolio": 2,
+        "risk": 2,
+        "data": 1,
+        "hybrid": 1
+      },
+      "route_space_overrides": {
+        "model_families": [
+          "ridge_ranker",
+          "lightgbm_gpu"
+        ]
+      },
+      "preferred_model_families": [
+        "ridge_ranker",
+        "lightgbm_gpu"
+      ],
+      "ban_model_families": [
+        "xgboost_gpu",
+        "generated_family"
+      ],
+      "research_brain_overrides": {
+        "max_cycles": 1,
+        "cycle_candidate_budget": 12,
+        "route_min_candidates": 1
+      },
+      "strategy_overrides": {
+        "top_k": 20,
+        "portfolio_base_exposure": 1.0,
+        "portfolio_weak_market_exposure": 0.5,
+        "portfolio_single_name_cap": 0.1
+      },
+      "portfolio_overrides": {
+        "max_names": 20,
+        "single_name_cap": 0.1,
+        "total_exposure_cap": 1.0
+      },
+      "scheduler_decision_summary": {
+        "version": "research_scheduler_decision_v2",
+        "generated_at": "2026-05-29 21:33:11",
+        "status": "ready",
+        "final_verdict": "balanced",
+        "policy_posture": "balanced",
+        "reason_chain": [
+          "research_runtime_stability:ban_xgboost_gpu_for_quick_test",
+          "research_runtime_stability:ban_generated_family_for_quick_test",
+          "market_state_signal:balanced",
+          "market_state_signal:selective",
+          "econometric_guardrails:guardrail_penalty=0.000",
+          "econometric_guardrails:incremental_value=0.000",
+          "profile=quick_test",
+          "market_regime=risk_off",
+          "quick_test_prefers_stable_model_families"
+        ],
+        "research_plan": {
+          "base_profile_cycles": 1,
+          "route_weights": {
+            "feature": 0.18,
+            "model": 0.18,
+            "training": 0.16,
+            "portfolio": 0.16,
+            "risk": 0.14,
+            "data": 0.1,
+            "hybrid": 0.08
+          },
+          "route_budget": {
+            "feature": 2,
+            "model": 2,
+            "training": 2,
+            "portfolio": 2,
+            "risk": 2,
+            "data": 1,
+            "hybrid": 1
+          },
+          "route_space_overrides": {
+            "model_families": [
+              "ridge_ranker",
+              "lightgbm_gpu"
+            ]
+          },
+          "preferred_model_families": [
+            "ridge_ranker",
+            "lightgbm_gpu"
+          ],
+          "ban_model_families": [
+            "xgboost_gpu",
+            "generated_family"
+          ],
+          "research_brain_overrides": {
+            "max_cycles": 1,
+            "cycle_candidate_budget": 12,
+            "route_min_candidates": 1
+          }
+        },
+        "portfolio_construction": {
+          "strategy_overrides": {
+            "top_k": 20,
+            "portfolio_base_exposure": 1.0,
+            "portfolio_weak_market_exposure": 0.5,
+            "portfolio_single_name_cap": 0.1
+          },
+          "portfolio_overrides": {
+            "max_names": 20,
+            "single_name_cap": 0.1,
+            "total_exposure_cap": 1.0
+          }
+        },
+        "route_weights": {
+          "feature": 0.18,
+          "model": 0.18,
+          "training": 0.16,
+          "portfolio": 0.16,
+          "risk": 0.14,
+          "data": 0.1,
+          "hybrid": 0.08
+        },
+        "route_budget": {
+          "feature": 2,
+          "model": 2,
+          "training": 2,
+          "portfolio": 2,
+          "risk": 2,
+          "data": 1,
+          "hybrid": 1
+        },
+        "route_space_overrides": {
+          "model_families": [
+            "ridge_ranker",
+            "lightgbm_gpu"
+          ]
+        },
+        "preferred_model_families": [
+          "ridge_ranker",
+          "lightgbm_gpu"
+        ],
+        "ban_model_families": [
+          "xgboost_gpu",
+          "generated_family"
+        ],
+        "research_brain_overrides": {
+          "max_cycles": 1,
+          "cycle_candidate_budget": 12,
+          "route_min_candidates": 1
+        },
+        "strategy_overrides": {
+          "top_k": 20,
+          "portfolio_base_exposure": 1.0,
+          "portfolio_weak_market_exposure": 0.5,
+          "portfolio_single_name_cap": 0.1
+        },
+        "portfolio_overrides": {
+          "max_names": 20,
+          "single_name_cap": 0.1,
+          "total_exposure_cap": 1.0
+        }
+      }
+    }
+  },
+  "gpu_profile": {
+    "enabled": true,
+    "vendor": "nvidia",
+    "name": "RTX 4000 Ada",
+    "vram_gb": 20,
+    "lightgbm_device_type": "gpu",
+    "xgboost_device": "cuda",
+    "gpu_platform_id": 0,
+    "gpu_device_id": 0,
+    "gpu_use_dp": false,
+    "default_n_estimators": 420,
+    "default_max_bin": 256
+  },
+  "stop_reason_if_zero": "V5.1 仍保持同轮去重、跨轮允许复验。"
+}

@@ -8,6 +8,72 @@
 
 ## Change Log
 
+### CDL-20260529-048
+- Local time: `2026-05-29 23:00:27`
+- Type: `cross-ai-dialogue-maintenance-policy`
+- Scope: `CLAUDE_CODEX_DIALOGUE active-thread and archive rules`
+- Author: `Codex`
+- Touched paths:
+  - `CLAUDE_CODEX_DIALOGUE.md`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+- What changed:
+  - Tightened `CLAUDE_CODEX_DIALOGUE.md` from a general leave-a-note file into an active-thread board.
+  - Added explicit archive triggers: more than 25 messages, about 25 KB, or long entries whose facts are already captured by a CDL record.
+  - Defined compact archive format: `time / topic / conclusion / related CDL / closed status`.
+  - Defined future session reading boundary: read maintenance rules, unresolved threads, and the latest 3-5 handoff entries instead of re-reading all historical dialogue.
+- Impact:
+  - Cross-AI communication should not grow into a second dev log.
+  - Stable facts remain in `CODEX_DEV_STABLE.md`, history in `CODEX_DEV_UPDATES.md`, retrieval in `CODEX_DEV_LOG_INDEX.md`, and dialogue only keeps active context.
+  - No archive move was needed in this turn because the dialogue file is still small.
+- Validation:
+  - Documentation-only change; inspected the updated rules and did not run code or pipeline tasks.
+- Compatibility:
+  - Existing dialogue entries remain valid.
+  - Future archival should use `CLAUDE_CODEX_DIALOGUE_ARCHIVE.md`; if that file does not exist when first needed, create it with purpose / maintainer / archive-condition notes.
+- Rollback:
+  - Revert the dialogue maintenance-rule edit and remove `CDL-20260529-048` references if the stricter archive policy is rejected.
+
+### CDL-20260529-047
+- Local time: `2026-05-29 22:51:33`
+- Type: `alpha-label-and-market-beta-separation`
+- Scope: `V5.1 stock-ranker training target and market-index feature policy`
+- Author: `Codex`
+- Touched paths:
+  - `src\ashare\research_brain\hub\training_engine.py`
+  - `src\ashare\research_brain\hub\single_run_v5.py`
+  - `src\ashare\research_brain\hub\candidate_factory.py`
+  - `src\ashare\research_brain\configs\hub_config.v5_1.integrated_gpu.json`
+  - `src\ashare\research_brain\configs\hub_config.v5_1.local.json`
+  - `src\ashare\research_brain\configs\hub_config.v5_1.example.json`
+  - `src\ashare\research_brain\configs\hub_config.v5_1.sandbox.json`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+  - `CLAUDE_CODEX_DIALOGUE.md`
+- What changed:
+  - Accepted Claude's static alpha diagnosis as actionable: the V5.1 stock ranker was still trained on raw absolute future returns, and high-importance `hs300_*` features meant a large share of model capacity could be spent on market beta instead of cross-sectional stock alpha.
+  - Added a configurable alpha label path in `training_engine.py`. The realized next-bar return label is still derived first, but training can now use a separate transformed label. Current config default is `alpha_label_mode=cross_section_rank`.
+  - Preserved economic/backtest correctness by keeping `realized_return_label_col` in `train_summary.json` and making `single_run_v5.py` pass that raw realized-return label to `backtest_from_pred_test(...)` instead of using the transformed training label as portfolio return.
+  - Added `feature_market_policy=exclude_from_stock_ranker`, which removes direct market-beta feature names such as `hs300_*`, `index_ret_*`, `market_ret_*`, `market_beta_*`, and `benchmark_*` from the selected stock-ranker training feature list.
+  - `candidate_factory.py` now propagates `alpha_label_mode` and `feature_market_policy` from the V5.1 strategy config into every candidate config and includes those policy fields in the candidate hash.
+  - `train_summary.json` now records `alpha_label_meta`, `feature_policy_meta`, realized-return metrics, training-label metrics, and the raw realized-return label column used for backtests.
+- Impact:
+  - The default V5.1 research path now trains the stock-picking model on daily cross-sectional alpha instead of raw absolute return.
+  - Market-index state remains available to portfolio/risk logic through prediction frames, but direct `hs300_*` style variables no longer dominate the stock-ranker feature set by default.
+  - Existing raw-return behavior can be restored by setting `alpha_label_mode=raw_return` and `feature_market_policy=allow` in the V5.1 config.
+  - No new scheduler, gate, service, or abstraction layer was added; this is a net-zero-compliant methodology fix inside the existing V5.1 training path.
+- Validation:
+  - `.venv313\Scripts\python.exe -m py_compile src\ashare\research_brain\hub\training_engine.py src\ashare\research_brain\hub\single_run_v5.py src\ashare\research_brain\hub\candidate_factory.py`
+  - Lightweight Python probe confirmed cross-sectional rank-label derivation and market-beta feature exclusion behavior on a small in-memory frame.
+  - No full integrated pipeline, no `research_only`, and no long-running V5.1 batch was executed in this session.
+- Compatibility:
+  - Candidate configs without the new fields default to `raw_return` / `allow`, so older generated candidate JSON remains runnable.
+  - The new default config changes future V5.1 research behavior; compare against old behavior with explicit `alpha_label_mode=raw_return` if an A/B run is later authorized.
+- Rollback:
+  - Set `alpha_label_mode=raw_return` and `feature_market_policy=allow` in `hub_config.v5_1.*.json`, or revert the touched V5.1 training/candidate files.
+
 ### CDL-20260529-046
 - Local time: `2026-05-29 21:30:00`
 - Type: `h-workspace-bootstrap-and-first-green-preflight`

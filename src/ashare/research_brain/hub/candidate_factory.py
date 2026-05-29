@@ -326,6 +326,9 @@ def build_cycle_plan(base_config: Dict[str, Any], registry_df, cycle_index: int,
     for idx, route in enumerate(route_seq, start=1):
         parent = parents[(idx - 1) % len(parents)]
         spec = _candidate_spec(route, parent, route_space, idx - 1, cycle_index, hypotheses)
+        spec['alpha_label_mode'] = str(base_config['strategy'].get('alpha_label_mode', 'raw_return'))
+        spec['feature_market_policy'] = str(base_config['strategy'].get('feature_market_policy', 'allow'))
+        spec['feature_liquidity_policy'] = str(base_config['strategy'].get('feature_liquidity_policy', 'allow'))
         sig = dict(spec)
         sig['cycle_index'] = cycle_index
         sig['candidate_index'] = idx
@@ -379,6 +382,9 @@ def build_cycle_plan(base_config: Dict[str, Any], registry_df, cycle_index: int,
             'training_logic': spec['training_logic'],
             'label_col': str(base_config['strategy']['label_col']),
             'label_horizon': int(spec['label_horizon']),
+            'alpha_label_mode': str(base_config['strategy'].get('alpha_label_mode', 'raw_return')),
+            'feature_market_policy': str(base_config['strategy'].get('feature_market_policy', 'allow')),
+            'feature_liquidity_policy': str(base_config['strategy'].get('feature_liquidity_policy', 'allow')),
             'top_k': int(spec['top_k']),
             'lab': lab_info,
             'resource_constraints': resource_constraints,

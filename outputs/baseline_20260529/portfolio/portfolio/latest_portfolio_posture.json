@@ -1,0 +1,26 @@
+{
+  "market_regime": "neutral",
+  "system_mode": "HALT",
+  "market_safety_regime": "CAUTION",
+  "manual_halt": false,
+  "manual_reduce_only": false,
+  "total_exposure_cap": 0.81702,
+  "new_entry_budget": 0.127455,
+  "add_budget": 0.228766,
+  "defensive_bias": 0.38,
+  "replacement_aggressiveness": 0.32,
+  "rebalance_mode": "defend",
+  "current_position_count": 0,
+  "current_target_weight_sum": 0.0,
+  "weak_existing_count": 0,
+  "control_feedback": {
+    "recent_new_entry_completion_ratio": 0.0,
+    "recent_add_completion_ratio": 0.0,
+    "persistent_gap_ratio": 0.0,
+    "turnover_truncation_ratio": 0.0,
+    "median_time_to_completion_hours": 0.0,
+    "partial_stuck_symbol_ratio": 0.0,
+    "release_convergence_score": 0.0,
+    "replacement_churn_score": 0.0
+  }
+}

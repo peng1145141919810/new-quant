@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-05-29 22:18:43",
+  "state_counts": {
+    "watch": 20
+  },
+  "action_counts": {
+    "watch": 20
+  },
+  "exposure_usage": {
+    "target_cap": 0.81702,
+    "proposal_weight_sum": 0.0,
+    "selected_weight_sum": 0.0,
+    "new_entry_budget": 0.127455,
+    "add_budget": 0.228766
+  },
+  "new_entry_count": 0,
+  "trim_count": 0,
+  "replacement_count": 0,
+  "soft_crowding_penalty_snapshot": {
+    "enabled": true,
+    "max_penalty": 0.0
+  },
+  "turnover_budget_usage_hint": {
+    "rebalance_mode": "defend",
+    "replacement_aggressiveness": 0.32,
+    "defensive_bias": 0.38
+  }
+}

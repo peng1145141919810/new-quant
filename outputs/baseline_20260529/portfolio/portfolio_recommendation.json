@@ -1,0 +1,2528 @@
+{
+  "generated_at": "2026-05-29 22:18:47",
+  "strategy_name": "autonomous_research_brain_v5_1__data__c001_003_dbfe4066",
+  "strategy_key": "dbfe406630ff",
+  "run_id": "20260529_220009_dbfe4066",
+  "run_dir": "H:\\Ashare\\data\\research_hub_integrated\\runs\\20260529_220009_dbfe4066",
+  "selection_source": "latest_cycle",
+  "total_score": 33.90533115686089,
+  "sharpe": 0.6059058634195086,
+  "max_drawdown": -0.29234472146580137,
+  "gpu_used": false,
+  "n_names": 18,
+  "price_coverage": {
+    "covered": 18,
+    "total": 18,
+    "coverage_ratio": 1.0,
+    "missing_symbols": []
+  },
+  "simulation_ready": false,
+  "research_deployment_ready": false,
+  "research_deployment_gate": {
+    "deployment_ready": false,
+    "reason": "暂无 champion",
+    "cycle_id": "cycle_001_20260529_214625",
+    "cycle_summary_path": "H:\\Ashare\\data\\research_hub_integrated\\cycles\\cycle_001_20260529_214625\\cycle_summary.json"
+  },
+  "research_deployment_reason": "暂无 champion",
+  "portfolio_limits": {
+    "max_names": 18,
+    "single_name_cap": 0.09078,
+    "total_exposure_cap": 0.81702,
+    "base_max_names": 20,
+    "base_single_name_cap": 0.1,
+    "base_total_exposure_cap": 1.0
+  },
+  "account_sizing": {
+    "ok": false,
+    "account_id": "",
+    "nav": 0.0,
+    "cash": 0.0,
+    "positions_count": 0,
+    "enabled": true,
+    "applied": false,
+    "reason": "missing_account_nav_or_cash"
+  },
+  "account_allocator_profile": {
+    "bucket": "unknown",
+    "cash_ratio": 0.0,
+    "positions_count": 0,
+    "target_slots": 6,
+    "desired_single_name_cap": 0.09078,
+    "desired_family_cap": 0.199716,
+    "desired_industry_cap": 0.167943,
+    "cash_posture": "hold_buffer",
+    "avoid_concentration": true
+  },
+  "previous_target_reset_reason": "",
+  "candidate_source": "latest_portfolio_v1",
+  "account_size_v2a_fallback": "",
+  "execution_candidate_filter": {
+    "source_name": "broad_candidate_pool",
+    "enforced": true,
+    "allowed_suffixes": [
+      ".SH",
+      ".SZ"
+    ],
+    "require_tradable_basic": true,
+    "kept_rows": 121,
+    "dropped_rows": 4,
+    "dropped_symbols": [
+      "920023.BJ",
+      "920039.BJ",
+      "920371.BJ",
+      "920414.BJ"
+    ]
+  },
+  "candidate_pool_stats": {
+    "broad_pool_count": 121,
+    "broad_pool_limit": 48,
+    "tier_counts": {
+      "F": 117,
+      "B": 4
+    },
+    "alpha_family_counts": {
+      "valuation": 98,
+      "liquidity": 21,
+      "revision": 2
+    },
+    "alpha_registry": {
+      "enabled": true,
+      "families": [
+        {
+          "family": "event_drive",
+          "horizon": "swing",
+          "capacity": "mid",
+          "style": "aggressive",
+          "objective": "event_follow_through",
+          "risk_budget": "high",
+          "default_state": "live",
+          "data_sources": [
+            "exchange_disclosure",
+            "event_fact_contract_orders",
+            "event_fact_supply_chain_signals"
+          ],
+          "score_columns": [
+            "event_drive_signal_score"
+          ],
+          "allocator_priority": 1.16
+        },
+        {
+          "family": "order_flow",
+          "horizon": "short",
+          "capacity": "mid",
+          "style": "aggressive",
+          "objective": "contract_and_order_acceleration",
+          "risk_budget": "high",
+          "default_state": "live",
+          "data_sources": [
+            "company_contract_fact",
+            "company_order_backlog_fact",
+            "event_fact_contract_orders"
+          ],
+          "score_columns": [
+            "order_flow_signal_score"
+          ],
+          "allocator_priority": 1.12
+        },
+        {
+          "family": "revision",
+          "horizon": "swing",
+          "capacity": "mid",
+          "style": "balanced",
+          "objective": "expectation_repricing",
+          "risk_budget": "medium",
+          "default_state": "live",
+          "data_sources": [
+            "expectation_revision_daily",
+            "exchange_disclosure"
+          ],
+          "score_columns": [
+            "revision_signal_score"
+          ],
+          "allocator_priority": 1.04
+        },
+        {
+          "family": "industry",
+          "horizon": "swing",
+          "capacity": "high",
+          "style": "balanced",
+          "objective": "industry_diffusion",
+          "risk_budget": "medium",
+          "default_state": "shadow",
+          "data_sources": [
+            "qianzhan_indicator_daily",
+            "industry_factor_price_inventory_daily",
+            "industry_factor_operation_daily"
+          ],
+          "score_columns": [
+            "industry_signal_score"
+          ],
+          "allocator_priority": 0.94
+        },
+        {
+          "family": "valuation",
+          "horizon": "medium",
+          "capacity": "high",
+          "style": "balanced",
+          "objective": "valuation_reversion",
+          "risk_budget": "medium",
+          "default_state": "shadow",
+          "data_sources": [
+            "valuation_daily"
+          ],
+          "score_columns": [
+            "valuation_signal_score"
+          ],
+          "allocator_priority": 0.92
+        },
+        {
+          "family": "liquidity",
+          "horizon": "short",
+          "capacity": "low",
+          "style": "tactical",
+          "objective": "intraday_liquidity_timing",
+          "risk_budget": "low",
+          "default_state": "shadow",
+          "data_sources": [
+            "crowding_daily",
+            "intraday_proxy_stream"
+          ],
+          "score_columns": [
+            "liquidity_signal_score"
+          ],
+          "allocator_priority": 0.84
+        }
+      ],
+      "family_counts": {
+        "valuation": 98,
+        "liquidity": 21,
+        "revision": 2
+      },
+      "family_weight_proxy": {
+        "liquidity": 0.38,
+        "revision": 0.0,
+        "valuation": 2.3
+      },
+      "family_score_means": {
+        "liquidity": 0.191217,
+        "revision": 0.362899,
+        "valuation": 0.320768
+      }
+    },
+    "llm_target_candidate_count": 0
+  },
+  "strategy_activation": {
+    "enabled": true,
+    "applied": true,
+    "runtime_sqlite_path": "H:\\Ashare\\data\\sql_store\\research_data_v1.sqlite3",
+    "fact_sqlite_path": "H:\\Ashare\\data\\sql_store\\research_fact_layers_v1.sqlite3",
+    "candidate_count": 121,
+    "feature_coverage": {
+      "pe_pct_industry": 121,
+      "revision_score": 121,
+      "recent_contract_count": 0,
+      "backlog_amount": 0,
+      "fact_contract_count": 1,
+      "positive_supply_signals": 0,
+      "qianzhan_relevance": 0,
+      "turnover_pct_rank": 121
+    },
+    "alpha_family_counts": {
+      "valuation": 98,
+      "liquidity": 21,
+      "revision": 2
+    },
+    "alpha_family_score_means": {
+      "valuation": 0.617962,
+      "revision": 0.016529,
+      "order_flow": 0.000826,
+      "event_drive": 0.0,
+      "industry": 0.0,
+      "liquidity": 0.364572
+    },
+    "alpha_family_data_map": {
+      "event_drive": [
+        "event_fact_contract_orders",
+        "event_fact_supply_chain_signals"
+      ],
+      "order_flow": [
+        "company_contract_fact",
+        "company_order_backlog_fact",
+        "event_fact_contract_orders"
+      ],
+      "revision": [
+        "expectation_revision_daily"
+      ],
+      "industry": [
+        "qianzhan_indicator_daily",
+        "industry_factor_price_inventory_daily",
+        "industry_factor_operation_daily"
+      ],
+      "valuation": [
+        "valuation_daily"
+      ],
+      "liquidity": [
+        "crowding_daily"
+      ]
+    },
+    "alpha_registry": {
+      "enabled": true,
+      "families": [
+        {
+          "family": "event_drive",
+          "horizon": "swing",
+          "capacity": "mid",
+          "style": "aggressive",
+          "objective": "event_follow_through",
+          "risk_budget": "high",
+          "default_state": "live",
+          "data_sources": [
+            "exchange_disclosure",
+            "event_fact_contract_orders",
+            "event_fact_supply_chain_signals"
+          ],
+          "score_columns": [
+            "event_drive_signal_score"
+          ],
+          "allocator_priority": 1.16
+        },
+        {
+          "family": "order_flow",
+          "horizon": "short",
+          "capacity": "mid",
+          "style": "aggressive",
+          "objective": "contract_and_order_acceleration",
+          "risk_budget": "high",
+          "default_state": "live",
+          "data_sources": [
+            "company_contract_fact",
+            "company_order_backlog_fact",
+            "event_fact_contract_orders"
+          ],
+          "score_columns": [
+            "order_flow_signal_score"
+          ],
+          "allocator_priority": 1.12
+        },
+        {
+          "family": "revision",
+          "horizon": "swing",
+          "capacity": "mid",
+          "style": "balanced",
+          "objective": "expectation_repricing",
+          "risk_budget": "medium",
+          "default_state": "live",
+          "data_sources": [
+            "expectation_revision_daily",
+            "exchange_disclosure"
+          ],
+          "score_columns": [
+            "revision_signal_score"
+          ],
+          "allocator_priority": 1.04
+        },
+        {
+          "family": "industry",
+          "horizon": "swing",
+          "capacity": "high",
+          "style": "balanced",
+          "objective": "industry_diffusion",
+          "risk_budget": "medium",
+          "default_state": "shadow",
+          "data_sources": [
+            "qianzhan_indicator_daily",
+            "industry_factor_price_inventory_daily",
+            "industry_factor_operation_daily"
+          ],
+          "score_columns": [
+            "industry_signal_score"
+          ],
+          "allocator_priority": 0.94
+        },
+        {
+          "family": "valuation",
+          "horizon": "medium",
+          "capacity": "high",
+          "style": "balanced",
+          "objective": "valuation_reversion",
+          "risk_budget": "medium",
+          "default_state": "shadow",
+          "data_sources": [
+            "valuation_daily"
+          ],
+          "score_columns": [
+            "valuation_signal_score"
+          ],
+          "allocator_priority": 0.92
+        },
+        {
+          "family": "liquidity",
+          "horizon": "short",
+          "capacity": "low",
+          "style": "tactical",
+          "objective": "intraday_liquidity_timing",
+          "risk_budget": "low",
+          "default_state": "shadow",
+          "data_sources": [
+            "crowding_daily",
+            "intraday_proxy_stream"
+          ],
+          "score_columns": [
+            "liquidity_signal_score"
+          ],
+          "allocator_priority": 0.84
+        }
+      ],
+      "family_counts": {
+        "valuation": 98,
+        "liquidity": 21,
+        "revision": 2
+      },
+      "family_weight_proxy": {
+        "liquidity": 0.38,
+        "revision": 0.0,
+        "valuation": 2.3
+      },
+      "family_score_means": {
+        "liquidity": 0.191217,
+        "revision": 0.362899,
+        "valuation": 0.320768
+      }
+    },
+    "llm_review": {
+      "enabled": false,
+      "applied": false
+    },
+    "blend_weight": 0.32,
+    "risk_budget_multiplier": 0.9,
+    "cash_multiplier": 0.88,
+    "weights": {
+      "signal_weights": {
+        "valuation": {
+          "pe_pct_industry": 0.35,
+          "pb_pct_industry": 0.35,
+          "ps_pct_industry": 0.3
+        },
+        "revision": {
+          "revision_score": 0.6,
+          "eps_revision_7d": 0.2,
+          "eps_revision_30d": 0.2
+        },
+        "order_flow": {
+          "recent_contract_count": 0.18,
+          "recent_contract_amount": 0.22,
+          "backlog_amount": 0.24,
+          "contract_liability": 0.14,
+          "has_major_contract": 0.12,
+          "has_bid_award": 0.1
+        },
+        "event_drive": {
+          "fact_contract_count": 0.25,
+          "fact_contract_amount": 0.25,
+          "fact_government_contracts": 0.1,
+          "positive_supply_signals": 0.25,
+          "total_supply_signals": 0.05,
+          "negative_supply_signals_inverted": 0.1
+        },
+        "industry": {
+          "qianzhan_relevance": 0.45,
+          "qianzhan_direction_bias": 0.2,
+          "inventory_direction_bias": 0.2,
+          "operation_direction_bias": 0.15
+        },
+        "liquidity": {
+          "turnover_pct_rank": 0.34,
+          "crowding_score_inverted": 0.22,
+          "fund_exposure_proxy": 0.18,
+          "northbound_holding_change": 0.13,
+          "margin_balance_change": 0.13
+        }
+      },
+      "meta_weights": {
+        "valuation_signal_score": 0.56,
+        "revision_signal_score": 0.08,
+        "order_flow_signal_score": 0.0,
+        "event_drive_signal_score": 0.0,
+        "industry_signal_score": 0.0,
+        "liquidity_signal_score": 0.36
+      },
+      "priority_weights": {
+        "selection_score_base": 0.66,
+        "selection_score_risk_budget_bonus": 0.12,
+        "data_activation_score": 0.34
+      },
+      "llm_overlay": {
+        "favored_symbol_boost": 0.09,
+        "favored_family_boost": 0.05,
+        "blocked_symbol_penalty": 0.16,
+        "aggressiveness_min": 0.85,
+        "aggressiveness_max": 1.35
+      },
+      "risk_budget_bounds": {
+        "min": 0.35,
+        "max": 1.6,
+        "priority_bonus_cap": 1.0
+      },
+      "cash_multipliers": {
+        "high_cash_threshold": 0.15,
+        "mid_cash_threshold": 0.08,
+        "high_cash_multiplier": 1.0,
+        "mid_cash_multiplier": 0.94,
+        "low_cash_multiplier": 0.88
+      }
+    }
+  },
+  "candidate_pool_llm_review": {
+    "enabled": false,
+    "applied": false
+  },
+  "outer_intelligence_allocator": {
+    "enabled": false,
+    "applied": false
+  },
+  "alpha_attribution": {
+    "available": true,
+    "target_weight_by_alpha_family": {
+      "unknown": 0.45
+    },
+    "pnl_proxy_by_alpha_family": {},
+    "market_value_by_alpha_family": {},
+    "pnl_yield_by_alpha_family": {},
+    "active_symbol_count_by_alpha_family": {},
+    "avg_target_weight_by_alpha_family": {
+      "unknown": 0.025
+    }
+  },
+  "alpha_lifecycle": {
+    "available": true,
+    "market_regime": "neutral",
+    "items": [
+      {
+        "family": "revision",
+        "sample_count": 2,
+        "target_weight": 0.0,
+        "market_value": 0.0,
+        "pnl_proxy": 0.0,
+        "pnl_yield": 0.0,
+        "priority_mean": 0.362899,
+        "activation_mean": 0.549878,
+        "concentration_proxy": 0.0,
+        "state": "shadow",
+        "issues": [
+          "research_only"
+        ]
+      },
+      {
+        "family": "valuation",
+        "sample_count": 98,
+        "target_weight": 0.0,
+        "market_value": 0.0,
+        "pnl_proxy": 0.0,
+        "pnl_yield": 0.0,
+        "priority_mean": 0.320768,
+        "activation_mean": 0.521162,
+        "concentration_proxy": 0.0,
+        "state": "shadow",
+        "issues": [
+          "research_only"
+        ]
+      },
+      {
+        "family": "liquidity",
+        "sample_count": 21,
+        "target_weight": 0.0,
+        "market_value": 0.0,
+        "pnl_proxy": 0.0,
+        "pnl_yield": 0.0,
+        "priority_mean": 0.191217,
+        "activation_mean": 0.273342,
+        "concentration_proxy": 0.0,
+        "state": "shadow",
+        "issues": [
+          "research_only",
+          "weak_priority"
+        ]
+      },
+      {
+        "family": "unknown",
+        "sample_count": 0,
+        "target_weight": 0.45,
+        "market_value": 0.0,
+        "pnl_proxy": 0.0,
+        "pnl_yield": 0.0,
+        "priority_mean": 0.0,
+        "activation_mean": 0.0,
+        "concentration_proxy": 0.45,
+        "state": "shadow",
+        "issues": [
+          "thin_sample",
+          "crowded_exposure"
+        ]
+      }
+    ],
+    "state_counts": {
+      "shadow": 4
+    },
+    "promote_families": [],
+    "demote_families": [],
+    "shadow_families": [
+      "revision",
+      "valuation",
+      "liquidity",
+      "unknown"
+    ]
+  },
+  "registered_family_allocator": {
+    "applied": true,
+    "weight_column": "portfolio_weight",
+    "focus_families": [
+      "valuation"
+    ],
+    "family_multiplier_map": {
+      "unknown": 1.0
+    },
+    "before_total_weight": 0.0,
+    "after_total_weight": 0.0
+  },
+  "alpha_lifecycle_allocator": {
+    "applied": true,
+    "weight_column": "portfolio_weight",
+    "state_counts": {
+      "inactive": 18
+    },
+    "family_multipliers": {
+      "revision": 0.88,
+      "valuation": 0.88,
+      "liquidity": 0.88,
+      "unknown": 0.0
+    },
+    "before_total_weight": 0.0,
+    "after_total_weight": 0.0
+  },
+  "trade_discipline": {
+    "available": true,
+    "posture": "defensive",
+    "cash_posture": "deploy",
+    "market_regime": "neutral",
+    "new_position_budget": 0.2,
+    "add_multiplier": 0.648,
+    "sell_pressure": 0.6,
+    "target_slots": 6,
+    "positions_count": 0,
+    "cash_ratio": 0.0,
+    "target_total_weight": 0.45,
+    "top1_weight": 0.025,
+    "hhi": 0.01125,
+    "concentration_risk": "ok",
+    "promote_families": [],
+    "demote_families": [],
+    "family_bias": {
+      "revision": 0.88,
+      "valuation": 0.88,
+      "liquidity": 0.88,
+      "unknown": 0.88
+    },
+    "sell_priority_symbols": []
+  },
+  "trade_discipline_allocator": {
+    "applied": true,
+    "posture": "defensive",
+    "new_position_budget": 0.2,
+    "add_multiplier": 0.648,
+    "target_slots": 6,
+    "family_bias_count": 4,
+    "before_total_weight": 0.0,
+    "after_total_weight": 0.0
+  },
+  "evidence_audit_gate": {
+    "enabled": true,
+    "applied": false,
+    "reason": "no_latest_evidence_reviews"
+  },
+  "portfolio_weight_totals": {
+    "final_total_weight": 0.45,
+    "reweight_before": 0.0,
+    "reweight_after": 0.0,
+    "target_fill": 0.612765
+  },
+  "diversification_objective": {
+    "applied": true,
+    "bucket": "unknown",
+    "target_slots": 6,
+    "desired_single_name_cap": 0.09078,
+    "desired_family_cap": 0.199716,
+    "desired_industry_cap": 0.167943,
+    "before_hhi": 0.0,
+    "after_hhi": 0.037085,
+    "family_weight_before": {},
+    "family_weight_after": {},
+    "industry_weight_before": {
+      "专用机械": 0.0,
+      "仓储物流": 0.0,
+      "元器件": 0.0,
+      "公共交通": 0.0,
+      "医药商业": 0.0,
+      "建筑工程": 0.0,
+      "汽车整车": 0.0,
+      "电器仪表": 0.0,
+      "电气设备": 0.0,
+      "石油开采": 0.0,
+      "软件服务": 0.0,
+      "食品": 0.0
+    },
+    "industry_weight_after": {
+      "专用机械": 0.09078,
+      "仓储物流": 0.04539,
+      "元器件": 0.04539,
+      "公共交通": 0.04539,
+      "医药商业": 0.04539,
+      "建筑工程": 0.04539,
+      "汽车整车": 0.04539,
+      "电器仪表": 0.09078,
+      "电气设备": 0.09078,
+      "石油开采": 0.04539,
+      "软件服务": 0.18156,
+      "食品": 0.04539
+    }
+  },
+  "executable_weight_floor": {
+    "applied": false,
+    "reason": "missing_prerequisites"
+  },
+  "pre_release_proxy_objective": {
+    "applied": true,
+    "proxy_rows": 0,
+    "config": {
+      "max_spread_pct": 0.028,
+      "turnover_enforce": true,
+      "diversification_flatten": true,
+      "cash_headroom_floor": 0.04,
+      "hhi_trigger": 0.18,
+      "flatten_gamma": 0.94
+    },
+    "source": "research_proxy_intraday_snapshot",
+    "note": "no_intraday_proxy_csv_falling_back_to_neutral_multipliers",
+    "account": {
+      "nav": 0.0,
+      "cash": 0.0,
+      "cash_ratio": 1.0,
+      "cash_scale": 1.0
+    },
+    "hhi_before": 0.055556,
+    "diversification_flatten_applied": false,
+    "turnover_l1_before": 0.81702,
+    "turnover_l1_after": 0.45,
+    "max_daily_turnover_ratio": 0.45
+  },
+  "account_candidate_selection": {
+    "applied": false,
+    "reason": "missing_prerequisites"
+  },
+  "portfolio": {
+    "generated_at": "2026-05-29 22:18:43",
+    "state_counts": {
+      "watch": 20
+    },
+    "action_counts": {
+      "watch": 20
+    },
+    "exposure_usage": {
+      "target_cap": 0.81702,
+      "proposal_weight_sum": 0.0,
+      "selected_weight_sum": 0.0,
+      "new_entry_budget": 0.127455,
+      "add_budget": 0.228766
+    },
+    "new_entry_count": 0,
+    "trim_count": 0,
+    "replacement_count": 0,
+    "soft_crowding_penalty_snapshot": {
+      "enabled": true,
+      "max_penalty": 0.0
+    },
+    "turnover_budget_usage_hint": {
+      "rebalance_mode": "defend",
+      "replacement_aggressiveness": 0.32,
+      "defensive_bias": 0.38
+    }
+  },
+  "portfolio_posture": {
+    "market_regime": "neutral",
+    "system_mode": "HALT",
+    "market_safety_regime": "CAUTION",
+    "manual_halt": false,
+    "manual_reduce_only": false,
+    "total_exposure_cap": 0.81702,
+    "new_entry_budget": 0.127455,
+    "add_budget": 0.228766,
+    "defensive_bias": 0.38,
+    "replacement_aggressiveness": 0.32,
+    "rebalance_mode": "defend",
+    "current_position_count": 0,
+    "current_target_weight_sum": 0.0,
+    "weak_existing_count": 0,
+    "control_feedback": {
+      "recent_new_entry_completion_ratio": 0.0,
+      "recent_add_completion_ratio": 0.0,
+      "persistent_gap_ratio": 0.0,
+      "turnover_truncation_ratio": 0.0,
+      "median_time_to_completion_hours": 0.0,
+      "partial_stuck_symbol_ratio": 0.0,
+      "release_convergence_score": 0.0,
+      "replacement_churn_score": 0.0
+    }
+  },
+  "market_state": {
+    "date": "20260529",
+    "generated_at": "2026-05-29 21:44:52",
+    "trend_score": 0.0457,
+    "breadth_score": -0.7433,
+    "liquidity_score": 0.2,
+    "style_score": 0.2449,
+    "market_regime_score": -0.1302,
+    "market_regime": "neutral",
+    "style_bias": "defensive",
+    "mechanism_bias": "macro_style",
+    "risk_budget_multiplier": 0.9,
+    "turnover_multiplier": 0.88,
+    "entry_strictness": 0.42,
+    "new_position_policy": "selective",
+    "de_risk_hint": "keep_selective",
+    "hs300_ret_1": -0.004495531360024674,
+    "hs300_ret_5": 0.009705835319327782,
+    "hs300_ret_20": 0.028143576648378188,
+    "hs300_above_ma20": true,
+    "hs300_above_ma60": true,
+    "avg_pct_chg": -0.02092045498928719,
+    "median_pct_chg": -0.022209241952232672,
+    "advancers_ratio": 0.28005811841627315,
+    "large_drop_ratio": 0.41609153650563024,
+    "strong_up_ratio": 0.07373774064656738,
+    "limit_down_ratio": 0.02960406828913912,
+    "total_amount": 3340873466888.69,
+    "total_amount_ratio_20": 1.0,
+    "median_turnover_rate": 2.6754,
+    "median_turnover_ratio_20": 1.0,
+    "large_cap_return_1d": -0.016079546422311,
+    "small_cap_return_1d": -0.02093044043474662,
+    "size_spread_1d": -0.00485089401243562,
+    "mechanism_lead_score": 0.097825,
+    "mechanism_multipliers": {
+      "trend_capex": 0.92,
+      "price_inventory": 0.92,
+      "macro_style": 1.1,
+      "balanced": 1.0
+    },
+    "active_amount_share": 0.7799511704749627,
+    "hs300_close": 4892.1213,
+    "hs300_ma20_gap": 0.0015722338991563944,
+    "hs300_ma60_gap": 0.03841194676878845
+  },
+  "formal_strategy_framework": "adaptive_multi_alpha_control",
+  "primary_strategy_key": "multi_alpha_allocator",
+  "integrated_thesis_state": {
+    "generated_at": "2026-05-29 21:44:52",
+    "trade_date": "20260529",
+    "status": "ok",
+    "formal_strategy_framework": "adaptive_multi_alpha_control",
+    "primary_strategy_key": "multi_alpha_allocator",
+    "portfolio_construction": {
+      "alpha_budget_multiplier": 0.9078,
+      "risk_budget_reference": 0.9
+    },
+    "summary": {
+      "n_event_cards": 6,
+      "n_joined_candidates": 30,
+      "n_fact_backed_candidates": 0,
+      "n_symbols": 7,
+      "n_accepted": 7,
+      "n_soft_admitted": 7,
+      "top_candidate_count": 7,
+      "event_gate_pass_count": 7,
+      "mechanism_gate_pass_count": 7,
+      "earnings_gate_pass_count": 0,
+      "portfolio_gate_pass_count": 7,
+      "event_type_distribution": {
+        "policy_supply_chain": 7
+      },
+      "mechanism_distribution": {
+        "direct_event_mapping": 3,
+        "macro_style": 4
+      },
+      "event_source_distribution": {
+        "missing": 7
+      },
+      "gate_stage_distribution": {
+        "earnings_soft_gate": 7
+      }
+    },
+    "top_candidates": [
+      {
+        "trade_date": "20260529",
+        "symbol": "300557",
+        "ts_code": "300557",
+        "event_quality": 0.9662,
+        "mechanism_fit_score": 1.0,
+        "mechanism_state_score": 0.9679,
+        "earnings_validation_score": 0.19,
+        "confidence_adjustment": 0.679,
+        "integrated_thesis_score": 0.6941,
+        "integrated_thesis_state": "pilot",
+        "primary_event_type": "policy_supply_chain",
+        "primary_mechanism_group": "direct_event_mapping",
+        "primary_event_fact_id": "825c450eed7d43f18abd235a5d7f2198",
+        "primary_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.966",
+          "mechanism_group:direct_event_mapping",
+          "mechanism_fit:1.000",
+          "mechanism_state:0.968",
+          "router_allow_entry:true",
+          "expectation:model:market_implied_trailing_profit",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "mechanism_reason_chain": [
+          "mechanism_group:direct_event_mapping",
+          "mechanism_fit:1.000",
+          "mechanism_state:0.968",
+          "router_allow_entry:true"
+        ],
+        "earnings_reason_chain": [
+          "expectation:model:market_implied_trailing_profit"
+        ],
+        "thesis_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.966",
+          "mechanism_group:direct_event_mapping",
+          "mechanism_fit:1.000",
+          "mechanism_state:0.968",
+          "router_allow_entry:true",
+          "expectation:model:market_implied_trailing_profit",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "thesis_gate_stage": "earnings_soft_gate",
+        "thesis_reject_reason": "",
+        "event_gate_pass": true,
+        "mechanism_gate_pass": true,
+        "earnings_gate_pass": false,
+        "portfolio_gate_pass": true,
+        "is_research_proxy_involved": false,
+        "earnings_reason": "expectation:model:market_implied_trailing_profit",
+        "event_summary": "公告关于2025年度权益分派实施",
+        "source_mix": "model:market_implied_trailing_profit",
+        "valuation_penalty": 0.0,
+        "implementation_risk": 0.04,
+        "event_source_class": "",
+        "event_source_confidence": 0.0
+      },
+      {
+        "trade_date": "20260529",
+        "symbol": "301387",
+        "ts_code": "301387",
+        "event_quality": 0.9662,
+        "mechanism_fit_score": 1.0,
+        "mechanism_state_score": 0.9679,
+        "earnings_validation_score": 0.19,
+        "confidence_adjustment": 0.679,
+        "integrated_thesis_score": 0.6941,
+        "integrated_thesis_state": "pilot",
+        "primary_event_type": "policy_supply_chain",
+        "primary_mechanism_group": "direct_event_mapping",
+        "primary_event_fact_id": "f5325940c6dce674daa3c9830054553c",
+        "primary_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.966",
+          "mechanism_group:direct_event_mapping",
+          "mechanism_fit:1.000",
+          "mechanism_state:0.968",
+          "router_allow_entry:true",
+          "expectation:model:market_implied_trailing_profit",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "mechanism_reason_chain": [
+          "mechanism_group:direct_event_mapping",
+          "mechanism_fit:1.000",
+          "mechanism_state:0.968",
+          "router_allow_entry:true"
+        ],
+        "earnings_reason_chain": [
+          "expectation:model:market_implied_trailing_profit"
+        ],
+        "thesis_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.966",
+          "mechanism_group:direct_event_mapping",
+          "mechanism_fit:1.000",
+          "mechanism_state:0.968",
+          "router_allow_entry:true",
+          "expectation:model:market_implied_trailing_profit",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "thesis_gate_stage": "earnings_soft_gate",
+        "thesis_reject_reason": "",
+        "event_gate_pass": true,
+        "mechanism_gate_pass": true,
+        "earnings_gate_pass": false,
+        "portfolio_gate_pass": true,
+        "is_research_proxy_involved": false,
+        "earnings_reason": "expectation:model:market_implied_trailing_profit",
+        "event_summary": "公司公告关于回购注销部分限制性股票并减资的通知",
+        "source_mix": "model:market_implied_trailing_profit",
+        "valuation_penalty": 0.0,
+        "implementation_risk": 0.04,
+        "event_source_class": "",
+        "event_source_confidence": 0.0
+      },
+      {
+        "trade_date": "20260529",
+        "symbol": "300710",
+        "ts_code": "300710",
+        "event_quality": 0.883,
+        "mechanism_fit_score": 1.0,
+        "mechanism_state_score": 0.8889,
+        "earnings_validation_score": 0.0,
+        "confidence_adjustment": 0.6335,
+        "integrated_thesis_score": 0.6052,
+        "integrated_thesis_state": "pilot",
+        "primary_event_type": "policy_supply_chain",
+        "primary_mechanism_group": "direct_event_mapping",
+        "primary_event_fact_id": "22d0ec6bc518f5a411c5e548259031a6",
+        "primary_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.883",
+          "mechanism_group:direct_event_mapping",
+          "mechanism_fit:1.000",
+          "mechanism_state:0.889",
+          "router_allow_entry:true",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "mechanism_reason_chain": [
+          "mechanism_group:direct_event_mapping",
+          "mechanism_fit:1.000",
+          "mechanism_state:0.889",
+          "router_allow_entry:true"
+        ],
+        "earnings_reason_chain": [],
+        "thesis_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.883",
+          "mechanism_group:direct_event_mapping",
+          "mechanism_fit:1.000",
+          "mechanism_state:0.889",
+          "router_allow_entry:true",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "thesis_gate_stage": "earnings_soft_gate",
+        "thesis_reject_reason": "",
+        "event_gate_pass": true,
+        "mechanism_gate_pass": true,
+        "earnings_gate_pass": false,
+        "portfolio_gate_pass": true,
+        "is_research_proxy_involved": false,
+        "earnings_reason": "",
+        "event_summary": "公司发行股份购买资产并募集配套资金",
+        "source_mix": "",
+        "valuation_penalty": 0.0,
+        "implementation_risk": 0.12,
+        "event_source_class": "",
+        "event_source_confidence": 0.0
+      },
+      {
+        "trade_date": "20260529",
+        "symbol": "600036.SH",
+        "ts_code": "600036.SH",
+        "event_quality": 0.9662,
+        "mechanism_fit_score": 0.4966,
+        "mechanism_state_score": 0.1546,
+        "earnings_validation_score": 0.19,
+        "confidence_adjustment": 0.615,
+        "integrated_thesis_score": 0.5079,
+        "integrated_thesis_state": "watch",
+        "primary_event_type": "policy_supply_chain",
+        "primary_mechanism_group": "macro_style",
+        "primary_event_fact_id": "825c450eed7d43f18abd235a5d7f2198",
+        "primary_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.966",
+          "mechanism_group:macro_style",
+          "mechanism_fit:0.497",
+          "mechanism_state:0.155",
+          "router_allow_entry:true",
+          "expectation:model:market_implied_trailing_profit",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "mechanism_reason_chain": [
+          "mechanism_group:macro_style",
+          "mechanism_fit:0.497",
+          "mechanism_state:0.155",
+          "router_allow_entry:true"
+        ],
+        "earnings_reason_chain": [
+          "expectation:model:market_implied_trailing_profit"
+        ],
+        "thesis_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.966",
+          "mechanism_group:macro_style",
+          "mechanism_fit:0.497",
+          "mechanism_state:0.155",
+          "router_allow_entry:true",
+          "expectation:model:market_implied_trailing_profit",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "thesis_gate_stage": "earnings_soft_gate",
+        "thesis_reject_reason": "",
+        "event_gate_pass": true,
+        "mechanism_gate_pass": true,
+        "earnings_gate_pass": false,
+        "portfolio_gate_pass": true,
+        "is_research_proxy_involved": false,
+        "earnings_reason": "expectation:model:market_implied_trailing_profit",
+        "event_summary": "公告关于2025年度权益分派实施",
+        "source_mix": "model:market_implied_trailing_profit",
+        "valuation_penalty": 0.0,
+        "implementation_risk": 0.04,
+        "event_source_class": "",
+        "event_source_confidence": 0.0
+      },
+      {
+        "trade_date": "20260529",
+        "symbol": "601318.SH",
+        "ts_code": "601318.SH",
+        "event_quality": 0.9662,
+        "mechanism_fit_score": 0.4954,
+        "mechanism_state_score": 0.1514,
+        "earnings_validation_score": 0.19,
+        "confidence_adjustment": 0.6148,
+        "integrated_thesis_score": 0.5073,
+        "integrated_thesis_state": "watch",
+        "primary_event_type": "policy_supply_chain",
+        "primary_mechanism_group": "macro_style",
+        "primary_event_fact_id": "825c450eed7d43f18abd235a5d7f2198",
+        "primary_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.966",
+          "mechanism_group:macro_style",
+          "mechanism_fit:0.495",
+          "mechanism_state:0.151",
+          "router_allow_entry:true",
+          "expectation:model:market_implied_trailing_profit",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "mechanism_reason_chain": [
+          "mechanism_group:macro_style",
+          "mechanism_fit:0.495",
+          "mechanism_state:0.151",
+          "router_allow_entry:true"
+        ],
+        "earnings_reason_chain": [
+          "expectation:model:market_implied_trailing_profit"
+        ],
+        "thesis_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.966",
+          "mechanism_group:macro_style",
+          "mechanism_fit:0.495",
+          "mechanism_state:0.151",
+          "router_allow_entry:true",
+          "expectation:model:market_implied_trailing_profit",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "thesis_gate_stage": "earnings_soft_gate",
+        "thesis_reject_reason": "",
+        "event_gate_pass": true,
+        "mechanism_gate_pass": true,
+        "earnings_gate_pass": false,
+        "portfolio_gate_pass": true,
+        "is_research_proxy_involved": false,
+        "earnings_reason": "expectation:model:market_implied_trailing_profit",
+        "event_summary": "公告关于2025年度权益分派实施",
+        "source_mix": "model:market_implied_trailing_profit",
+        "valuation_penalty": 0.0,
+        "implementation_risk": 0.04,
+        "event_source_class": "",
+        "event_source_confidence": 0.0
+      },
+      {
+        "trade_date": "20260529",
+        "symbol": "601398.SH",
+        "ts_code": "601398.SH",
+        "event_quality": 0.9662,
+        "mechanism_fit_score": 0.4947,
+        "mechanism_state_score": 0.1497,
+        "earnings_validation_score": 0.19,
+        "confidence_adjustment": 0.6147,
+        "integrated_thesis_score": 0.507,
+        "integrated_thesis_state": "watch",
+        "primary_event_type": "policy_supply_chain",
+        "primary_mechanism_group": "macro_style",
+        "primary_event_fact_id": "825c450eed7d43f18abd235a5d7f2198",
+        "primary_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.966",
+          "mechanism_group:macro_style",
+          "mechanism_fit:0.495",
+          "mechanism_state:0.150",
+          "router_allow_entry:true",
+          "expectation:model:market_implied_trailing_profit",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "mechanism_reason_chain": [
+          "mechanism_group:macro_style",
+          "mechanism_fit:0.495",
+          "mechanism_state:0.150",
+          "router_allow_entry:true"
+        ],
+        "earnings_reason_chain": [
+          "expectation:model:market_implied_trailing_profit"
+        ],
+        "thesis_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.966",
+          "mechanism_group:macro_style",
+          "mechanism_fit:0.495",
+          "mechanism_state:0.150",
+          "router_allow_entry:true",
+          "expectation:model:market_implied_trailing_profit",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "thesis_gate_stage": "earnings_soft_gate",
+        "thesis_reject_reason": "",
+        "event_gate_pass": true,
+        "mechanism_gate_pass": true,
+        "earnings_gate_pass": false,
+        "portfolio_gate_pass": true,
+        "is_research_proxy_involved": false,
+        "earnings_reason": "expectation:model:market_implied_trailing_profit",
+        "event_summary": "公告关于2025年度权益分派实施",
+        "source_mix": "model:market_implied_trailing_profit",
+        "valuation_penalty": 0.0,
+        "implementation_risk": 0.04,
+        "event_source_class": "",
+        "event_source_confidence": 0.0
+      },
+      {
+        "trade_date": "20260529",
+        "symbol": "601688.SH",
+        "ts_code": "601688.SH",
+        "event_quality": 0.9662,
+        "mechanism_fit_score": 0.4761,
+        "mechanism_state_score": 0.1033,
+        "earnings_validation_score": 0.19,
+        "confidence_adjustment": 0.6116,
+        "integrated_thesis_score": 0.4981,
+        "integrated_thesis_state": "watch",
+        "primary_event_type": "policy_supply_chain",
+        "primary_mechanism_group": "macro_style",
+        "primary_event_fact_id": "825c450eed7d43f18abd235a5d7f2198",
+        "primary_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.966",
+          "mechanism_group:macro_style",
+          "mechanism_fit:0.476",
+          "mechanism_state:0.103",
+          "router_allow_entry:true",
+          "expectation:model:market_implied_trailing_profit",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "mechanism_reason_chain": [
+          "mechanism_group:macro_style",
+          "mechanism_fit:0.476",
+          "mechanism_state:0.103",
+          "router_allow_entry:true"
+        ],
+        "earnings_reason_chain": [
+          "expectation:model:market_implied_trailing_profit"
+        ],
+        "thesis_reason_chain": [
+          "event_type:policy_supply_chain",
+          "event_strength:0.966",
+          "mechanism_group:macro_style",
+          "mechanism_fit:0.476",
+          "mechanism_state:0.103",
+          "router_allow_entry:true",
+          "expectation:model:market_implied_trailing_profit",
+          "risk_budget:0.900",
+          "new_position_policy:selective"
+        ],
+        "thesis_gate_stage": "earnings_soft_gate",
+        "thesis_reject_reason": "",
+        "event_gate_pass": true,
+        "mechanism_gate_pass": true,
+        "earnings_gate_pass": false,
+        "portfolio_gate_pass": true,
+        "is_research_proxy_involved": false,
+        "earnings_reason": "expectation:model:market_implied_trailing_profit",
+        "event_summary": "公告关于2025年度权益分派实施",
+        "source_mix": "model:market_implied_trailing_profit",
+        "valuation_penalty": 0.0,
+        "implementation_risk": 0.04,
+        "event_source_class": "",
+        "event_source_confidence": 0.0
+      }
+    ],
+    "artifacts": {
+      "latest_path": "H:\\Ashare\\data\\event_lake_v6\\research\\integrated_thesis\\integrated_thesis_state.json",
+      "daily_path": "H:\\Ashare\\data\\event_lake_v6\\research\\integrated_thesis\\integrated_thesis_daily.csv",
+      "candidates_path": "H:\\Ashare\\data\\event_lake_v6\\research\\integrated_thesis\\integrated_thesis_candidates.csv",
+      "latest_table_path": "H:\\Ashare\\data\\event_lake_v6\\research\\integrated_thesis\\latest_integrated_thesis.csv",
+      "explainer_path": "H:\\Ashare\\data\\event_lake_v6\\research\\integrated_thesis\\integrated_thesis_explainer.json"
+    }
+  },
+  "technical_confirmation": {},
+  "artifacts": {
+    "portfolio_posture_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\portfolio\\latest_portfolio_posture.json",
+    "position_lifecycle_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\portfolio\\latest_position_lifecycle.csv",
+    "position_lifecycle_daily_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\portfolio\\position_lifecycle_daily.csv",
+    "admission_replacement_audit_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\portfolio\\admission_replacement_audit.json",
+    "portfolio_control_summary_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\portfolio\\portfolio_control_summary.json",
+    "market_state_path": "H:\\Ashare\\data\\market_state_v6\\latest_market_state.json",
+    "integrated_thesis_state_path": "H:\\Ashare\\data\\event_lake_v6\\research\\integrated_thesis\\integrated_thesis_state.json",
+    "candidate_pool_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\candidate_pool.csv",
+    "evidence_audit_summary_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\evidence_audit_v1\\latest\\evidence_audit_summary.json",
+    "evidence_audit_reviews_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\evidence_audit_v1\\latest\\evidence_audit_reviews.json",
+    "evidence_audit_sources_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\evidence_audit_v1\\latest\\evidence_audit_sources.json",
+    "harvest_risk_assessment_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\harvest_risk_assessment.json",
+    "econometric_guardrails_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\econometric_guardrails.json",
+    "global_objective_snapshot_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\global_objective_snapshot.json"
+  },
+  "fallback_retained_due_all_filtered": true,
+  "performance_feedback": {
+    "generated_at": "2026-05-29 21:33:11",
+    "available": false,
+    "authority_role": "local_signal_only",
+    "source_equity_curve": "H:\\Ashare\\data\\live_execution_bridge\\equity_curve.csv",
+    "regime": "neutral",
+    "metrics": {},
+    "signal_trace": [],
+    "signal_route_weights": {},
+    "route_space_signals": {},
+    "preferred_model_signals": [],
+    "ban_model_signals": [],
+    "research_constraint_signals": {},
+    "portfolio_constraint_signals": {},
+    "route_weights": {
+      "feature": 0.18,
+      "model": 0.18,
+      "training": 0.16,
+      "portfolio": 0.16,
+      "risk": 0.14,
+      "data": 0.1,
+      "hybrid": 0.08
+    },
+    "route_budget": {
+      "feature": 2,
+      "model": 2,
+      "training": 2,
+      "portfolio": 2,
+      "risk": 2,
+      "data": 1,
+      "hybrid": 1
+    },
+    "route_space_overrides": {
+      "model_families": [
+        "ridge_ranker",
+        "lightgbm_gpu"
+      ]
+    },
+    "preferred_model_families": [
+      "ridge_ranker",
+      "lightgbm_gpu"
+    ],
+    "ban_model_families": [
+      "xgboost_gpu",
+      "generated_family"
+    ],
+    "strategy_overrides": {
+      "top_k": 20,
+      "portfolio_base_exposure": 1.0,
+      "portfolio_weak_market_exposure": 0.5,
+      "portfolio_single_name_cap": 0.1
+    },
+    "portfolio_overrides": {
+      "max_names": 20,
+      "single_name_cap": 0.1,
+      "total_exposure_cap": 1.0
+    },
+    "research_brain_overrides": {
+      "max_cycles": 1,
+      "cycle_candidate_budget": 12,
+      "route_min_candidates": 1
+    },
+    "scheduler_budget_decision": {
+      "version": "research_scheduler_decision_v2",
+      "generated_at": "2026-05-29 21:33:11",
+      "authority_owner": "intelligent_scheduler",
+      "status": "ready",
+      "final_verdict": "balanced",
+      "policy_posture": "balanced",
+      "reason_chain": [
+        "research_runtime_stability:ban_xgboost_gpu_for_quick_test",
+        "research_runtime_stability:ban_generated_family_for_quick_test",
+        "market_state_signal:balanced",
+        "market_state_signal:selective",
+        "econometric_guardrails:guardrail_penalty=0.000",
+        "econometric_guardrails:incremental_value=0.000",
+        "profile=quick_test",
+        "market_regime=risk_off",
+        "quick_test_prefers_stable_model_families"
+      ],
+      "advisor_chain": [
+        {
+          "advisor": "local_performance_signal",
+          "category": "signal",
+          "status": "inactive",
+          "summary": "neutral",
+          "hard_stop": false,
+          "reasons": [],
+          "evidence": {
+            "profile": "quick_test",
+            "daily_return": 0.0,
+            "three_day_return": 0.0,
+            "five_day_return": 0.0,
+            "current_drawdown": 0.0,
+            "route_signal_weights": {}
+          }
+        },
+        {
+          "advisor": "research_runtime_stability",
+          "category": "risk",
+          "status": "warning",
+          "summary": "quick_test_prefers_stable_families",
+          "hard_stop": false,
+          "reasons": [
+            "ban_xgboost_gpu_for_quick_test",
+            "ban_generated_family_for_quick_test"
+          ],
+          "evidence": {
+            "profile": "quick_test",
+            "quick_test": true
+          }
+        },
+        {
+          "advisor": "market_state_signal",
+          "category": "signal",
+          "status": "ok",
+          "summary": "risk_off",
+          "hard_stop": false,
+          "reasons": [
+            "balanced",
+            "balanced",
+            "selective"
+          ],
+          "evidence": {
+            "risk_budget_multiplier": 0.72,
+            "market_regime": "risk_off",
+            "style_bias": "balanced",
+            "mechanism_bias": "balanced"
+          }
+        },
+        {
+          "advisor": "previous_global_objective",
+          "category": "arbitration",
+          "status": "ok",
+          "summary": "balanced",
+          "hard_stop": false,
+          "reasons": [],
+          "evidence": {
+            "overall": 0.0,
+            "evidence": 0.0,
+            "diversity": 0.0,
+            "execution": 0.0,
+            "adversarial": 0.0
+          }
+        },
+        {
+          "advisor": "econometric_guardrails",
+          "category": "risk",
+          "status": "ok",
+          "summary": "unknown",
+          "hard_stop": false,
+          "reasons": [
+            "guardrail_penalty=0.000",
+            "incremental_value=0.000"
+          ],
+          "evidence": {
+            "guardrail_penalty": 0.0,
+            "stability_score": 0.0,
+            "regime_dependency_score": 0.0
+          }
+        },
+        {
+          "advisor": "harvest_risk",
+          "category": "risk",
+          "status": "ok",
+          "summary": "unknown",
+          "hard_stop": false,
+          "reasons": [],
+          "evidence": {
+            "harvest_risk_score": 0.0,
+            "dominant_family": "",
+            "dominant_family_share": 0.0
+          }
+        },
+        {
+          "advisor": "execution_feedback",
+          "category": "feedback",
+          "status": "ok",
+          "summary": "feedback_quiet",
+          "hard_stop": false,
+          "reasons": [],
+          "evidence": {
+            "research_meta_available": false,
+            "control_feedback_available": false,
+            "bridge_feedback_available": false
+          }
+        }
+      ],
+      "research_plan": {
+        "base_profile_cycles": 1,
+        "route_weights": {
+          "feature": 0.18,
+          "model": 0.18,
+          "training": 0.16,
+          "portfolio": 0.16,
+          "risk": 0.14,
+          "data": 0.1,
+          "hybrid": 0.08
+        },
+        "route_budget": {
+          "feature": 2,
+          "model": 2,
+          "training": 2,
+          "portfolio": 2,
+          "risk": 2,
+          "data": 1,
+          "hybrid": 1
+        },
+        "route_space_overrides": {
+          "model_families": [
+            "ridge_ranker",
+            "lightgbm_gpu"
+          ]
+        },
+        "preferred_model_families": [
+          "ridge_ranker",
+          "lightgbm_gpu"
+        ],
+        "ban_model_families": [
+          "xgboost_gpu",
+          "generated_family"
+        ],
+        "research_brain_overrides": {
+          "max_cycles": 1,
+          "cycle_candidate_budget": 12,
+          "route_min_candidates": 1
+        }
+      },
+      "portfolio_construction": {
+        "strategy_overrides": {
+          "top_k": 20,
+          "portfolio_base_exposure": 1.0,
+          "portfolio_weak_market_exposure": 0.5,
+          "portfolio_single_name_cap": 0.1
+        },
+        "portfolio_overrides": {
+          "max_names": 20,
+          "single_name_cap": 0.1,
+          "total_exposure_cap": 1.0
+        }
+      },
+      "route_weights": {
+        "feature": 0.18,
+        "model": 0.18,
+        "training": 0.16,
+        "portfolio": 0.16,
+        "risk": 0.14,
+        "data": 0.1,
+        "hybrid": 0.08
+      },
+      "route_budget": {
+        "feature": 2,
+        "model": 2,
+        "training": 2,
+        "portfolio": 2,
+        "risk": 2,
+        "data": 1,
+        "hybrid": 1
+      },
+      "route_space_overrides": {
+        "model_families": [
+          "ridge_ranker",
+          "lightgbm_gpu"
+        ]
+      },
+      "preferred_model_families": [
+        "ridge_ranker",
+        "lightgbm_gpu"
+      ],
+      "ban_model_families": [
+        "xgboost_gpu",
+        "generated_family"
+      ],
+      "research_brain_overrides": {
+        "max_cycles": 1,
+        "cycle_candidate_budget": 12,
+        "route_min_candidates": 1
+      },
+      "strategy_overrides": {
+        "top_k": 20,
+        "portfolio_base_exposure": 1.0,
+        "portfolio_weak_market_exposure": 0.5,
+        "portfolio_single_name_cap": 0.1
+      },
+      "portfolio_overrides": {
+        "max_names": 20,
+        "single_name_cap": 0.1,
+        "total_exposure_cap": 1.0
+      },
+      "reasons": [
+        "profile=quick_test",
+        "market_regime=risk_off",
+        "quick_test_prefers_stable_model_families"
+      ]
+    },
+    "scheduler_research_decision": {
+      "version": "research_scheduler_decision_v2",
+      "generated_at": "2026-05-29 21:33:11",
+      "authority_owner": "intelligent_scheduler",
+      "status": "ready",
+      "final_verdict": "balanced",
+      "policy_posture": "balanced",
+      "reason_chain": [
+        "research_runtime_stability:ban_xgboost_gpu_for_quick_test",
+        "research_runtime_stability:ban_generated_family_for_quick_test",
+        "market_state_signal:balanced",
+        "market_state_signal:selective",
+        "econometric_guardrails:guardrail_penalty=0.000",
+        "econometric_guardrails:incremental_value=0.000",
+        "profile=quick_test",
+        "market_regime=risk_off",
+        "quick_test_prefers_stable_model_families"
+      ],
+      "advisor_chain": [
+        {
+          "advisor": "local_performance_signal",
+          "category": "signal",
+          "status": "inactive",
+          "summary": "neutral",
+          "hard_stop": false,
+          "reasons": [],
+          "evidence": {
+            "profile": "quick_test",
+            "daily_return": 0.0,
+            "three_day_return": 0.0,
+            "five_day_return": 0.0,
+            "current_drawdown": 0.0,
+            "route_signal_weights": {}
+          }
+        },
+        {
+          "advisor": "research_runtime_stability",
+          "category": "risk",
+          "status": "warning",
+          "summary": "quick_test_prefers_stable_families",
+          "hard_stop": false,
+          "reasons": [
+            "ban_xgboost_gpu_for_quick_test",
+            "ban_generated_family_for_quick_test"
+          ],
+          "evidence": {
+            "profile": "quick_test",
+            "quick_test": true
+          }
+        },
+        {
+          "advisor": "market_state_signal",
+          "category": "signal",
+          "status": "ok",
+          "summary": "risk_off",
+          "hard_stop": false,
+          "reasons": [
+            "balanced",
+            "balanced",
+            "selective"
+          ],
+          "evidence": {
+            "risk_budget_multiplier": 0.72,
+            "market_regime": "risk_off",
+            "style_bias": "balanced",
+            "mechanism_bias": "balanced"
+          }
+        },
+        {
+          "advisor": "previous_global_objective",
+          "category": "arbitration",
+          "status": "ok",
+          "summary": "balanced",
+          "hard_stop": false,
+          "reasons": [],
+          "evidence": {
+            "overall": 0.0,
+            "evidence": 0.0,
+            "diversity": 0.0,
+            "execution": 0.0,
+            "adversarial": 0.0
+          }
+        },
+        {
+          "advisor": "econometric_guardrails",
+          "category": "risk",
+          "status": "ok",
+          "summary": "unknown",
+          "hard_stop": false,
+          "reasons": [
+            "guardrail_penalty=0.000",
+            "incremental_value=0.000"
+          ],
+          "evidence": {
+            "guardrail_penalty": 0.0,
+            "stability_score": 0.0,
+            "regime_dependency_score": 0.0
+          }
+        },
+        {
+          "advisor": "harvest_risk",
+          "category": "risk",
+          "status": "ok",
+          "summary": "unknown",
+          "hard_stop": false,
+          "reasons": [],
+          "evidence": {
+            "harvest_risk_score": 0.0,
+            "dominant_family": "",
+            "dominant_family_share": 0.0
+          }
+        },
+        {
+          "advisor": "execution_feedback",
+          "category": "feedback",
+          "status": "ok",
+          "summary": "feedback_quiet",
+          "hard_stop": false,
+          "reasons": [],
+          "evidence": {
+            "research_meta_available": false,
+            "control_feedback_available": false,
+            "bridge_feedback_available": false
+          }
+        }
+      ],
+      "research_plan": {
+        "base_profile_cycles": 1,
+        "route_weights": {
+          "feature": 0.18,
+          "model": 0.18,
+          "training": 0.16,
+          "portfolio": 0.16,
+          "risk": 0.14,
+          "data": 0.1,
+          "hybrid": 0.08
+        },
+        "route_budget": {
+          "feature": 2,
+          "model": 2,
+          "training": 2,
+          "portfolio": 2,
+          "risk": 2,
+          "data": 1,
+          "hybrid": 1
+        },
+        "route_space_overrides": {
+          "model_families": [
+            "ridge_ranker",
+            "lightgbm_gpu"
+          ]
+        },
+        "preferred_model_families": [
+          "ridge_ranker",
+          "lightgbm_gpu"
+        ],
+        "ban_model_families": [
+          "xgboost_gpu",
+          "generated_family"
+        ],
+        "research_brain_overrides": {
+          "max_cycles": 1,
+          "cycle_candidate_budget": 12,
+          "route_min_candidates": 1
+        }
+      },
+      "portfolio_construction": {
+        "strategy_overrides": {
+          "top_k": 20,
+          "portfolio_base_exposure": 1.0,
+          "portfolio_weak_market_exposure": 0.5,
+          "portfolio_single_name_cap": 0.1
+        },
+        "portfolio_overrides": {
+          "max_names": 20,
+          "single_name_cap": 0.1,
+          "total_exposure_cap": 1.0
+        }
+      },
+      "route_weights": {
+        "feature": 0.18,
+        "model": 0.18,
+        "training": 0.16,
+        "portfolio": 0.16,
+        "risk": 0.14,
+        "data": 0.1,
+        "hybrid": 0.08
+      },
+      "route_budget": {
+        "feature": 2,
+        "model": 2,
+        "training": 2,
+        "portfolio": 2,
+        "risk": 2,
+        "data": 1,
+        "hybrid": 1
+      },
+      "route_space_overrides": {
+        "model_families": [
+          "ridge_ranker",
+          "lightgbm_gpu"
+        ]
+      },
+      "preferred_model_families": [
+        "ridge_ranker",
+        "lightgbm_gpu"
+      ],
+      "ban_model_families": [
+        "xgboost_gpu",
+        "generated_family"
+      ],
+      "research_brain_overrides": {
+        "max_cycles": 1,
+        "cycle_candidate_budget": 12,
+        "route_min_candidates": 1
+      },
+      "strategy_overrides": {
+        "top_k": 20,
+        "portfolio_base_exposure": 1.0,
+        "portfolio_weak_market_exposure": 0.5,
+        "portfolio_single_name_cap": 0.1
+      },
+      "portfolio_overrides": {
+        "max_names": 20,
+        "single_name_cap": 0.1,
+        "total_exposure_cap": 1.0
+      },
+      "reasons": [
+        "profile=quick_test",
+        "market_regime=risk_off",
+        "quick_test_prefers_stable_model_families"
+      ]
+    }
+  },
+  "research_context": {
+    "research_thesis": "今天主线是把高置信公告型单名事件做成可交易事件路由，并暂停事件向宏观风格股的错误扩散。",
+    "why_now": "本轮证据全为已确认公告，单名事件占比100%；但 fact_backed_candidates 为0、event_source 缺失、earnings_gate 全未通过，说明今天先补事件链路数据并收缩研究方向。",
+    "priority_events": [
+      {
+        "title": "关于2025年度权益分派实施公告",
+        "event_type": "buyback_dividend",
+        "importance": 7,
+        "summary": "300557 分红实施公告，正向，窗口1_4w。",
+        "research_angle": "做分红实施事件特征与5/10日标签回测。",
+        "source_type": "",
+        "event_direction": "uncertain",
+        "impact_scope": "",
+        "impact_horizon": "",
+        "evidence_quality": 0.0,
+        "research_priority": 0.0,
+        "corroboration_count": 1,
+        "source_diversity": 1,
+        "anti_overfit_weight": 1.0
+      },
+      {
+        "title": "关于回购注销部分限制性股票减资暨通知债权人的公告",
+        "event_type": "buyback_dividend",
+        "importance": 7,
+        "summary": "301387 回购注销并减资，正向，窗口1_4w。",
+        "research_angle": "提取注销比例与流通盘变化，测短中窗收益。",
+        "source_type": "",
+        "event_direction": "uncertain",
+        "impact_scope": "",
+        "impact_horizon": "",
+        "evidence_quality": 0.0,
+        "research_priority": 0.0,
+        "corroboration_count": 1,
+        "source_diversity": 1,
+        "anti_overfit_weight": 1.0
+      },
+      {
+        "title": "财通证券股份有限公司关于本次交易不构成《上市公司重大资产重组管理办法》第十三条规定的重组上市情形的核查意见",
+        "event_type": "mna_restructure",
+        "importance": 7,
+        "summary": "重组不构成借壳，属合规推进信号。",
+        "research_angle": "按重组阶段建强度分层，测10/20日表现。",
+        "source_type": "",
+        "event_direction": "uncertain",
+        "impact_scope": "",
+        "impact_horizon": "",
+        "evidence_quality": 0.0,
+        "research_priority": 0.0,
+        "corroboration_count": 1,
+        "source_diversity": 1,
+        "anti_overfit_weight": 1.0
+      },
+      {
+        "title": "财通证券股份有限公司关于本次交易符合《上市公司监管指引第9号——上市公司筹划和实施重大资产重组的监管要求》第四条规定的核查意见",
+        "event_type": "mna_restructure",
+        "importance": 7,
+        "summary": "交易符合监管要求，属进度确认。",
+        "research_angle": "合并多份核查意见为单次重组进度分数。",
+        "source_type": "",
+        "event_direction": "uncertain",
+        "impact_scope": "",
+        "impact_horizon": "",
+        "evidence_quality": 0.0,
+        "research_priority": 0.0,
+        "corroboration_count": 1,
+        "source_diversity": 1,
+        "anti_overfit_weight": 1.0
+      }
+    ],
+    "candidate_experiments": [
+      {
+        "experiment_id": "EXP01",
+        "name": "分红实施短窗基线",
+        "hypothesis": "分红实施公告对5至10日收益有稳定正贡献。",
+        "route": "feature",
+        "features": [
+          "dividend_impl_flag",
+          "cash_dividend_yield",
+          "ex_date_gap",
+          "liquidity_20d"
+        ],
+        "models": [
+          "ridge_ranker"
+        ],
+        "labels": [
+          5,
+          10
+        ],
+        "top_k": 2,
+        "reason": "证据质量最高，先做可解释基线。"
+      },
+      {
+        "experiment_id": "EXP02",
+        "name": "回购注销强度分层",
+        "hypothesis": "注销占流通盘比例越高，5至20日超额收益越强。",
+        "route": "feature",
+        "features": [
+          "share_cancel_flag",
+          "share_cancel_ratio_float",
+          "capital_reduction_flag",
+          "turnover_20d"
+        ],
+        "models": [
+          "ridge_ranker",
+          "xgboost_gpu"
+        ],
+        "labels": [
+          5,
+          20
+        ],
+        "top_k": 2,
+        "reason": "301387 为核心样本，需做强度分层。"
+      },
+      {
+        "experiment_id": "EXP03",
+        "name": "重组合规阶段评分",
+        "hypothesis": "重组核查意见聚合后的阶段分数可解释10至20日收益。",
+        "route": "portfolio",
+        "features": [
+          "mna_stage_score",
+          "regulatory_clearance_flag",
+          "deal_type_flag",
+          "volatility_20d"
+        ],
+        "models": [
+          "ridge_ranker",
+          "xgboost_gpu"
+        ],
+        "labels": [
+          10,
+          20
+        ],
+        "top_k": 2,
+        "reason": "mna 事件窗口更长，适合阶段化。"
+      },
+      {
+        "experiment_id": "EXP04",
+        "name": "事件源完整性过滤",
+        "hypothesis": "加入 source 完整性过滤后，样本数下降但命中率上升。",
+        "route": "feature",
+        "features": [
+          "event_source_class",
+          "event_source_confidence",
+          "fact_join_count",
+          "evidence_quality"
+        ],
+        "models": [
+          "ridge_ranker"
+        ],
+        "labels": [
+          5,
+          10
+        ],
+        "top_k": 2,
+        "reason": "当前 event_source 缺失，先验证过滤价值。"
+      },
+      {
+        "experiment_id": "EXP05",
+        "name": "盈利软门槛校准",
+        "hypothesis": "用 earnings_validation_score 过滤后，可去掉公告利好但基本面弱的样本。",
+        "route": "feature",
+        "features": [
+          "earnings_validation_score",
+          "cash_dividend_yield",
+          "share_cancel_ratio_float",
+          "mna_stage_score"
+        ],
+        "models": [
+          "ridge_ranker"
+        ],
+        "labels": [
+          10,
+          20
+        ],
+        "top_k": 2,
+        "reason": "当前所有候选卡在 earnings_soft_gate。"
+      },
+      {
+        "experiment_id": "EXP06",
+        "name": "跨路由泄漏拦截",
+        "hypothesis": "屏蔽 single_name 事件向 macro_style 股票扩散后，组合噪声显著下降。",
+        "route": "portfolio",
+        "features": [
+          "cross_route_leakage_flag",
+          "impact_scope",
+          "event_source_confidence",
+          "mechanism_fit_score"
+        ],
+        "models": [
+          "ridge_ranker"
+        ],
+        "labels": [
+          5,
+          10
+        ],
+        "top_k": 2,
+        "reason": "600036等 watch 可能来自路由错配。"
+      },
+      {
+        "experiment_id": "EXP07",
+        "name": "公告确认度加权",
+        "hypothesis": "confirmed 公告在5日窗口优于非确认或低权重事件。",
+        "route": "training",
+        "features": [
+          "anti_overfit_weight",
+          "corroboration_count",
+          "source_diversity",
+          "evidence_quality"
+        ],
+        "models": [
+          "ridge_ranker"
+        ],
+        "labels": [
+          5
+        ],
+        "top_k": 3,
+        "reason": "本轮 confirmed_ratio 为1，可测确认度权重。"
+      },
+      {
+        "experiment_id": "EXP08",
+        "name": "低广度环境下事件择时",
+        "hypothesis": "breadth_score 偏弱时，单名事件需更高流动性门槛才有效。",
+        "route": "feature",
+        "features": [
+          "breadth_score",
+          "liquidity_20d",
+          "event_quality",
+          "implementation_risk"
+        ],
+        "models": [
+          "xgboost_gpu"
+        ],
+        "labels": [
+          5,
+          10
+        ],
+        "top_k": 2,
+        "reason": "市场广度-0.7433，需检验择时约束。"
+      }
+    ],
+    "feature_actions": [
+      {
+        "action": "recompute",
+        "priority": "high",
+        "reason": "分红实施是今日核心事件。",
+        "feature_name": "dividend_impl_flag",
+        "source_dataset": "announcement_event_master"
+      },
+      {
+        "action": "build",
+        "priority": "high",
+        "reason": "需量化分红强度，不能只看公告标题。",
+        "feature_name": "cash_dividend_yield",
+        "source_dataset": "announcement_event_master"
+      },
+      {
+        "action": "build",
+        "priority": "high",
+        "reason": "回购注销强度取决于注销占流通盘比例。",
+        "feature_name": "share_cancel_ratio_float",
+        "source_dataset": "announcement_event_master"
+      },
+      {
+        "action": "build",
+        "priority": "high",
+        "reason": "多份核查意见需聚合为重组阶段分数。",
+        "feature_name": "mna_stage_score",
+        "source_dataset": "announcement_event_master"
+      },
+      {
+        "action": "build",
+        "priority": "high",
+        "reason": "当前 source_confidence 为0，先补过滤特征。",
+        "feature_name": "event_source_confidence",
+        "source_dataset": "event_source_mapping"
+      },
+      {
+        "action": "recompute",
+        "priority": "high",
+        "reason": "当前候选全部停在 earnings_soft_gate。",
+        "feature_name": "earnings_validation_score",
+        "source_dataset": "earnings_validation_panel"
+      },
+      {
+        "action": "build",
+        "priority": "medium",
+        "reason": "需区分单公告与多证据确认强度。",
+        "feature_name": "fact_join_count",
+        "source_dataset": "fact_backed_join_table"
+      },
+      {
+        "action": "build",
+        "priority": "medium",
+        "reason": "识别事件向宏观风格错误扩散。",
+        "feature_name": "cross_route_leakage_flag",
+        "source_dataset": "router_mapping_audit"
+      }
+    ],
+    "risk_actions": [
+      {
+        "action": "tighten_entry",
+        "priority": "high",
+        "reason": "new_position_policy 为 selective，执行更严入场。"
+      },
+      {
+        "action": "block_cross_name_propagation",
+        "priority": "high",
+        "reason": "单名公告不得外溢到无事件个股。"
+      },
+      {
+        "action": "require_source_fields",
+        "priority": "high",
+        "reason": "event_source_class 或 confidence 缺失时禁入。"
+      },
+      {
+        "action": "reduce_risk_budget",
+        "priority": "medium",
+        "reason": "risk_budget_reference 为0.9，维持降档。"
+      },
+      {
+        "action": "cap_turnover",
+        "priority": "medium",
+        "reason": "turnover_multiplier 为0.88，控制事件追价。"
+      }
+    ]
+  },
+  "llm_operating_brain": {
+    "generated_at": "2026-05-29T22:18:47",
+    "review": {
+      "enabled": true,
+      "applied": true,
+      "provider": "llm_operating_brain_deepseek",
+      "model": "deepseek-chat",
+      "research_brain": {
+        "focus_families": [
+          "valuation"
+        ],
+        "data_refresh_priorities": [
+          "valuation signals",
+          "liquidity constraints"
+        ],
+        "decision_basis": [
+          "valuation family has highest sample count and activation mean, priority mean above threshold",
+          "liquidity family has weak priority and research_only issues, deprioritize",
+          "revision family is shadow with research_only, not actionable"
+        ]
+      },
+      "dispatch_brain": {
+        "preferred_posture": "balanced",
+        "cash_posture": "deploy",
+        "tactical_bias": "rebuild_core",
+        "decision_basis": [
+          "market regime neutral, style bias defensive, risk budget multiplier 0.9 allows moderate deployment",
+          "no existing positions, need to build core using highest conviction candidates",
+          "valuation family provides sufficient candidates with reasonable priority"
+        ]
+      },
+      "operations_brain": {
+        "watch_items": [
+          "candidate execution slippage",
+          "liquidity of 688622.SH",
+          "industry concentration"
+        ],
+        "incident_actions": [
+          "if slippage exceeds 0.5%, reduce size",
+          "if liquidity dries up, replace with next candidate"
+        ],
+        "decision_basis": [
+          "ensure execution quality",
+          "avoid overconcentration in single industry",
+          "maintain diversification"
+        ]
+      },
+      "uncertainty_flags": [
+        "all alpha families are shadow or inactive, no live signals",
+        "candidate pool limited to 10 stocks, diversification may be insufficient"
+      ],
+      "overfit_guard": "Prioritize valuation family due to larger sample count and stable activation; avoid over-reliance on single candidate; limit position size to 5% max per stock.",
+      "error": ""
+    },
+    "input_payload": {
+      "task": "Act as the operating brain of an A-share multi-alpha system. Return strict JSON only.",
+      "required_json_schema": {
+        "research_brain": {
+          "focus_families": [
+            "string"
+          ],
+          "data_refresh_priorities": [
+            "string"
+          ],
+          "decision_basis": [
+            "string"
+          ]
+        },
+        "dispatch_brain": {
+          "preferred_posture": "aggressive|balanced|defensive",
+          "cash_posture": "deploy|hold_buffer|raise_cash",
+          "tactical_bias": "reduce_risk_first|rebuild_core|expand_winners",
+          "decision_basis": [
+            "string"
+          ]
+        },
+        "operations_brain": {
+          "watch_items": [
+            "string"
+          ],
+          "incident_actions": [
+            "string"
+          ],
+          "decision_basis": [
+            "string"
+          ]
+        },
+        "uncertainty_flags": [
+          "string"
+        ],
+        "overfit_guard": "string"
+      },
+      "rules": [
+        "Do not invent unavailable data sources.",
+        "Respect diversification-first and avoid heavy concentration.",
+        "Treat intraday T as a portfolio service layer, not a standalone alpha.",
+        "Prefer alpha families with promote/live status over demote status."
+      ],
+      "market_state": {
+        "market_regime": "neutral",
+        "style_bias": "defensive",
+        "mechanism_bias": "macro_style",
+        "risk_budget_multiplier": 0.9
+      },
+      "account_state": {
+        "nav": 0.0,
+        "cash": 0.0,
+        "positions_count": 0
+      },
+      "alpha_lifecycle": [
+        {
+          "family": "revision",
+          "sample_count": 2,
+          "target_weight": 0.0,
+          "market_value": 0.0,
+          "pnl_proxy": 0.0,
+          "pnl_yield": 0.0,
+          "priority_mean": 0.362899,
+          "activation_mean": 0.549878,
+          "concentration_proxy": 0.0,
+          "state": "shadow",
+          "issues": [
+            "research_only"
+          ]
+        },
+        {
+          "family": "valuation",
+          "sample_count": 98,
+          "target_weight": 0.0,
+          "market_value": 0.0,
+          "pnl_proxy": 0.0,
+          "pnl_yield": 0.0,
+          "priority_mean": 0.320768,
+          "activation_mean": 0.521162,
+          "concentration_proxy": 0.0,
+          "state": "shadow",
+          "issues": [
+            "research_only"
+          ]
+        },
+        {
+          "family": "liquidity",
+          "sample_count": 21,
+          "target_weight": 0.0,
+          "market_value": 0.0,
+          "pnl_proxy": 0.0,
+          "pnl_yield": 0.0,
+          "priority_mean": 0.191217,
+          "activation_mean": 0.273342,
+          "concentration_proxy": 0.0,
+          "state": "shadow",
+          "issues": [
+            "research_only",
+            "weak_priority"
+          ]
+        },
+        {
+          "family": "unknown",
+          "sample_count": 0,
+          "target_weight": 0.0,
+          "market_value": 0.0,
+          "pnl_proxy": 0.0,
+          "pnl_yield": 0.0,
+          "priority_mean": 0.0,
+          "activation_mean": 0.0,
+          "concentration_proxy": 0.0,
+          "state": "inactive",
+          "issues": [
+            "thin_sample"
+          ]
+        }
+      ],
+      "candidate_rows": [
+        {
+          "symbol": "688496.SH",
+          "alpha_family": "valuation",
+          "priority": 0.635679,
+          "portfolio_weight": 0.05,
+          "industry": "",
+          "reason_code": ""
+        },
+        {
+          "symbol": "301139.SZ",
+          "alpha_family": "valuation",
+          "priority": 0.554541,
+          "portfolio_weight": 0.02,
+          "industry": "",
+          "reason_code": ""
+        },
+        {
+          "symbol": "300430.SZ",
+          "alpha_family": "valuation",
+          "priority": 0.539512,
+          "portfolio_weight": 0.05,
+          "industry": "",
+          "reason_code": ""
+        },
+        {
+          "symbol": "600180.SH",
+          "alpha_family": "valuation",
+          "priority": 0.528776,
+          "portfolio_weight": 0.05,
+          "industry": "",
+          "reason_code": ""
+        },
+        {
+          "symbol": "600370.SH",
+          "alpha_family": "valuation",
+          "priority": 0.518088,
+          "portfolio_weight": 0.05,
+          "industry": "",
+          "reason_code": ""
+        },
+        {
+          "symbol": "000725.SZ",
+          "alpha_family": "valuation",
+          "priority": 0.490786,
+          "portfolio_weight": 0.02,
+          "industry": "",
+          "reason_code": ""
+        },
+        {
+          "symbol": "300532.SZ",
+          "alpha_family": "valuation",
+          "priority": 0.487964,
+          "portfolio_weight": 0.05,
+          "industry": "",
+          "reason_code": ""
+        },
+        {
+          "symbol": "300068.SZ",
+          "alpha_family": "valuation",
+          "priority": 0.477427,
+          "portfolio_weight": 0.05,
+          "industry": "",
+          "reason_code": ""
+        },
+        {
+          "symbol": "688622.SH",
+          "alpha_family": "liquidity",
+          "priority": 0.462625,
+          "portfolio_weight": 0.05,
+          "industry": "",
+          "reason_code": ""
+        },
+        {
+          "symbol": "600611.SH",
+          "alpha_family": "valuation",
+          "priority": 0.461167,
+          "portfolio_weight": 0.05,
+          "industry": "",
+          "reason_code": ""
+        }
+      ],
+      "summary": {
+        "account_allocator_profile": {},
+        "diversification_objective": {},
+        "candidate_pool_stats": {}
+      }
+    },
+    "trace": {
+      "enabled": true,
+      "applied": true,
+      "artifact_path": "H:\\Ashare\\data\\trade_clock\\llm_trace\\llm_operating_brain_20260529_221847.json",
+      "latest_artifact_path": "H:\\Ashare\\data\\trade_clock\\llm_trace\\latest\\latest_llm_operating_brain.json",
+      "prompt_hash": {
+        "system_prompt_sha256": "cfc3d23ab3535c60a4d09d39099d16b111d0cc564d1f791fc9088623c2c6cb64",
+        "user_prompt_sha256": "8341cd9850f617019ef38229a91d925f337e45134d69937b7cc3a15c4337d791"
+      }
+    },
+    "artifact_path": "H:\\Ashare\\data\\trade_clock\\llm_operating_brain\\llm_operating_brain_20260529_221847.json",
+    "latest_artifact_path": "H:\\Ashare\\data\\trade_clock\\llm_operating_brain\\latest\\latest_llm_operating_brain.json"
+  },
+  "harvest_risk": {
+    "version": "harvest_risk_v1",
+    "harvest_risk_score": 0.5129449035812672,
+    "harvest_risk_level": "medium",
+    "harvest_risk_confidence": 0.75,
+    "dominant_family": "valuation",
+    "dominant_family_share": 0.8099173553719008,
+    "tags": [
+      "family_crowding",
+      "weak_fact_coverage"
+    ],
+    "signals": {
+      "candidate_count": 18,
+      "fact_backed_ratio": 0.0,
+      "fallback_ratio": 0.0,
+      "turnover_heat": 0.12,
+      "llm_risk": 0.35,
+      "reason_weight": 0.0
+    },
+    "reasons": []
+  },
+  "econometric_guardrails": {
+    "version": "econometric_guardrails_v1",
+    "stability_flag": "fragile",
+    "stability_score": 0.2414664180571124,
+    "sample_fragility_score": 0.5170541265518865,
+    "regime_dependency_score": 0.5109778362133734,
+    "spurious_correlation_risk": 0.3739669421487603,
+    "incremental_value_score": 0.32,
+    "guardrail_penalty": 0.4720012696124691,
+    "signals": {
+      "candidate_count": 18,
+      "fact_backed_ratio": 0.0,
+      "accepted_thesis_ratio": 0.0,
+      "fallback_ratio": 0.0,
+      "dominant_family_share": 0.8099173553719008,
+      "family_count": 3
+    }
+  },
+  "global_objective": {
+    "version": "global_objective_v1",
+    "stage": "portfolio_recommendation",
+    "constitution": {
+      "minimum_evidence_score": 0.35,
+      "maximum_harvest_risk": 0.85,
+      "maximum_family_concentration": 0.6,
+      "minimum_execution_score": 0.3,
+      "minimum_candidate_count": 3,
+      "maximum_guardrail_penalty": 0.78,
+      "minimum_incremental_value_score": 0.28
+    },
+    "policy": {
+      "outcome_weight": 0.22,
+      "evidence_weight": 0.24,
+      "diversity_weight": 0.18,
+      "execution_weight": 0.18,
+      "adversarial_weight": 0.18,
+      "guardrail_weight": 0.12,
+      "exploration_budget": 0.15,
+      "max_cycles": 3
+    },
+    "scores": {
+      "outcome": 0.37287554771959686,
+      "evidence": 0.2475,
+      "diversity": 0.3273628850488355,
+      "execution": 0.40599999999999997,
+      "adversarial": 0.4870550964187328,
+      "guardrail": 0.5279987303875309,
+      "overall": 0.4244677048089773
+    },
+    "signals": {
+      "candidate_count": 18,
+      "fact_backed_ratio": 0.0,
+      "accepted_thesis_ratio": 0.0,
+      "fallback_ratio": 0.0,
+      "family_concentration_penalty": 0.6543951915852741,
+      "technical_allow_ratio": 0.0,
+      "execution_risk_level": "",
+      "market_regime": "neutral",
+      "style_bias": "defensive",
+      "account_nav": 0.0,
+      "guardrail_penalty": 0.4720012696124691,
+      "incremental_value_score": 0.32
+    },
+    "hard_flags": [
+      "evidence_below_floor",
+      "family_concentration_above_ceiling"
+    ],
+    "policy_posture": "balanced",
+    "recommended_budget": {
+      "exploration_budget": 0.15,
+      "max_cycles": 3,
+      "early_stop": false,
+      "shadow_only": false
+    }
+  }
+}

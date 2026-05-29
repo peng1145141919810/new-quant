@@ -1,0 +1,15 @@
+{
+  "issues": [
+    "cold_start"
+  ],
+  "route_weights": {
+    "feature": 2,
+    "model": 2,
+    "training": 2,
+    "portfolio": 1,
+    "risk": 1,
+    "data": 1,
+    "hybrid": 1
+  },
+  "summary": {}
+}

@@ -278,7 +278,7 @@ def _load_runtime_stock_features(db_path: Path, codes: Sequence[str]) -> pd.Data
         AVG(COALESCE(parse_confidence, 0.0)) AS contract_parse_confidence
     FROM company_contract_fact
     WHERE stock_code IN ({placeholders})
-      AND date(COALESCE(announcement_date, created_at)) >= date('now', '-180 day')
+      AND date(COALESCE(announcement_date, created_at)) >= date('now', '-30 day')
     GROUP BY stock_code
     """
     backlog_sql = f"""
@@ -323,7 +323,7 @@ def _load_fact_stock_features(db_path: Path, symbols: Sequence[str]) -> pd.DataF
         MAX(CASE WHEN COALESCE(is_new_order, 0) > 0 THEN 1 ELSE 0 END) AS has_new_order
     FROM event_fact_contract_orders
     WHERE symbol IN ({placeholders})
-      AND date(COALESCE(event_date, trade_date)) >= date('now', '-90 day')
+      AND date(COALESCE(event_date, trade_date)) >= date('now', '-14 day')
     GROUP BY symbol
     """
     supply_sql = f"""
@@ -338,7 +338,7 @@ def _load_fact_stock_features(db_path: Path, symbols: Sequence[str]) -> pd.DataF
         COUNT(*) AS total_supply_signals
     FROM event_fact_supply_chain_signals
     WHERE symbol IN ({placeholders})
-      AND date(COALESCE(event_date, trade_date)) >= date('now', '-60 day')
+      AND date(COALESCE(event_date, trade_date)) >= date('now', '-14 day')
     GROUP BY symbol
     """
     merged = pd.DataFrame({"ts_code": list(symbols)})
@@ -369,7 +369,7 @@ def _load_industry_features(db_path: Path, industries: Sequence[str]) -> pd.Data
         COUNT(*) AS qianzhan_item_count
     FROM qianzhan_indicator_daily
     WHERE industry_name IN ({placeholders})
-      AND date(COALESCE(publish_date, trade_date)) >= date('now', '-45 day')
+      AND date(COALESCE(publish_date, trade_date)) >= date('now', '-21 day')
     GROUP BY industry_name
     """
     inventory_sql = f"""
@@ -385,7 +385,7 @@ def _load_industry_features(db_path: Path, industries: Sequence[str]) -> pd.Data
         COUNT(*) AS inventory_factor_count
     FROM industry_factor_price_inventory_daily
     WHERE industry_name IN ({placeholders})
-      AND date(COALESCE(publish_date, trade_date)) >= date('now', '-45 day')
+      AND date(COALESCE(publish_date, trade_date)) >= date('now', '-21 day')
     GROUP BY industry_name
     """
     operation_sql = f"""
@@ -401,7 +401,7 @@ def _load_industry_features(db_path: Path, industries: Sequence[str]) -> pd.Data
         COUNT(*) AS operation_factor_count
     FROM industry_factor_operation_daily
     WHERE industry_name IN ({placeholders})
-      AND date(COALESCE(publish_date, trade_date)) >= date('now', '-45 day')
+      AND date(COALESCE(publish_date, trade_date)) >= date('now', '-21 day')
     GROUP BY industry_name
     """
     merged = pd.DataFrame({"industry_key": list(clean)})
