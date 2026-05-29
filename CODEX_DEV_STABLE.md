@@ -40,7 +40,12 @@
 - **DONE** Stale runtime artifacts purged (event_lake research state, generated_runtime configs)
 - **DONE** `git init -b main`, first commit `ad19272`, 381 tracked files
 - **DONE** Preflight green: `launch_canonical.py --preflight-only --profile quick_test` → exit 0, all 28 checks pass
-- **PENDING** `D:\AshareHotData\research_hub_integrated\runs` NVMe junction — not yet recreated; V5 will write under `H:\Ashare\data\` until/unless user re-creates the junction
+- **N/A** `D:\AshareHotData\research_hub_integrated\runs` NVMe junction — no longer needed. H: is itself a dedicated NVMe SSD (aigo P7000Z 2TB), so the original motivation (move hot V5 writes off F:'s HDD onto NVMe) is solved by living on H: directly. V5 will write under `H:\Ashare\data\research_hub_integrated\` and that path is already on NVMe.
+
+### Physical Disk Layout (verified 2026-05-29)
+- `C:` and `D:` — both partitions on Lexar THOR PRO 1TB NVMe SSD (shared spindle)
+- `F:` — Seagate ST4000DM004 4TB HDD (slow; old workspace lives here, read-only)
+- `H:` — **aigo P7000Z 2TB NVMe SSD, dedicated** — this is the active workspace. Do not assume H: is HDD.
 - **PENDING** No real chain run executed yet — first `research_only` will likely hit data-consistency gate due to 20-day-stale SQLite (`research_data_v1` last touched 2026-05-09)
 - **PENDING** `git remote add origin <url>` if user wants a remote; currently local-only repo
 

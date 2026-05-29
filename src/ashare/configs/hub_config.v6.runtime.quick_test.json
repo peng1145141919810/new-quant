@@ -368,6 +368,13 @@
     "hard_factor_lookback_days": 5,
     "timeout_minutes": 90
   },
+  "derived_alpha_refresh": {
+    "enabled": true,
+    "run_before_research": true,
+    "fail_open": false,
+    "affordable_sqlite_path": "H:\\Ashare\\data\\sql_store\\affordable_data_v1.sqlite3",
+    "runtime_sqlite_path": "H:\\Ashare\\data\\sql_store\\research_data_v1.sqlite3"
+  },
   "external_research_refresh": {
     "enabled": true,
     "run_before_research": true,
@@ -392,8 +399,8 @@
     "policy_path": "H:\\Ashare\\src\\ashare\\configs\\t_overlay\\t_audit_policy.json"
   },
   "audit_site_publish": {
-    "enabled": true,
-    "run_after_summary": true,
+    "enabled": false,
+    "run_after_summary": false,
     "fail_open": true,
     "script_path": "H:\\Ashare\\scripts\\publish_audit_report_to_site.ps1",
     "powershell_executable": "powershell.exe",
@@ -585,9 +592,16 @@
     "account_size_min_weight_buffer": 1.05,
     "account_size_max_single_name_cap": 0.35,
     "broad_candidate_pool_limit": 48,
+    "hard_data_candidate_pool_enabled": true,
+    "hard_data_candidate_weights": {
+      "seed_weight": 0.18,
+      "pred_score": 0.42,
+      "valuation": 0.24,
+      "liquidity": 0.16
+    },
     "llm_candidate_weak_accept_threshold": 6,
-    "enable_intelligent_outer_allocator": true,
-    "intelligent_outer_allocator_replaces_internal_gates": true,
+    "enable_intelligent_outer_allocator": false,
+    "intelligent_outer_allocator_replaces_internal_gates": false,
     "pre_release_intraday_proxy_objective_enabled": true,
     "pre_release_proxy_max_spread_pct": 0.028,
     "pre_release_proxy_turnover_enforce": true,
@@ -598,7 +612,7 @@
     "pre_release_proxy_fail_open": true
   },
   "portfolio_candidate_llm_review": {
-    "enabled": true,
+    "enabled": false,
     "provider": "deepseek_worker",
     "timeout_seconds": 45,
     "max_input_rows": 18,
@@ -611,7 +625,7 @@
   "strategy_activation": {
     "enabled": true,
     "blend_weight": 0.32,
-    "llm_enabled": true,
+    "llm_enabled": false,
     "llm_provider": "deepseek_worker",
     "llm_timeout_seconds": 40,
     "llm_max_input_rows": 16,
@@ -658,12 +672,12 @@
       }
     },
     "meta_weights": {
-      "valuation_signal_score": 0.14,
-      "revision_signal_score": 0.2,
-      "order_flow_signal_score": 0.23,
-      "event_drive_signal_score": 0.21,
-      "industry_signal_score": 0.12,
-      "liquidity_signal_score": 0.1
+      "valuation_signal_score": 0.56,
+      "revision_signal_score": 0.08,
+      "order_flow_signal_score": 0.0,
+      "event_drive_signal_score": 0.0,
+      "industry_signal_score": 0.0,
+      "liquidity_signal_score": 0.36
     },
     "priority_weights": {
       "selection_score_base": 0.66,
@@ -689,6 +703,47 @@
       "mid_cash_multiplier": 0.94,
       "low_cash_multiplier": 0.88
     }
+  },
+  "evidence_audit": {
+    "enabled": true,
+    "portfolio_gate_enabled": true,
+    "run_after_portfolio_recommendation": true,
+    "rebuild_portfolio_after_audit": true,
+    "block_execution_on_failure": true,
+    "llm_provider": "deepseek_worker",
+    "llm_timeout_seconds": 60,
+    "max_candidates": 40,
+    "max_results_per_query": 3,
+    "max_sources_per_symbol": 8,
+    "fetch_timeout_seconds": 12,
+    "max_page_chars": 8000,
+    "artifact_root": "H:\\Ashare\\data\\portfolio_recommendation_v6\\evidence_audit_v1",
+    "allow_domains": [
+      "cninfo.com.cn",
+      "sse.com.cn",
+      "szse.cn",
+      "eastmoney.com",
+      "stcn.com",
+      "cs.com.cn",
+      "thepaper.cn",
+      "gov.cn",
+      "ccgp.gov.cn"
+    ],
+    "grade_weight_multipliers": {
+      "A": 1.1,
+      "B": 1.04,
+      "C": 0.92,
+      "D": 0.55,
+      "F": 0.0
+    },
+    "query_templates": [
+      "{base} {code} 公告 业绩预告 业绩快报 利润增长",
+      "{base} {code} 年报 季报 营收 净利润 现金流 毛利率",
+      "{base} {code} 中标 合同 订单 客户 供货",
+      "{base} {code} 减持 质押 冻结 立案 调查 处罚 诉讼",
+      "{base} {code} 退市风险 ST 非标审计 业绩亏损",
+      "{base} {code} 涨价 产能 扩产 停产 产品价格"
+    ]
   },
   "portfolio": {
     "enabled": true,
@@ -957,8 +1012,8 @@
   "execution_bridge": {
     "enabled": false,
     "mode": "gmtrade_sim",
-    "python_executable": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python39\\python.exe",
-    "config_template_path": "H:\\Ashare\\src\\ashare\\configs\\gmtrade_runtime_config.local.json",
+    "python_executable": "H:\\Ashare\\.venv\\gmtrade39\\Scripts\\python.exe",
+    "config_template_path": "H:\\Ashare\\src\\ashare\\configs\\gmtrade_runtime_config.example.json",
     "autogen_config_path": "H:\\Ashare\\src\\ashare\\configs\\gmtrade_runtime_config.autogen.json",
     "script_path": "H:\\Ashare\\src\\ashare\\run_gmtrade_portfolio_bridge.py",
     "health_probe_script_path": "H:\\Ashare\\src\\ashare\\run_gmtrade_health_probe.py"

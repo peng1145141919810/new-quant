@@ -80,6 +80,9 @@ data/external_research_feeds/
 data/account_switch_archive/
 data/private/
 
+# ====== site_portal (control_plane_snapshot 写入此目录；该功能已砍但 snapshot 仍会写) ======
+site_portal/
+
 # ====== Secrets / 私密 ======
 data/private/
 src/ashare/configs/gmtrade_runtime_config.local.json
