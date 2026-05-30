@@ -1,0 +1,21 @@
+{
+  "version": "harvest_risk_v1",
+  "harvest_risk_score": 0.47300000000000003,
+  "harvest_risk_level": "medium",
+  "harvest_risk_confidence": 0.74,
+  "dominant_family": "valuation",
+  "dominant_family_share": 0.75,
+  "tags": [
+    "family_crowding",
+    "weak_fact_coverage"
+  ],
+  "signals": {
+    "candidate_count": 17,
+    "fact_backed_ratio": 0.0,
+    "fallback_ratio": 0.0,
+    "turnover_heat": 0.12,
+    "llm_risk": 0.35,
+    "reason_weight": 0.0
+  },
+  "reasons": []
+}

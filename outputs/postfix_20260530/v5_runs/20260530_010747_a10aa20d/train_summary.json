@@ -1,0 +1,125 @@
+{
+  "strategy_name": "autonomous_research_brain_v5_1__hybrid__c001_011_a10aa20d",
+  "label_col": "future_ret_5",
+  "effective_label_col": "future_ret_5__entry_lag_1__cs_rank",
+  "training_label_col": "future_ret_5__entry_lag_1__cs_rank",
+  "realized_return_label_col": "future_ret_5__entry_lag_1",
+  "alpha_label_meta": {
+    "label_mode": "cross_section_rank",
+    "requested_label_mode": "cross_section_rank",
+    "realized_label_col": "future_ret_5__entry_lag_1",
+    "training_label_col": "future_ret_5__entry_lag_1__cs_rank",
+    "training_label_derived": true,
+    "training_label_non_null_ratio": 1.0
+  },
+  "model_family": "lightgbm_gpu",
+  "effective_model_family": "lightgbm_gpu",
+  "feature_profile": "generated_feature_pack",
+  "training_logic": "generated_training",
+  "n_features": 19,
+  "feature_policy_meta": {
+    "feature_market_policy": "exclude_from_stock_ranker",
+    "market_beta_features_excluded": 5,
+    "excluded_market_beta_feature_names": [
+      "hs300_close",
+      "hs300_ret_5",
+      "hs300_ret_10",
+      "hs300_ret_20",
+      "hs300_ret_60"
+    ],
+    "feature_liquidity_policy": "exclude_from_stock_ranker",
+    "liquidity_features_excluded": 7,
+    "excluded_liquidity_feature_names": [
+      "amount",
+      "turnover_rate",
+      "amount_mean_5",
+      "amount_mean_20",
+      "amount_z_20",
+      "turnover_mean_5",
+      "turnover_mean_20"
+    ]
+  },
+  "valid_metrics": {
+    "pearson_corr": 0.0942789714079285,
+    "spearman_corr": 0.08685660130463403,
+    "daily_rank_ic_mean": 0.08667533387478706
+  },
+  "test_metrics": {
+    "pearson_corr": 0.09238712841135019,
+    "spearman_corr": 0.08579619376681281,
+    "daily_rank_ic_mean": NaN
+  },
+  "realized_valid_metrics": {
+    "pearson_corr": 0.04962405596362642,
+    "spearman_corr": 0.06976089610667399,
+    "daily_rank_ic_mean": 0.08667533387478706
+  },
+  "realized_test_metrics": {
+    "pearson_corr": 0.03046670581308506,
+    "spearman_corr": 0.05460142207869043,
+    "daily_rank_ic_mean": 0.0855636789045245
+  },
+  "overfit_diagnostics": {
+    "risk_score": 0.0,
+    "risk_level": "low",
+    "flags": [],
+    "valid_daily_rank_ic_mean": 0.086675,
+    "test_daily_rank_ic_mean": NaN,
+    "valid_test_ic_gap": NaN,
+    "valid_test_spearman_gap": 0.00106,
+    "test_vs_valid_ic_ratio": NaN,
+    "test_rank_ic_negative_share": 0.265487,
+    "test_window_consistency": 0.666667,
+    "valid_rank_ic_days": 789,
+    "test_rank_ic_days": 791
+  },
+  "time_alignment": {
+    "base_label_col": "future_ret_5",
+    "effective_label_col": "future_ret_5__entry_lag_1",
+    "label_horizon": 5,
+    "execution_lag_bars": 1,
+    "derived_execution_label": true,
+    "effective_label_non_null_ratio": 0.997563,
+    "split_embargo_days": 6
+  },
+  "resource_meta": {
+    "train_rows_before_sampling": 5013346,
+    "train_rows_after_sampling": 5013346,
+    "feature_count": 19,
+    "budget_action": "full_train",
+    "requested_model_family": "lightgbm_gpu",
+    "estimated_cost_units_before_sampling": 71.4401805,
+    "estimated_cost_units_after_sampling": 71.4401805,
+    "requested_family": "lightgbm_gpu",
+    "gpu_requested": true,
+    "gpu_used": true,
+    "backend": "lightgbm_gpu",
+    "feature_market_policy": "exclude_from_stock_ranker",
+    "market_beta_features_excluded": 5,
+    "excluded_market_beta_feature_names": [
+      "hs300_close",
+      "hs300_ret_5",
+      "hs300_ret_10",
+      "hs300_ret_20",
+      "hs300_ret_60"
+    ],
+    "feature_liquidity_policy": "exclude_from_stock_ranker",
+    "liquidity_features_excluded": 7,
+    "excluded_liquidity_feature_names": [
+      "amount",
+      "turnover_rate",
+      "amount_mean_5",
+      "amount_mean_20",
+      "amount_z_20",
+      "turnover_mean_5",
+      "turnover_mean_20"
+    ],
+    "effective_model_family": "lightgbm_gpu",
+    "effective_label_col": "future_ret_5__entry_lag_1__cs_rank",
+    "realized_return_label_col": "future_ret_5__entry_lag_1",
+    "selected_feature_count": 19,
+    "latest_date": "2026-05-29 00:00:00",
+    "label_horizon": 5,
+    "execution_lag_bars": 1
+  }
+}

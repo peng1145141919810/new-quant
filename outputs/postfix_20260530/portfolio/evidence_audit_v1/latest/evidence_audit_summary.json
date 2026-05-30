@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "ok": true,
+  "ran": true,
+  "candidate_pool_path": "H:\\Ashare\\data\\portfolio_recommendation_v6\\candidate_pool.csv",
+  "candidate_count": 40,
+  "audited_count": 40,
+  "source_count": 0,
+  "grade_counts": {
+    "D": 40
+  },
+  "verdict_counts": {
+    "watch_only": 40
+  },
+  "generated_at": "2026-05-30 01:49:37",
+  "artifact_dir": "H:\\Ashare\\data\\portfolio_recommendation_v6\\evidence_audit_v1\\20260530_014937"
+}

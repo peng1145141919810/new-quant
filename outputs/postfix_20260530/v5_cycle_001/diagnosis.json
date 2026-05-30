@@ -1,0 +1,23 @@
+{
+  "issues": [
+    "high_drawdown",
+    "weak_risk_adjusted_return",
+    "unstable_research"
+  ],
+  "route_weights": {
+    "feature": 1,
+    "model": 1,
+    "training": 1,
+    "portfolio": 5,
+    "risk": 5,
+    "data": 1,
+    "hybrid": 3
+  },
+  "summary": {
+    "recent_valid_ic_mean": 0.04769324564126682,
+    "recent_test_ic_mean": 0.052215077292350955,
+    "recent_sharpe_mean": 0.4561110609714058,
+    "recent_drawdown_mean": -0.2682451987179441,
+    "recent_total_score_mean": 3.0161242208827623
+  }
+}

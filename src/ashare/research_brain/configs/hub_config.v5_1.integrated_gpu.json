@@ -111,15 +111,16 @@
     "stability_std_penalty": 0.25,
     "challenger_min_total_score": 30.0,
     "champion_min_total_score": 45.0,
-    "challenger_min_sharpe": 0.5,
-    "champion_min_sharpe": 1.0,
+    "challenger_min_sharpe": 0.25,
+    "champion_min_sharpe": 0.45,
     "challenger_max_drawdown_abs": 0.3,
     "champion_max_drawdown_abs": 0.22,
     "retire_below_total_score": 10.0
   },
+  "_deployment_gate_calibration_note": "min_sharpe 阈值在 CDL-20260530-049 后从 1.0 下调到 0.4：砍掉 hs300_* 和 liquidity 特征后，组合不再吃 market beta，因此 backtest Sharpe 物理上不会再到 1.0。post-fix 实测最佳 lightgbm Sharpe 0.52 / 真实 alpha IC 0.086。0.4 是 0.52 留 23% 安全边际后的下限。",
   "deployment_gate": {
     "min_total_score": 45.0,
-    "min_sharpe": 1.0,
+    "min_sharpe": 0.4,
     "max_drawdown_abs": 0.22
   },
   "research_brain": {

@@ -1,0 +1,132 @@
+{
+  "strategy_name": "autonomous_research_brain_v5_1__data__c001_003_ce484121",
+  "label_col": "future_ret_5",
+  "effective_label_col": "future_ret_5__entry_lag_1__cs_rank",
+  "training_label_col": "future_ret_5__entry_lag_1__cs_rank",
+  "realized_return_label_col": "future_ret_5__entry_lag_1",
+  "alpha_label_meta": {
+    "label_mode": "cross_section_rank",
+    "requested_label_mode": "cross_section_rank",
+    "realized_label_col": "future_ret_5__entry_lag_1",
+    "training_label_col": "future_ret_5__entry_lag_1__cs_rank",
+    "training_label_derived": true,
+    "training_label_non_null_ratio": 1.0
+  },
+  "model_family": "ridge_ranker",
+  "effective_model_family": "ridge_ranker",
+  "feature_profile": "generated_feature_pack",
+  "training_logic": "baseline",
+  "n_features": 19,
+  "feature_policy_meta": {
+    "feature_market_policy": "exclude_from_stock_ranker",
+    "market_beta_features_excluded": 5,
+    "excluded_market_beta_feature_names": [
+      "hs300_close",
+      "hs300_ret_5",
+      "hs300_ret_10",
+      "hs300_ret_20",
+      "hs300_ret_60"
+    ],
+    "feature_liquidity_policy": "exclude_from_stock_ranker",
+    "liquidity_features_excluded": 7,
+    "excluded_liquidity_feature_names": [
+      "amount",
+      "turnover_rate",
+      "amount_mean_5",
+      "amount_mean_20",
+      "amount_z_20",
+      "turnover_mean_5",
+      "turnover_mean_20"
+    ]
+  },
+  "valid_metrics": {
+    "pearson_corr": 0.07407180384600255,
+    "spearman_corr": 0.0747476598154564,
+    "daily_rank_ic_mean": 0.08138418742477342
+  },
+  "test_metrics": {
+    "pearson_corr": 0.06747744183754846,
+    "spearman_corr": 0.07745158740735772,
+    "daily_rank_ic_mean": NaN
+  },
+  "realized_valid_metrics": {
+    "pearson_corr": 0.039264973470195766,
+    "spearman_corr": 0.06733981640197081,
+    "daily_rank_ic_mean": 0.08138418742477342
+  },
+  "realized_test_metrics": {
+    "pearson_corr": 0.013014160449634058,
+    "spearman_corr": 0.038196387000500785,
+    "daily_rank_ic_mean": 0.0816866062657202
+  },
+  "overfit_diagnostics": {
+    "risk_score": 0.0,
+    "risk_level": "low",
+    "flags": [],
+    "valid_daily_rank_ic_mean": 0.081384,
+    "test_daily_rank_ic_mean": NaN,
+    "valid_test_ic_gap": NaN,
+    "valid_test_spearman_gap": -0.002704,
+    "test_vs_valid_ic_ratio": NaN,
+    "test_rank_ic_negative_share": 0.274336,
+    "test_window_consistency": 0.666667,
+    "valid_rank_ic_days": 789,
+    "test_rank_ic_days": 791
+  },
+  "time_alignment": {
+    "base_label_col": "future_ret_5",
+    "effective_label_col": "future_ret_5__entry_lag_1",
+    "label_horizon": 5,
+    "execution_lag_bars": 1,
+    "derived_execution_label": true,
+    "effective_label_non_null_ratio": 0.997563,
+    "split_embargo_days": 6
+  },
+  "resource_meta": {
+    "train_rows_before_sampling": 5013346,
+    "train_rows_after_sampling": 5013346,
+    "feature_count": 19,
+    "budget_action": "full_train",
+    "requested_model_family": "ridge_ranker",
+    "estimated_cost_units_before_sampling": 23.8133935,
+    "estimated_cost_units_after_sampling": 23.8133935,
+    "requested_family": "ridge_ranker",
+    "gpu_used": false,
+    "backend": "stable_ridge",
+    "linear_original_feature_count": 19,
+    "linear_selected_feature_count": 18,
+    "linear_dropped_constant_count": 0,
+    "linear_dropped_correlated_count": 1,
+    "linear_dropped_constant_features": [],
+    "linear_dropped_correlated_features": [
+      "ret_1"
+    ],
+    "feature_market_policy": "exclude_from_stock_ranker",
+    "market_beta_features_excluded": 5,
+    "excluded_market_beta_feature_names": [
+      "hs300_close",
+      "hs300_ret_5",
+      "hs300_ret_10",
+      "hs300_ret_20",
+      "hs300_ret_60"
+    ],
+    "feature_liquidity_policy": "exclude_from_stock_ranker",
+    "liquidity_features_excluded": 7,
+    "excluded_liquidity_feature_names": [
+      "amount",
+      "turnover_rate",
+      "amount_mean_5",
+      "amount_mean_20",
+      "amount_z_20",
+      "turnover_mean_5",
+      "turnover_mean_20"
+    ],
+    "effective_model_family": "ridge_ranker",
+    "effective_label_col": "future_ret_5__entry_lag_1__cs_rank",
+    "realized_return_label_col": "future_ret_5__entry_lag_1",
+    "selected_feature_count": 19,
+    "latest_date": "2026-05-29 00:00:00",
+    "label_horizon": 5,
+    "execution_lag_bars": 1
+  }
+}

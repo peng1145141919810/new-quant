@@ -1,0 +1,922 @@
+[
+  {
+    "ok": false,
+    "symbol": "688496.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "688496.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.719772,
+      "alpha_activation_priority": 0.557398,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601186.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601186.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.675712,
+      "alpha_activation_priority": 0.524396,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "600030.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "600030.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "revision",
+      "selection_score": 0.63402,
+      "alpha_activation_priority": 0.488754,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "301139.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "301139.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.5547,
+      "alpha_activation_priority": 0.48054,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601065.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601065.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.654916,
+      "alpha_activation_priority": 0.47634,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "600998.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "600998.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.591191,
+      "alpha_activation_priority": 0.460001,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601766.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601766.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.548038,
+      "alpha_activation_priority": 0.458021,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "002120.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "002120.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.612638,
+      "alpha_activation_priority": 0.452496,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "000720.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "000720.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.61606,
+      "alpha_activation_priority": 0.450346,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "000001.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "000001.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.595168,
+      "alpha_activation_priority": 0.44907,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "300594.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "300594.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.569919,
+      "alpha_activation_priority": 0.43804,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "600905.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "600905.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "revision",
+      "selection_score": 0.535375,
+      "alpha_activation_priority": 0.437547,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "603359.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "603359.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.572254,
+      "alpha_activation_priority": 0.436101,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601108.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601108.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.559044,
+      "alpha_activation_priority": 0.424095,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "600004.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "600004.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.556465,
+      "alpha_activation_priority": 0.422349,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "002074.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "002074.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.492466,
+      "alpha_activation_priority": 0.417398,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601139.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601139.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "revision",
+      "selection_score": 0.382341,
+      "alpha_activation_priority": 0.417265,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "600233.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "600233.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.58411,
+      "alpha_activation_priority": 0.415074,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601857.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601857.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.494417,
+      "alpha_activation_priority": 0.409433,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601800.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601800.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.398144,
+      "alpha_activation_priority": 0.389683,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601211.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601211.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.42871,
+      "alpha_activation_priority": 0.386668,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "000030.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "000030.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.393782,
+      "alpha_activation_priority": 0.384681,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "000544.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "000544.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.386895,
+      "alpha_activation_priority": 0.380346,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601688.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601688.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.387239,
+      "alpha_activation_priority": 0.371249,
+      "candidate_tier": "B"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601128.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601128.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.53069,
+      "alpha_activation_priority": 0.370352,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "688472.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "688472.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.380398,
+      "alpha_activation_priority": 0.366279,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "002252.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "002252.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.38592,
+      "alpha_activation_priority": 0.365322,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "600448.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "600448.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.388629,
+      "alpha_activation_priority": 0.363031,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601686.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601686.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.369218,
+      "alpha_activation_priority": 0.362552,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "000776.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "000776.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.384502,
+      "alpha_activation_priority": 0.361185,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601788.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601788.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.506684,
+      "alpha_activation_priority": 0.359641,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601601.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601601.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.490868,
+      "alpha_activation_priority": 0.355543,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "002634.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "002634.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.367074,
+      "alpha_activation_priority": 0.350795,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "300912.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "300912.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.495831,
+      "alpha_activation_priority": 0.350497,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "601158.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "601158.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.498533,
+      "alpha_activation_priority": 0.348294,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "301223.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "301223.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.357821,
+      "alpha_activation_priority": 0.346577,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "002958.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "002958.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.367711,
+      "alpha_activation_priority": 0.344179,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "002156.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "002156.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.361956,
+      "alpha_activation_priority": 0.341485,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "600017.SH",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "600017.SH",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.369554,
+      "alpha_activation_priority": 0.341326,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  },
+  {
+    "ok": false,
+    "symbol": "000650.SZ",
+    "evidence_grade": "D",
+    "verdict": "watch_only",
+    "positive_claims": [],
+    "negative_claims": [],
+    "uncertainty_flags": [
+      "no_sources_found"
+    ],
+    "source_ids": [],
+    "review_summary": "no_sources_found",
+    "candidate": {
+      "symbol": "000650.SZ",
+      "name": "",
+      "industry": "",
+      "activation_alpha_family": "valuation",
+      "selection_score": 0.349935,
+      "alpha_activation_priority": 0.335484,
+      "candidate_tier": "F"
+    },
+    "source_count": 0
+  }
+]

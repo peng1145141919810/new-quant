@@ -19,11 +19,19 @@ def safe_corr(a: pd.Series, b: pd.Series, method: str = 'pearson') -> float:
 
     Returns:
         float
+
+    Notes:
+        当其中一列方差为 0（例如截面 rank label 的某天 pred 完全相同），
+        pandas.Series.corr 会返回 NaN。`x or 0.0` 在 Python 里对 NaN 不起作用
+        （NaN 是 truthy），所以必须显式判 NaN。
     """
     df = pd.concat([a, b], axis=1).dropna()
     if len(df) < 3:
         return 0.0
-    return float(df.iloc[:, 0].corr(df.iloc[:, 1], method=method) or 0.0)
+    val = df.iloc[:, 0].corr(df.iloc[:, 1], method=method)
+    if val is None or not np.isfinite(val):
+        return 0.0
+    return float(val)
 
 
 def daily_rank_ic_mean(df: pd.DataFrame, date_col: str, pred_col: str, label_col: str) -> float:
@@ -45,7 +53,9 @@ def daily_rank_ic_mean(df: pd.DataFrame, date_col: str, pred_col: str, label_col
         if len(g) < 5:
             continue
         ic = safe_corr(g[pred_col], g[label_col], method='spearman')
-        vals.append(ic)
+        # safe_corr 已保证不会返回 NaN/inf，但保险起见再过一遍
+        if ic is not None and np.isfinite(ic):
+            vals.append(float(ic))
     return float(np.mean(vals)) if vals else 0.0
 
 

@@ -1,0 +1,56 @@
+{
+  "version": "global_objective_v1",
+  "stage": "portfolio_recommendation",
+  "constitution": {
+    "minimum_evidence_score": 0.35,
+    "maximum_harvest_risk": 0.85,
+    "maximum_family_concentration": 0.6,
+    "minimum_execution_score": 0.3,
+    "minimum_candidate_count": 3,
+    "maximum_guardrail_penalty": 0.78,
+    "minimum_incremental_value_score": 0.28
+  },
+  "policy": {
+    "outcome_weight": 0.22,
+    "evidence_weight": 0.24,
+    "diversity_weight": 0.18,
+    "execution_weight": 0.18,
+    "adversarial_weight": 0.18,
+    "guardrail_weight": 0.12,
+    "exploration_budget": 0.15,
+    "max_cycles": 3
+  },
+  "scores": {
+    "outcome": 0.7607005095854427,
+    "evidence": 0.2475,
+    "diversity": 0.39272727272727276,
+    "execution": 0.40599999999999997,
+    "adversarial": 0.5269999999999999,
+    "guardrail": 0.5739318592234772,
+    "overall": 0.5342568443065236
+  },
+  "signals": {
+    "candidate_count": 17,
+    "fact_backed_ratio": 0.0,
+    "accepted_thesis_ratio": 0.0,
+    "fallback_ratio": 0.0,
+    "family_concentration_penalty": 0.5454545454545454,
+    "technical_allow_ratio": 0.0,
+    "execution_risk_level": "",
+    "market_regime": "neutral",
+    "style_bias": "defensive",
+    "account_nav": 0.0,
+    "guardrail_penalty": 0.4260681407765228,
+    "incremental_value_score": 0.32
+  },
+  "hard_flags": [
+    "evidence_below_floor"
+  ],
+  "policy_posture": "balanced",
+  "recommended_budget": {
+    "exploration_budget": 0.15,
+    "max_cycles": 3,
+    "early_stop": false,
+    "shadow_only": false
+  }
+}

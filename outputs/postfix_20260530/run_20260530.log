@@ -1,0 +1,25 @@
+[2026-05-30 00:38:28] Supervisor: [1/8] 研究前数据刷新 开始。
+[2026-05-30 00:44:08] MarketPipeline: HS300 index sync done, updated_rows=0
+[2026-05-30 00:44:09] MarketPipeline: enriched sync done, updated_files=0 updated_rows=0 missing_trade_dates=0
+[2026-05-30 00:44:46] MarketPipeline: price snapshot done, trade_date=20260529 rows=5506
+[2026-05-30 00:44:46] MarketPipeline: train append done, appended_rows=0
+[2026-05-30 00:44:59] Supervisor: [1/8] 研究前数据刷新 完成。 warnings=0 fail_open=none
+[2026-05-30 00:44:59] Supervisor: [2/8] 市场数据流水线 开始。
+[2026-05-30 00:44:59] Supervisor: [2/8] 市场数据流水线 完成。 {"enabled": true, "started_at": "2026-05-30 00:44:08", "hs300_sync": {"updated_rows": 0, "updated_sql_rows": 3981}, "enriched_sync": {"updated_files": 0, "updated_rows": 0, "missing_trade_dates": []}, "price_snapshot": {"path": "H:\\Ashare\
+[2026-05-30 00:44:59] Supervisor: [3/8] 策略信号刷新 开始。
+[2026-05-30 00:44:59] Supervisor: [3/8] 策略信号刷新 完成。 regime=neutral
+[2026-05-30 00:44:59] Supervisor: [4/8] 中枢研究预算决策 开始。
+[2026-05-30 00:45:00] Market State: 完成 date=20260529 regime=neutral risk_budget=0.90 turnover=0.88
+[2026-05-30 00:45:00] Supervisor: [4/8] 中枢研究预算决策 完成。 max_cycles=1 budget=12
+[2026-05-30 00:45:00] Supervisor: [5/8] V6 研究计划 跳过。 沿用 24 小时内最近一次研究计划
+[2026-05-30 00:45:37] Supervisor Note: 当前在运行 V5.1 GPU 研究阶段，需关注 controller_state.json 是否成功推进至新周期。 watch=data/research_hub/controller_state.json, data/research_hub/registry/experiment_registry.csv
+[2026-05-30 00:45:37] Supervisor: [6/8] V5.1 GPU 研究 开始。
+[2026-05-30 00:45:37] Supervisor: V5.1 研究进程已启动，输出根=H:\Ashare\data\research_hub_integrated，可观察 controller_state.json / registry/experiment_registry.csv / cycles/*/cycle_summary.json
+[2026-05-30 01:11:22] Supervisor: V5 本地复盘已生成 cycle_id=cycle_001_20260530_004538 model=deepseek-r1:14b
+[2026-05-30 01:11:22] Supervisor: [6/8] V5.1 GPU 研究 完成。 hub_output_root=H:\Ashare\data\research_hub_integrated review=ok cycle_id=cycle_001_20260530_004538
+[2026-05-30 01:11:57] Supervisor Note: 当前正在生成持仓建议，请关注portfolio_recommendation.json和target_positions.csv文件的更新情况。注意检查组合文件是否已刷新，若未刷新请参考V5版本的cycle_summary.json。 watch=data/portfolio_recommendation_v6/portfolio_recommendation.json, data/portfolio_recommendation_v6/target_positions.csv
+[2026-05-30 01:11:57] Supervisor: [7/8] 持仓建议生成 开始。
+[2026-05-30 01:12:05] Supervisor: [7/8] 持仓建议生成 完成。 run_id=20260530_005618_7b8928c0 n_names=17 regime=neutral tech_allow=0
+[2026-05-30 01:12:05] Supervisor: [8/8] small-pool evidence audit 开始。
+[2026-05-30 01:49:44] Supervisor: portfolio release 发布失败：组合建议未通过研究/模拟门禁，拒绝发布 release: 暂无 champion
+[2026-05-30 01:49:44] Supervisor: [8/8] small-pool evidence audit 完成。 audited=40 sources=0 rebuild=true

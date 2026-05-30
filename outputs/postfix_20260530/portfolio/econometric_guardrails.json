@@ -1,0 +1,18 @@
+{
+  "version": "econometric_guardrails_v1",
+  "stability_flag": "stable",
+  "stability_score": 0.6949096574465946,
+  "sample_fragility_score": 0.45538299962123396,
+  "regime_dependency_score": 0.46195454545454545,
+  "spurious_correlation_risk": 0.35,
+  "incremental_value_score": 0.32,
+  "guardrail_penalty": 0.4260681407765228,
+  "signals": {
+    "candidate_count": 17,
+    "fact_backed_ratio": 0.0,
+    "accepted_thesis_ratio": 0.0,
+    "fallback_ratio": 0.0,
+    "dominant_family_share": 0.75,
+    "family_count": 3
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "annualized_ret": 0.08570054654891579,
+  "sharpe": 0.6378586503429423,
+  "max_drawdown": -0.14067024933715944,
+  "n_rebalance": 159,
+  "curve_path": "H:\\Ashare\\data\\research_hub_integrated\\runs\\20260530_005618_7b8928c0\\portfolio_backtest_curve.csv",
+  "holdings_path": "H:\\Ashare\\data\\research_hub_integrated\\runs\\20260530_005618_7b8928c0\\portfolio_backtest_holdings.csv",
+  "execution_model": "next_bar_close_cost_aware_limit_aware_exit",
+  "backtest_costs": {
+    "buy_fee_rate": 0.0003,
+    "sell_fee_rate": 0.0003,
+    "sell_tax_rate": 0.001,
+    "base_slippage_bp": 8.0,
+    "queue_risk_trigger_pct": 7.0,
+    "queue_risk_bp": 12.0
+  }
+}

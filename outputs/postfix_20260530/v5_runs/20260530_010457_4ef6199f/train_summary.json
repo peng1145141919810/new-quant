@@ -1,0 +1,140 @@
+{
+  "strategy_name": "autonomous_research_brain_v5_1__training__c001_009_4ef6199f",
+  "label_col": "future_ret_5",
+  "effective_label_col": "future_ret_5__entry_lag_1__cs_rank",
+  "training_label_col": "future_ret_5__entry_lag_1__cs_rank",
+  "realized_return_label_col": "future_ret_5__entry_lag_1",
+  "alpha_label_meta": {
+    "label_mode": "cross_section_rank",
+    "requested_label_mode": "cross_section_rank",
+    "realized_label_col": "future_ret_5__entry_lag_1",
+    "training_label_col": "future_ret_5__entry_lag_1__cs_rank",
+    "training_label_derived": true,
+    "training_label_non_null_ratio": 1.0
+  },
+  "model_family": "ridge_ranker",
+  "effective_model_family": "ridge_ranker",
+  "feature_profile": "generated_feature_pack",
+  "training_logic": "generated_training",
+  "n_features": 34,
+  "feature_policy_meta": {
+    "feature_market_policy": "exclude_from_stock_ranker",
+    "market_beta_features_excluded": 5,
+    "excluded_market_beta_feature_names": [
+      "hs300_close",
+      "hs300_ret_5",
+      "hs300_ret_10",
+      "hs300_ret_20",
+      "hs300_ret_60"
+    ],
+    "feature_liquidity_policy": "exclude_from_stock_ranker",
+    "liquidity_features_excluded": 7,
+    "excluded_liquidity_feature_names": [
+      "amount",
+      "turnover_rate",
+      "amount_mean_5",
+      "amount_mean_20",
+      "amount_z_20",
+      "turnover_mean_5",
+      "turnover_mean_20"
+    ]
+  },
+  "valid_metrics": {
+    "pearson_corr": 0.07907181835815444,
+    "spearman_corr": 0.07326821269044793,
+    "daily_rank_ic_mean": 0.07810173985944545
+  },
+  "test_metrics": {
+    "pearson_corr": 0.07934459165726027,
+    "spearman_corr": 0.07691123852085904,
+    "daily_rank_ic_mean": NaN
+  },
+  "realized_valid_metrics": {
+    "pearson_corr": 0.03843140070913829,
+    "spearman_corr": 0.06186148620626192,
+    "daily_rank_ic_mean": 0.07810173985944545
+  },
+  "realized_test_metrics": {
+    "pearson_corr": 0.016092181949402488,
+    "spearman_corr": 0.03731919518970372,
+    "daily_rank_ic_mean": 0.08100625159370092
+  },
+  "overfit_diagnostics": {
+    "risk_score": 0.0,
+    "risk_level": "low",
+    "flags": [],
+    "valid_daily_rank_ic_mean": 0.078102,
+    "test_daily_rank_ic_mean": NaN,
+    "valid_test_ic_gap": NaN,
+    "valid_test_spearman_gap": -0.003643,
+    "test_vs_valid_ic_ratio": NaN,
+    "test_rank_ic_negative_share": 0.268015,
+    "test_window_consistency": 0.666667,
+    "valid_rank_ic_days": 789,
+    "test_rank_ic_days": 791
+  },
+  "time_alignment": {
+    "base_label_col": "future_ret_5",
+    "effective_label_col": "future_ret_5__entry_lag_1",
+    "label_horizon": 5,
+    "execution_lag_bars": 1,
+    "derived_execution_label": true,
+    "effective_label_non_null_ratio": 0.997563,
+    "split_embargo_days": 6
+  },
+  "resource_meta": {
+    "train_rows_before_sampling": 5013346,
+    "train_rows_after_sampling": 5013346,
+    "feature_count": 34,
+    "budget_action": "full_train",
+    "requested_model_family": "ridge_ranker",
+    "estimated_cost_units_before_sampling": 42.613441,
+    "estimated_cost_units_after_sampling": 42.613441,
+    "requested_family": "ridge_ranker",
+    "gpu_used": false,
+    "backend": "stable_ridge",
+    "linear_original_feature_count": 34,
+    "linear_selected_feature_count": 26,
+    "linear_dropped_constant_count": 7,
+    "linear_dropped_correlated_count": 1,
+    "linear_dropped_constant_features": [
+      "feat_volume_trend",
+      "feat_volume_shock",
+      "feat_price_range",
+      "inter_momentum_volume",
+      "feat_turnover_std",
+      "feat_volume_weighted_price",
+      "feat_price_volume_corr"
+    ],
+    "linear_dropped_correlated_features": [
+      "ret_1"
+    ],
+    "feature_market_policy": "exclude_from_stock_ranker",
+    "market_beta_features_excluded": 5,
+    "excluded_market_beta_feature_names": [
+      "hs300_close",
+      "hs300_ret_5",
+      "hs300_ret_10",
+      "hs300_ret_20",
+      "hs300_ret_60"
+    ],
+    "feature_liquidity_policy": "exclude_from_stock_ranker",
+    "liquidity_features_excluded": 7,
+    "excluded_liquidity_feature_names": [
+      "amount",
+      "turnover_rate",
+      "amount_mean_5",
+      "amount_mean_20",
+      "amount_z_20",
+      "turnover_mean_5",
+      "turnover_mean_20"
+    ],
+    "effective_model_family": "ridge_ranker",
+    "effective_label_col": "future_ret_5__entry_lag_1__cs_rank",
+    "realized_return_label_col": "future_ret_5__entry_lag_1",
+    "selected_feature_count": 34,
+    "latest_date": "2026-05-29 00:00:00",
+    "label_horizon": 5,
+    "execution_lag_bars": 1
+  }
+}
