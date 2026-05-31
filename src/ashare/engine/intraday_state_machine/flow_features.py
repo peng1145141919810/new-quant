@@ -40,14 +40,14 @@ def _paths(config: Dict[str, Any]) -> Dict[str, Path]:
     local_data_root = repo_root / "data"
     external_data_root = Path(r"F:\quant_data\Ashare\data")
     live_root = Path(str(config.get("paths", {}).get("live_execution_root", local_data_root / "live_execution_bridge") or "")).resolve()
-    technical_root = Path(str(config.get("paths", {}).get("technical_confirmation_root", local_data_root / "event_lake_v6" / "research" / "technical_confirmation") or "")).resolve()
+    technical_root = Path(str(config.get("paths", {}).get("technical_confirmation_root", local_data_root / "event_lake" / "research" / "technical_confirmation") or "")).resolve()
     return {
         "live_snapshot": live_root / "daily_price_snapshot.csv",
         "live_snapshot_fallback": local_data_root / "live_execution_bridge" / "daily_price_snapshot.csv",
         "live_snapshot_external": external_data_root / "live_execution_bridge" / "daily_price_snapshot.csv",
         "intraday_proxy_root": local_data_root / "trade_clock" / "intraday_proxy" / "latest",
         "technical_latest": technical_root / "latest_technical_confirmation.csv",
-        "technical_latest_external": external_data_root / "event_lake_v6" / "research" / "technical_confirmation" / "latest_technical_confirmation.csv",
+        "technical_latest_external": external_data_root / "event_lake" / "research" / "technical_confirmation" / "latest_technical_confirmation.csv",
         "affordable_root": local_data_root / "affordable_feeds" / "latest",
     }
 

@@ -315,7 +315,7 @@ def run_evidence_audit(config: Dict[str, Any], *, candidate_pool_path: Path | No
     if not bool(cfg.get("enabled", True)):
         return {"enabled": False, "ok": True, "ran": False, "message": "disabled"}
     paths = dict(config.get("paths", {}) or {})
-    out_root = ensure_dir(Path(_text(cfg.get("artifact_root")) or Path(paths.get("portfolio_output_root", "data/portfolio_recommendation_v6")) / "evidence_audit_v1").resolve())
+    out_root = ensure_dir(Path(_text(cfg.get("artifact_root")) or Path(paths.get("portfolio_output_root", "data/portfolio_recommendation")) / "evidence_audit_v1").resolve())
 
     # 缓存命中：如果最近一次 audit 还在新鲜窗口内，直接复用，省 30-40 分钟的网搜+LLM。
     # 默认窗口 12 小时——一天内多次迭代研究时，audit 结果不需要每次都重跑。
@@ -337,7 +337,7 @@ def run_evidence_audit(config: Dict[str, Any], *, candidate_pool_path: Path | No
             except Exception:
                 pass  # cache corrupt, fall through to fresh run
 
-    pool_path = Path(candidate_pool_path or _text(cfg.get("candidate_pool_path")) or Path(paths.get("portfolio_output_root", "data/portfolio_recommendation_v6")) / "candidate_pool.csv").resolve()
+    pool_path = Path(candidate_pool_path or _text(cfg.get("candidate_pool_path")) or Path(paths.get("portfolio_output_root", "data/portfolio_recommendation")) / "candidate_pool.csv").resolve()
     max_candidates = int(limit or cfg.get("max_candidates", 40) or 40)
     max_results_per_query = int(cfg.get("max_results_per_query", 3) or 3)
     max_sources_per_symbol = int(cfg.get("max_sources_per_symbol", 8) or 8)
@@ -424,7 +424,7 @@ def load_latest_evidence_reviews(config: Dict[str, Any]) -> Dict[str, Dict[str, 
     if not bool(cfg.get("enabled", True)):
         return {}
     paths = dict(config.get("paths", {}) or {})
-    root = Path(_text(cfg.get("artifact_root")) or Path(paths.get("portfolio_output_root", "data/portfolio_recommendation_v6")) / "evidence_audit_v1").resolve()
+    root = Path(_text(cfg.get("artifact_root")) or Path(paths.get("portfolio_output_root", "data/portfolio_recommendation")) / "evidence_audit_v1").resolve()
     path = root / "latest" / "evidence_audit_reviews.json"
     if not path.exists():
         return {}

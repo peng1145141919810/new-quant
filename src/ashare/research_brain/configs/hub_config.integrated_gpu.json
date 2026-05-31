@@ -1,7 +1,7 @@
 {
   "project_name": "quant_research_hub_v5_1_xgb_lock",
   "project_root": "H:\\Ashare\\src\\ashare\\research_brain",
-  "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table_v1",
+  "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table",
   "hub_output_root": "H:\\Ashare\\data\\research_hub_integrated",
   "execution": {
     "python_executable": "H:\\Ashare\\.venv313\\Scripts\\python.exe",
@@ -214,6 +214,6 @@
   },
   "bridge_inputs": {
     "enabled": true,
-    "bridge_root": "H:\\Ashare\\data\\event_lake_v6\\bridge"
+    "bridge_root": "H:\\Ashare\\data\\event_lake\\bridge"
   }
 }

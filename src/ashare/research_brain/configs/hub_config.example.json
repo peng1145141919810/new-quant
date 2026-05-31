@@ -1,7 +1,7 @@
 {
   "project_name": "quant_research_hub_v5_1_xgb_lock",
   "project_root": "YOUR_PROJECT_ROOT/quant_research_hub_v5_1",
-  "train_table_dir": "YOUR_DATA_ROOT/train_table_v1",
+  "train_table_dir": "YOUR_DATA_ROOT/train_table",
   "hub_output_root": "YOUR_OUTPUT_ROOT/research_hub_v5_1",
   "execution": {
     "python_executable": "YOUR_PYTHON_EXE",

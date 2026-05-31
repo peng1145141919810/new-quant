@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""从根上重建训练表 train_table_v2。
+"""从根上重建训练表 train_table。
 
 为什么有这个脚本：
-  旧的 train_table_v1 是从 F 盘一批"很久以前一次性灌库"的 per-stock enriched CSV
+  旧的训练表（已归档到 data/_archive/train_table_v1）是从 F 盘一批"很久以前一次性灌库"的 per-stock enriched CSV
   建出来的，那次灌库静默漏掉了约 37% 股票的 daily_basic（市值/换手/估值），
   整段历史为空，且从没有覆盖率校验发现它。结果模型把"数据残缺的那批票"当成了
   伪 alpha。
@@ -19,15 +19,15 @@
       phase A (pull)  : 逐交易日拉原始面板，落 staging/raw/<YYYY>/<YYYYMMDD>.parquet，
                         已存在则跳过 → 中断后重跑自动续。
       phase B (build) : 读 staging，逐股 qfq + 算特征/标签，并入 hs300、派生 flags，
-                        写 train_table_v2 的 parquet 分片。
+                        写 train_table 的 parquet 分片。
   - 结束做覆盖率自检：任何关键列覆盖率或 per-stock 覆盖率低于阈值 → 直接报错退出，
     把当年"漏了不报警"的洞从根上堵死。
 
 用法：
-  python scripts/build_train_table_v2.py pull   --start 2005-01-01 --end today
-  python scripts/build_train_table_v2.py build
-  python scripts/build_train_table_v2.py check
-  python scripts/build_train_table_v2.py all    --start 2005-01-01 --end today
+  python scripts/build_train_table.py pull   --start 2005-01-01 --end today
+  python scripts/build_train_table.py build
+  python scripts/build_train_table.py check
+  python scripts/build_train_table.py all    --start 2005-01-01 --end today
 """
 
 from __future__ import annotations
@@ -52,7 +52,7 @@ except Exception as exc:  # pragma: no cover
 
 # ----------------------------- 路径与常量 -----------------------------
 
-OUT_ROOT = Path(r"H:\Ashare\data\ml_datasets\train_table_v2")
+OUT_ROOT = Path(r"H:\Ashare\data\ml_datasets\train_table")
 STAGING = OUT_ROOT / "staging"
 RAW_DIR = STAGING / "raw"
 META_DIR = OUT_ROOT / "_meta"
@@ -466,7 +466,7 @@ def phase_check() -> int:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="重建 train_table_v2（根因修复版）")
+    ap = argparse.ArgumentParser(description="重建 train_table（根因修复版）")
     ap.add_argument("phase", choices=["pull", "build", "check", "all"])
     ap.add_argument("--start", default="2005-01-01")
     ap.add_argument("--end", default="today")

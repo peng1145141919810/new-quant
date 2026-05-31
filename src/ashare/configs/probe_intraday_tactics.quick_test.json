@@ -1,7 +1,7 @@
 {
   "project_name": "quant_research_engine_lean_portfolio_integrated",
   "project_root": "H:\\Ashare\\src\\ashare",
-  "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table_v1",
+  "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table",
   "hub_output_root": "H:\\Ashare\\data\\ml_runs\\research_engine",
   "execution": {
     "python_executable": "C:\\Users\\Administrator\\PyCharmMiscProject\\.venv\\Scripts\\python.exe",
@@ -9,28 +9,28 @@
     "max_cycles": 1
   },
   "paths": {
-    "raw_event_root": "H:\\Ashare\\data\\event_lake_v6\\raw",
-    "event_store_root": "H:\\Ashare\\data\\event_lake_v6\\curated",
-    "inventory_root": "H:\\Ashare\\data\\event_lake_v6\\inventory",
-    "research_root": "H:\\Ashare\\data\\event_lake_v6\\research",
-    "bridge_root": "H:\\Ashare\\data\\event_lake_v6\\bridge",
-    "market_state_root": "H:\\Ashare\\data\\market_state_v6",
-    "daily_cache_root": "H:\\Ashare\\data\\daily_cache_v6",
-    "log_root": "H:\\Ashare\\data\\event_lake_v6\\logs",
-    "portfolio_output_root": "H:\\Ashare\\data\\portfolio_recommendation_v6",
+    "raw_event_root": "H:\\Ashare\\data\\event_lake\\raw",
+    "event_store_root": "H:\\Ashare\\data\\event_lake\\curated",
+    "inventory_root": "H:\\Ashare\\data\\event_lake\\inventory",
+    "research_root": "H:\\Ashare\\data\\event_lake\\research",
+    "bridge_root": "H:\\Ashare\\data\\event_lake\\bridge",
+    "market_state_root": "H:\\Ashare\\data\\market_state",
+    "daily_cache_root": "H:\\Ashare\\data\\daily_cache",
+    "log_root": "H:\\Ashare\\data\\event_lake\\logs",
+    "portfolio_output_root": "H:\\Ashare\\data\\portfolio_recommendation",
     "live_execution_root": "H:\\Ashare\\data\\live_execution_bridge",
     "live_price_snapshot_path": "H:\\Ashare\\data\\live_execution_bridge\\daily_price_snapshot.csv",
-    "trade_release_root": "H:\\Ashare\\data\\trade_release_v1",
+    "trade_release_root": "H:\\Ashare\\data\\trade_release",
     "trade_clock_root": "H:\\Ashare\\data\\trade_clock",
     "automation_runs_root": "H:\\Ashare\\outputs\\automation_runs",
-    "trading_calendar_cache_path": "H:\\Ashare\\data\\market_state_v6\\trading_calendar_a_share.csv",
-    "industry_router_output_root": "H:\\Ashare\\data\\event_lake_v6\\research\\industry_router",
-    "technical_confirmation_root": "H:\\Ashare\\data\\event_lake_v6\\research\\technical_confirmation",
+    "trading_calendar_cache_path": "H:\\Ashare\\data\\market_state\\trading_calendar_a_share.csv",
+    "industry_router_output_root": "H:\\Ashare\\data\\event_lake\\research\\industry_router",
+    "technical_confirmation_root": "H:\\Ashare\\data\\event_lake\\research\\technical_confirmation",
     "oms_output_root": "H:\\Ashare\\data\\live_execution_bridge\\oms_v1",
     "affordable_sqlite_path": "H:\\Ashare\\data\\sql_store\\affordable_data_v1.sqlite3",
     "research_fact_sqlite_path": "H:\\Ashare\\data\\sql_store\\research_fact_layers_v1.sqlite3",
     "affordable_snapshot_root": "H:\\Ashare\\data\\affordable_feeds\\latest",
-    "manual_event_proxy_path": "H:\\Ashare\\data\\event_lake_v6\\research\\manual_event_proxy\\manual_event_proxy.jsonl",
+    "manual_event_proxy_path": "H:\\Ashare\\data\\event_lake\\research\\manual_event_proxy\\manual_event_proxy.jsonl",
     "external_research_root": "H:\\Ashare\\data\\external_research_feeds\\latest"
   },
   "providers": {
@@ -196,13 +196,13 @@
   },
   "integrated_thesis": {
     "enabled": true,
-    "output_root": "H:\\Ashare\\data\\event_lake_v6\\research\\integrated_thesis",
+    "output_root": "H:\\Ashare\\data\\event_lake\\research\\integrated_thesis",
     "portfolio_budget_overlay": true
   },
   "industry_router": {
     "enabled": true,
     "contract_root": "H:\\Ashare\\src\\ashare\\configs\\industry_router",
-    "output_root": "H:\\Ashare\\data\\event_lake_v6\\research\\industry_router",
+    "output_root": "H:\\Ashare\\data\\event_lake\\research\\industry_router",
     "history_lookback_days": 14,
     "enable_context_pack": true,
     "enable_backtest": true,
@@ -245,8 +245,8 @@
   "research_brain": {
     "project_root": "H:\\Ashare\\src\\ashare\\research_brain",
     "hub_output_root": "H:\\Ashare\\data\\research_hub_integrated",
-    "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table_v1",
-    "bridge_input_root": "H:\\Ashare\\data\\event_lake_v6\\bridge",
+    "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table",
+    "bridge_input_root": "H:\\Ashare\\data\\event_lake\\bridge",
     "python_executable": "C:\\Users\\Administrator\\PyCharmMiscProject\\.venv\\Scripts\\python.exe"
   },
   "market_pipeline": {
@@ -549,7 +549,7 @@
     "admission_replacement_enabled": true,
     "soft_crowding_penalty_enabled": true,
     "rich_audit_enabled": true,
-    "output_root": "H:\\Ashare\\data\\portfolio_recommendation_v6\\portfolio",
+    "output_root": "H:\\Ashare\\data\\portfolio_recommendation\\portfolio",
     "pilot_max_weight": 0.04,
     "build_speed": 1.25,
     "trim_speed": 0.72,

@@ -41,7 +41,7 @@ def _event_store_path(config: Dict[str, Any]) -> Path | None:
     candidates: List[Path] = []
     if local_root_raw:
         candidates.append(Path(local_root_raw).resolve() / "event_store.jsonl")
-    candidates.append(Path(r"F:\quant_data\Ashare\data\event_lake_v6\curated\event_store.jsonl"))
+    candidates.append(Path(r"F:\quant_data\Ashare\data\event_lake\curated\event_store.jsonl"))
     for path in candidates:
         if path.exists():
             return path

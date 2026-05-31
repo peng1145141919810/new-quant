@@ -509,9 +509,9 @@ def build_manual_review_queue(config: Dict[str, Any], structured_events: List[Di
 _RUNTIME_STAGE_WATCH = {
     "v6_planning": {
         "watch_files": [
-            "data/event_lake_v6/research/context_pack/research_context_pack.json",
-            "data/event_lake_v6/research/briefs/research_brief_diagnostic.json",
-            "data/event_lake_v6/research/briefs/research_brief.json",
+            "data/event_lake/research/context_pack/research_context_pack.json",
+            "data/event_lake/research/briefs/research_brief_diagnostic.json",
+            "data/event_lake/research/briefs/research_brief.json",
         ],
         "risk_hint": "如果长时间无新日志，先看 research_brief_diagnostic.json 是否卡在上游模型调用。",
     },
@@ -525,8 +525,8 @@ _RUNTIME_STAGE_WATCH = {
     },
     "portfolio_recommendation": {
         "watch_files": [
-            "data/portfolio_recommendation_v6/portfolio_recommendation.json",
-            "data/portfolio_recommendation_v6/target_positions.csv",
+            "data/portfolio_recommendation/portfolio_recommendation.json",
+            "data/portfolio_recommendation/target_positions.csv",
         ],
         "risk_hint": "如果组合文件未刷新，先回看 V5 最新 cycle_summary.json。",
     },

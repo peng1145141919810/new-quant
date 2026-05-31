@@ -59,7 +59,7 @@ def build_runtime_config() -> Dict[str, Any]:
             "portfolio_output_root": LS.PORTFOLIO_OUTPUT_ROOT,
             "live_execution_root": LS.LIVE_EXECUTION_ROOT,
             "live_price_snapshot_path": str(getattr(LS, "LIVE_PRICE_SNAPSHOT_PATH", Path(LS.LIVE_EXECUTION_ROOT) / "daily_price_snapshot.csv")),
-            "trade_release_root": str(getattr(LS, "TRADE_RELEASE_ROOT", Path(LS.LIVE_EXECUTION_ROOT).parents[0] / "trade_release_v1")),
+            "trade_release_root": str(getattr(LS, "TRADE_RELEASE_ROOT", Path(LS.LIVE_EXECUTION_ROOT).parents[0] / "trade_release")),
             "trade_clock_root": str(getattr(LS, "TRADE_CLOCK_ROOT", Path(LS.LIVE_EXECUTION_ROOT).parents[0] / "trade_clock")),
             "automation_runs_root": str(getattr(LS, "AUTOMATION_RUNS_ROOT", Path(LS.PROJECT_ROOT).parents[1] / "outputs" / "automation_runs")),
             "trading_calendar_cache_path": str(getattr(LS, "TRADING_CALENDAR_CACHE_PATH", Path(LS.MARKET_STATE_ROOT) / "trading_calendar_a_share.csv")),
