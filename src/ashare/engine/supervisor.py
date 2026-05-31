@@ -272,10 +272,10 @@ def _apply_strategy_feedback(template: Dict[str, Any], feedback: Dict[str, Any])
         current = list(route_space.get('model_families', []) or [])
         route_space['model_families'] = [m for m in list(dict.fromkeys(preferred_models + current)) if m not in ban_models]
 
-def _build_v5_gpu_config(config: Dict[str, Any], project_root: Path, feedback: Dict[str, Any] | None = None) -> Path:
-    v5_root = project_root / 'research_brain'
-    local_template_path = v5_root / 'configs' / 'hub_config.v5_1.local.json'
-    example_template_path = v5_root / 'configs' / 'hub_config.v5_1.example.json'
+def _build_gpu_config(config: Dict[str, Any], project_root: Path, feedback: Dict[str, Any] | None = None) -> Path:
+    brain_root = project_root / 'research_brain'
+    local_template_path = brain_root / 'configs' / 'hub_config.local.json'
+    example_template_path = brain_root / 'configs' / 'hub_config.example.json'
     template_path = local_template_path if local_template_path.exists() else example_template_path
     template = json.loads(template_path.read_text(encoding='utf-8'))
     runtime_cfg = dict(config.get('research_brain', {}))
@@ -295,20 +295,20 @@ def _build_v5_gpu_config(config: Dict[str, Any], project_root: Path, feedback: D
     if feedback:
         _apply_strategy_feedback(template, feedback)
     effective_max_cycles = int(template.get('research_brain', {}).get('max_cycles', config.get('supervisor', {}).get('v5_gpu_max_cycles_per_tick', 8)) or 8)
-    out_path = v5_root / 'configs' / 'hub_config.v5_1.integrated_gpu.json'
+    out_path = brain_root / 'configs' / 'hub_config.integrated_gpu.json'
     out_path.write_text(json.dumps(template, ensure_ascii=False, indent=2), encoding='utf-8')
-    local_settings = v5_root / 'hub' / 'local_settings.py'
+    local_settings = brain_root / 'hub' / 'local_settings.py'
     local_settings.write_text(
-        "# -*- coding: utf-8 -*-\nCONFIG_PATH = r\"configs/hub_config.v5_1.integrated_gpu.json\"\nMODE = \"adaptive_research_brain\"\nDRY_RUN = False\nMAX_CYCLES = %d\nSLEEP_SECONDS = 0\n" % effective_max_cycles,
+        "# -*- coding: utf-8 -*-\nCONFIG_PATH = r\"configs/hub_config.integrated_gpu.json\"\nMODE = \"adaptive_research_brain\"\nDRY_RUN = False\nMAX_CYCLES = %d\nSLEEP_SECONDS = 0\n" % effective_max_cycles,
         encoding='utf-8'
     )
     return out_path
 
-def _run_v5_gpu(config: Dict[str, Any], project_root: Path, feedback: Dict[str, Any] | None = None) -> None:
-    v5_root = project_root / 'research_brain'
-    _build_v5_gpu_config(config, project_root, feedback=feedback)
+def _run_gpu(config: Dict[str, Any], project_root: Path, feedback: Dict[str, Any] | None = None) -> None:
+    brain_root = project_root / 'research_brain'
+    _build_gpu_config(config, project_root, feedback=feedback)
     pyexe = str(config.get('research_brain', {}).get('python_executable'))
-    script = v5_root / 'run_research_hub_v5_1_local.py'
+    script = brain_root / 'run_research_hub_local.py'
     env = os.environ.copy()
     # 强制 unbuffered stdout/stderr，避免 supervisor 用 `*> $log` 重定向时拿到 0 字节文件。
     env['PYTHONUNBUFFERED'] = '1'
@@ -317,7 +317,7 @@ def _run_v5_gpu(config: Dict[str, Any], project_root: Path, feedback: Dict[str, 
         config,
         f"Supervisor: V5.1 研究进程已启动，输出根={output_root}，可观察 controller_state.json / registry/experiment_registry.csv / cycles/*/cycle_summary.json",
     )
-    subprocess.run([pyexe, str(script)], cwd=str(v5_root), check=True, env=env)
+    subprocess.run([pyexe, str(script)], cwd=str(brain_root), check=True, env=env)
 
 def _write_supervisor_state(config: Dict[str, Any], payload: Dict[str, Any]) -> None:
     root = ensure_dir(Path(str(config['paths']['research_root'])) / 'supervisor')
@@ -790,7 +790,7 @@ def run_integrated_supervisor(
             _stage_skip(config, state, 'v6_planning', v6_stage_label, v6_stage_order, stage_total, summary='沿用 24 小时内最近一次研究计划')
         _stage_start(config, state, 'v5_gpu', stage_label_map['v5_gpu'], stage_order_map['v5_gpu'], stage_total)
         try:
-            _run_v5_gpu(config, project_root, feedback=feedback)
+            _run_gpu(config, project_root, feedback=feedback)
             state['v5_gpu_completed'] = True
             review_summary = 'review=not_generated'
             try:

@@ -117,7 +117,7 @@
     "champion_max_drawdown_abs": 0.22,
     "retire_below_total_score": 10.0
   },
-  "_deployment_gate_calibration_note": "min_sharpe 从 1.0 下调到 0.4：砍掉 hs300_* 和 liquidity 特征后组合不再吃 market beta，backtest Sharpe 物理上不会再到 1.0。post-fix 实测最佳 lightgbm Sharpe 0.52。0.4 是 0.52 留 23% 安全边际。这个文件是 supervisor._build_v5_gpu_config 每次运行的源头模板，integrated_gpu.json 是它的运行时副本。",
+  "_deployment_gate_calibration_note": "min_sharpe 从 1.0 下调到 0.4：砍掉 hs300_* 和 liquidity 特征后组合不再吃 market beta，backtest Sharpe 物理上不会再到 1.0。post-fix 实测最佳 lightgbm Sharpe 0.52。0.4 是 0.52 留 23% 安全边际。这个文件是 supervisor._build_gpu_config 每次运行的源头模板，hub_config.integrated_gpu.json 是它的运行时副本。",
   "deployment_gate": {
     "min_total_score": 45.0,
     "min_sharpe": 0.4,

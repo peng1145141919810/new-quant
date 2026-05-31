@@ -62,7 +62,7 @@ def _heartbeat(logger: Any, title: str, interval_seconds: int = 30):
         hb.stop()
 
 
-def execute_single_experiment_v5(
+def execute_single_experiment(
     config: Dict[str, Any],
     dry_run: bool = False,
     logger: Any = None,
@@ -167,7 +167,7 @@ def execute_single_experiment_v5(
 
         # 释放大对象（pred_test_df 5000-100k 行 × 20 列；latest_portfolio_df 也几 MB），
         # 减少 Python 解释器关闭阶段的内存压力。lightgbm Booster 已在 train_and_predict
-        # 内部 scope 外，但仍可能被 cli_v5 端的 train_result 引用着 → 强制 gc。
+        # 内部 scope 外，但仍可能被 cli 端的 train_result 引用着 → 强制 gc。
         try:
             train_result.pop('pred_test_df', None)
             latest_portfolio.pop('latest_portfolio_df', None)

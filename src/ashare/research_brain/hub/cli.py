@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""V5 主控入口。"""
+"""研究中枢主控入口。"""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional
 def _try_load_valid_result(result_path: Path) -> Optional[Dict[str, Any]]:
     """如果 result.json 存在且 record.status 合法，返回 dict，否则返回 None。
 
-    Why: cli_v5 不能再用 subprocess returncode 判定成败。lightgbm_gpu 在 Python
+    Why: cli 不能再用 subprocess returncode 判定成败。lightgbm_gpu 在 Python
     解释器关闭阶段经常崩（exit 120 / 0xC0000005），但 artifacts 已经全部写完。
     这种"完成但脏退出"应被接受。
     """
@@ -55,7 +55,7 @@ def parse_args() -> argparse.Namespace:
     Returns:
         argparse.Namespace
     """
-    p = argparse.ArgumentParser(description='量化研究中枢 V5')
+    p = argparse.ArgumentParser(description='量化研究中枢')
     p.add_argument('--config', required=True)
     p.add_argument('--mode', default='adaptive_research_brain', choices=['validate_only', 'plan', 'batch', 'adaptive_research_brain'])
     p.add_argument('--dry-run', action='store_true')
@@ -206,7 +206,7 @@ def run_batch(config: Dict[str, Any], dry_run: bool, cycle_index: int) -> Dict[s
     plan = ctx['plan']
     results = []
     pyexe = str(config.get('execution', {}).get('python_executable', sys.executable) or sys.executable)
-    candidate_runner = Path(__file__).resolve().parent.parent / 'run_single_candidate_v5.py'
+    candidate_runner = Path(__file__).resolve().parent.parent / 'run_single_candidate.py'
     # 子进程环境强制 unbuffered，避免 supervisor 看到的 log 文件 0 字节。
     sub_env = os.environ.copy()
     sub_env['PYTHONUNBUFFERED'] = '1'
