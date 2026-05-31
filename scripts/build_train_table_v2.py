@@ -91,7 +91,7 @@ COVERAGE_MIN = {
     "total_mv": 0.98,
     "circ_mv": 0.98,
     "turnover_rate": 0.98,
-    "pe_ttm": 0.80,   # 亏损股 pe 为空属正常，阈值放低
+    "pe_ttm": 0.70,   # 亏损股 pe 天然为空（A股常态~26%），阈值按事实放低
     "pb": 0.95,
     "close": 0.999,
 }
