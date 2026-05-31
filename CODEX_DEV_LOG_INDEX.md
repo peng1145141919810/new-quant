@@ -12,6 +12,7 @@
 - Prior workspace `F:\quant_data\AshareC#`: historical reference only, read-only.
 
 ## Recent Entries
+- `CDL-20260531-049` — 全库 V5/V5.1/V6 版本后缀命名债务清零（代码符号/数据目录/持久化契约/文档四阶段）；附带修复 train_table_dir 指向破损 v1 表的隐性 bug。Author: Claude.
 - `CDL-20260529-048` — tightened `CLAUDE_CODEX_DIALOGUE.md` into an active-thread board with 25-message / ~25KB archive triggers and compact archive rules. Author: Codex.
 - `CDL-20260529-047` — V5.1 stock-ranker now defaults to cross-sectional alpha labels and excludes direct market-beta features from training while preserving raw realized returns for backtests. Author: Codex.
 - `CDL-20260529-046` — H: workspace bootstrap complete. Venvs installed on H, local_settings rewritten, F: paths batch-cleaned, git init, preflight green (28/28). Author: Claude.

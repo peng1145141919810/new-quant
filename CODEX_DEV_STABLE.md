@@ -14,10 +14,10 @@
 - Fail visibly: if refreshes or runtime gates are important to correctness, emit explicit stage/state artifacts that show whether they ran, failed open, or blocked downstream work.
 
 ## Latest Stable Snapshot
-- Snapshot time: `2026-05-29 23:00:27`
+- Snapshot time: `2026-05-31`
 - Workspace root: `H:\Ashare` (active)
 - Prior workspace root: `F:\quant_data\AshareC#` (historical reference, read-only)
-- Major change this snapshot: workspace forked + slimmed; C# skeleton / RPC bridge / site_portal / ashare_control / operator_chat_backend / deploy & publish scripts all dropped from active workspace. 124 GB of GPU training residue and all stale runtime state (trade_clock, trade_release_v1, live_execution_bridge, research_hub_integrated, portfolio_recommendation_v6, daily_cache_v6) excluded. See `CDL-20260529-045`.
+- Major change this snapshot: full version-suffix naming cleanup across code + data dirs + docs. All V5/V5.1/V6 suffix tokens removed from module names, config keys, supervisor-state keys, stage ids, data directories, and documentation. See `CDL-20260531-049`.
 - New governance doc: `CLAUDE_CODEX_DIALOGUE.md` (async Claude↔Codex note channel)
 - Dialogue maintenance policy: `CLAUDE_CODEX_DIALOGUE.md` is an active-thread board, not a second dev log. Archive closed threads to `CLAUDE_CODEX_DIALOGUE_ARCHIVE.md` when it exceeds 25 messages, about 25 KB, or when long entries already have a CDL record; see `CDL-20260529-048`.
 - Formal operator entry: `launch_canonical.py`
@@ -73,7 +73,7 @@
 3. Canonical run registration via `tools\register_run.py`
 4. Research Python resolved from `src\ashare\engine\local_settings.py`
 5. `main_research_runner.py`
-6. Runtime config generation into `src\ashare\configs\hub_config.v6.runtime.<profile>.json` and alias paths
+6. Runtime config generation into `src\ashare\configs\hub_config.runtime.<profile>.json`
 7. Control-plane snapshot write into `site_portal\control_plane_snapshot.json`
 8. Mode dispatch into `src\ashare\engine\...`
 
@@ -154,7 +154,7 @@
 - `evidence_audit` is the boundary for non-structured web / announcement evidence. It runs on a small hard-data-selected candidate pool, fetches source pages, requires source IDs, and emits A/B/C/D/F evidence grades; portfolio generation only reads the latest audit grades as a gate/weight modifier and does not perform live web crawling inside portfolio construction.
 - `evidence_audit_only` is now a first-class runtime mode in `main_research_runner.py` / `RUN_PROFILES.yaml`; `scripts\run_evidence_audit_once.py` is the lightweight manual wrapper. Integrated supervisor now defaults to running evidence audit after portfolio recommendation, rebuilding the portfolio after fresh audit grades, and blocking downstream execution if the audit stage fails (`EVIDENCE_AUDIT_RUN_AFTER_PORTFOLIO_RECOMMENDATION=True`, `EVIDENCE_AUDIT_REBUILD_PORTFOLIO_AFTER_AUDIT=True`, `EVIDENCE_AUDIT_BLOCK_EXECUTION_ON_FAILURE=True`).
 - Candidate-pool formation is now hard-data-first by default: `PORTFOLIO_HARD_DATA_CANDIDATE_POOL_ENABLED=True` and the default selection weights use only seed weight, model prediction score, valuation signal, and liquidity signal. Router/thesis/event facts are no longer default structural-pool inputs; they belong in evidence audit unless explicitly re-enabled.
-- V5.1 alpha-training knobs live under `strategy` in `src\ashare\research_brain\configs\hub_config.v5_1.*.json`: `alpha_label_mode` defaults to `cross_section_rank`, and `feature_market_policy` defaults to `exclude_from_stock_ranker`. Training metrics use the transformed alpha label, while portfolio backtests still use the realized raw-return label recorded as `realized_return_label_col`.
+- GPU 研究脑 alpha-training knobs live under `strategy` in `src\ashare\research_brain\configs\hub_config.*.json`: `alpha_label_mode` defaults to `cross_section_rank`, and `feature_market_policy` defaults to `exclude_from_stock_ranker`. Training metrics use the transformed alpha label, while portfolio backtests still use the realized raw-return label recorded as `realized_return_label_col`.
 - External source seed currently under top-level `configs`: `configs\external_sources\qianzhan_seed_urls.json`
 - Industry-router configs: `src\ashare\configs\industry_router\*`
 - Market-state config: `src\ashare\configs\market_state\default.json`
@@ -184,10 +184,10 @@
 - Intraday tactics latest orders: `data\trade_clock\intraday_tactics\latest\intraday_tactical_orders.json`
 
 ### Release, OMS, And Execution
-- Latest release family: `data\trade_release_v1`
+- Latest release family: `data\trade_release`
 - OMS ledgers root: `data\live_execution_bridge\oms_v1\ledgers`
 - OMS snapshots root: `data\live_execution_bridge\oms_v1\snapshots`
-- Research run root is still logically `data\research_hub_integrated\runs`, but on this machine it is now a junction to `D:\AshareHotData\research_hub_integrated\runs` so the hottest V5 write path lands on NVMe instead of the `F:` HDD.
+- Research run root: `data\research_hub_integrated\runs` (H: is NVMe; no junction needed).
 - `src\ashare\engine\oms\runtime.py` now emits explicit `ok` / `status` fields in `execution_report_*.json`, and `src\ashare\engine\execution_bridge_runner.py` infers the same success contract for older report-shaped JSON payloads that omitted those fields.
 - `src\ashare\engine\portfolio_release.py` now keeps `trade_date=today` as long as the current trading day still has at least one remaining execution window; it no longer flips to the next trading day immediately after the first morning window starts.
 - `src\ashare\engine\portfolio_release.py` now treats filesystem release JSON as the primary release truth and SQL runtime artifacts as fallback/cache, so manual or automated file-side revocation is not overridden by stale SQL mirror rows.
@@ -310,7 +310,7 @@
 - Do not re-enable full `pred_test.csv` emission unless you are doing bounded debugging; the old default was a major HDD / storage-stack pressure source during the crash investigation.
 - Do not reintroduce full nested scheduler decisions or full bridge feedback payloads into active feedback artifacts. Scheduler / bridge feedback JSON inputs are intentionally capped at `5 MB`; large historical runtime artifacts should be treated as tombstoned audit remnants, not active inputs.
 - Do not publish or execute a portfolio when the latest V5 cycle deployment gate says there is no champion. `portfolio_recommendation.py` now lowers `simulation_ready`, `portfolio_release.py` refuses the release by default, and `execution_manager.py` blocks non-published release statuses.
-- Treat `data\trade_release_v1\latest_release.json` and the referenced release manifest files as the active release truth. SQL runtime artifact rows are fallback/cache, not authority for revocation or readiness.
+- Treat `data\trade_release\latest_release.json` and the referenced release manifest files as the active release truth. SQL runtime artifact rows are fallback/cache, not authority for revocation or readiness.
 - Unless the user explicitly asks for mock matching, default manual execution probes to the runtime default `precision` account mode instead of overriding to `simulation`.
 - Treat `precision` here as the default paper-trading / precision-matching account, not as live trading.
 - Treat `simulation` and `precision` as different paper-execution semantics; do not conflate either of them with the future QMT / QM real-money path.

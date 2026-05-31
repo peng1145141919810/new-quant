@@ -8,6 +8,30 @@
 
 ## Change Log
 
+### CDL-20260531-049
+- Local time: `2026-05-31`
+- Type: `naming-cleanup`
+- Scope: `全库 V5/V5.1/V6 版本后缀命名债务清零`
+- Author: `Claude`
+- Touched paths (三阶段合并记录):
+  - **Stage A（代码符号）**: `research_brain/hub/cli_v5.py→cli.py`, `single_run_v5.py→single_run.py`, `run_single_candidate_v5.py→run_single_candidate.py`, `run_research_hub_v5_1_local.py→run_research_hub_local.py`; configs `hub_config.v5_1.*.json→hub_config.*.json`; supervisor `_build_v5_gpu_config→_build_gpu_config`, `_run_v5_gpu→_run_gpu`
+  - **Stage B（数据目录）**: `train_table_v2→train_table`（干净表），`train_table_v1→data/_archive/train_table_v1`（破损表归档）; `daily_cache_v6→daily_cache`, `event_lake_v6→event_lake`, `market_state_v6→market_state`, `portfolio_recommendation_v6→portfolio_recommendation`, `trade_release_v1→trade_release`; 同步修复 train_table_dir 指向错误（旧配置指向破损 v1 表）
+  - **Stage C（规划层 + 持久化契约）**: `orchestrator_v6.py→orchestrator.py`, `v5_bridge.py→research_bridge.py`, `run_v6_full_cycle_real.py→run_full_cycle_real.py`, `hub_config.v6.runtime.*.json→hub_config.runtime.*.json`; config 键 `v5_gpu_*→gpu_research_*`; supervisor_state 键 `v6_ran/v6_error→research_plan_*`, `v5_gpu_*→gpu_research_*`, `v5_cycle_review→cycle_review`; stage id `v6_planning→research_plan`, `v5_gpu→gpu_research`; LS 常量 `V5_GPU_*→GPU_RESEARCH_*`
+  - **Stage D（文档）**: `docs/00_V6*.md→00_系统执行摘要.md` 等 7 个 doc 文件 git mv；`DEPRECATED_ENTRYPOINTS.md` 旧路径修正；`CODEX_DEV_STABLE.md` 3 处过时引用更新
+- What changed:
+  - 彻底消除源码、配置、运行时状态契约、数据目录、文档中所有 V5/V5.1/V6 版本后缀标识符
+  - 修复了一个隐性数据 bug：多处 train_table_dir 指向破损的 train_table_v1（~60% market_cap 为 null）
+  - 操作者可见字符串 V5/V6 → 研究计划/GPU 研究
+- Validation:
+  - import smoke: supervisor / orchestrator / research_bridge / research_cycle_orchestrator 全部 OK
+  - `build_runtime_config()` 无残留旧 token，`gpu_research_max_cycles_per_tick` 存在
+  - preflight（overnight / integrated_supervisor）所有 check `ok=True`
+- Compatibility:
+  - supervisor_state.json 中旧 key（v6_ran、v5_gpu_completed 等）在下次写入前会消失；不影响首次运行
+  - hub_config.runtime.*.json 是 .gitignore 排除的运行时文件，首次跑时重新生成
+- Rollback:
+  - git revert 对应三个 commit（56ad0f9 Stage A、f456d8e Stage B、e5ee91d Stage C + 本次 doc commit）
+
 ### CDL-20260529-048
 - Local time: `2026-05-29 23:00:27`
 - Type: `cross-ai-dialogue-maintenance-policy`
