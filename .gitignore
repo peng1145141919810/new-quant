@@ -104,3 +104,8 @@ tmp_*.html
 *.tmp
 *.bak
 *.orig
+
+# Added 2026-05-30: runtime artifacts that were accidentally tracked in initial import
+data/event_lake_v6/research/briefs/
+data/event_lake_v6/research/extract_summary/
+data/index_daily_csv/

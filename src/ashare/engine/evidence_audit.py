@@ -316,6 +316,27 @@ def run_evidence_audit(config: Dict[str, Any], *, candidate_pool_path: Path | No
         return {"enabled": False, "ok": True, "ran": False, "message": "disabled"}
     paths = dict(config.get("paths", {}) or {})
     out_root = ensure_dir(Path(_text(cfg.get("artifact_root")) or Path(paths.get("portfolio_output_root", "data/portfolio_recommendation_v6")) / "evidence_audit_v1").resolve())
+
+    # 缓存命中：如果最近一次 audit 还在新鲜窗口内，直接复用，省 30-40 分钟的网搜+LLM。
+    # 默认窗口 12 小时——一天内多次迭代研究时，audit 结果不需要每次都重跑。
+    # 用户/上层若要强制重跑：cfg['cache_max_age_hours'] = 0
+    cache_max_age_hours = float(cfg.get("cache_max_age_hours", 12.0) or 0.0)
+    latest_summary = out_root / "latest" / "evidence_audit_summary.json"
+    if cache_max_age_hours > 0 and latest_summary.exists():
+        import time as _time
+        age_hours = (_time.time() - latest_summary.stat().st_mtime) / 3600.0
+        if age_hours < cache_max_age_hours:
+            try:
+                cached = json.loads(latest_summary.read_text(encoding="utf-8"))
+                cached["ran"] = False
+                cached["cache_hit"] = True
+                cached["cache_age_hours"] = round(age_hours, 2)
+                cached["enabled"] = True
+                cached["ok"] = True
+                return cached
+            except Exception:
+                pass  # cache corrupt, fall through to fresh run
+
     pool_path = Path(candidate_pool_path or _text(cfg.get("candidate_pool_path")) or Path(paths.get("portfolio_output_root", "data/portfolio_recommendation_v6")) / "candidate_pool.csv").resolve()
     max_candidates = int(limit or cfg.get("max_candidates", 40) or 40)
     max_results_per_query = int(cfg.get("max_results_per_query", 3) or 3)

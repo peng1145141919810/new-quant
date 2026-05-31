@@ -165,6 +165,16 @@ def execute_single_experiment_v5(
         if logger is not None:
             logger.info('组合回测完成。ann=%.4f sharpe=%.4f mdd=%.4f elapsed=%.1fs', float(portfolio_summary.get('annualized_ret', 0.0)), float(portfolio_summary.get('sharpe', 0.0)), float(portfolio_summary.get('max_drawdown', 0.0)), time.time() - bt_start)
 
+        # 释放大对象（pred_test_df 5000-100k 行 × 20 列；latest_portfolio_df 也几 MB），
+        # 减少 Python 解释器关闭阶段的内存压力。lightgbm Booster 已在 train_and_predict
+        # 内部 scope 外，但仍可能被 cli_v5 端的 train_result 引用着 → 强制 gc。
+        try:
+            train_result.pop('pred_test_df', None)
+            latest_portfolio.pop('latest_portfolio_df', None)
+        except Exception:
+            pass
+        gc.collect()
+
         elapsed_seconds = float(time.time() - exp_start)
         total_score = compute_total_score(
             train_result['train_summary'],

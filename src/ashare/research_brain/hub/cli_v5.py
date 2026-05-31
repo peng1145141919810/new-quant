@@ -5,12 +5,34 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+
+def _try_load_valid_result(result_path: Path) -> Optional[Dict[str, Any]]:
+    """如果 result.json 存在且 record.status 合法，返回 dict，否则返回 None。
+
+    Why: cli_v5 不能再用 subprocess returncode 判定成败。lightgbm_gpu 在 Python
+    解释器关闭阶段经常崩（exit 120 / 0xC0000005），但 artifacts 已经全部写完。
+    这种"完成但脏退出"应被接受。
+    """
+    if not result_path.exists():
+        return None
+    try:
+        ret = json.loads(result_path.read_text(encoding='utf-8'))
+    except Exception:
+        return None
+    if not isinstance(ret, dict) or 'record' not in ret:
+        return None
+    status = str(ret.get('record', {}).get('status', ''))
+    if status not in {'ok', 'skipped_budget_guard', 'failed'}:
+        return None
+    return ret
 
 from hub.candidate_factory import build_cycle_plan
 from hub.config_utils import ensure_required_keys, load_config
@@ -185,31 +207,65 @@ def run_batch(config: Dict[str, Any], dry_run: bool, cycle_index: int) -> Dict[s
     results = []
     pyexe = str(config.get('execution', {}).get('python_executable', sys.executable) or sys.executable)
     candidate_runner = Path(__file__).resolve().parent.parent / 'run_single_candidate_v5.py'
-    retryable_codes = {3221225477, 3221226356}
+    # 子进程环境强制 unbuffered，避免 supervisor 看到的 log 文件 0 字节。
+    sub_env = os.environ.copy()
+    sub_env['PYTHONUNBUFFERED'] = '1'
     log.info('本轮计划已生成。cycle=%s n_candidates=%s budget=%s', plan['cycle_id'], len(plan['candidate_configs']), plan['budget'])
     for idx, cfg in enumerate(plan['candidate_configs'], start=1):
         c = cfg['candidate']
-        log.info('开始执行候选实验 %s/%s: %s | route=%s model=%s feature=%s logic=%s', idx, len(plan['candidate_configs']), c['strategy_name'], c['research_route'], c['model_family'], c['feature_profile'], c['training_logic'])
         result_path = Path(str(c['config_path'])).with_suffix('.result.json')
+
+        # Intra-cycle resume：如果本候选的 result.json 已经存在且合法，直接复用。
+        # 适用场景：上一次 cycle 在某个候选后崩了，重跑同 cycle_dir 时不浪费 LLM/算力。
+        existing = _try_load_valid_result(result_path)
+        if existing is not None and str(existing['record'].get('status', '')) == 'ok':
+            log.info('候选 %s/%s 已有有效 result.json，跳过重跑：%s', idx, len(plan['candidate_configs']), c['strategy_name'])
+            results.append(existing['record'])
+            continue
+        # 不合法的旧 result 先清掉，避免 stale 读
         if result_path.exists():
             result_path.unlink()
-        proc = None
+
+        log.info('开始执行候选实验 %s/%s: %s | route=%s model=%s feature=%s logic=%s', idx, len(plan['candidate_configs']), c['strategy_name'], c['research_route'], c['model_family'], c['feature_profile'], c['training_logic'])
+        accepted_record: Optional[Dict[str, Any]] = None
+        last_returncode: Optional[int] = None
         for attempt in range(3):
             proc = subprocess.run(
                 [pyexe, str(candidate_runner), '--config', str(c['config_path']), '--result-path', str(result_path), '--dry-run' if dry_run else '--no-dry-run'],
                 cwd=str(candidate_runner.parent),
                 check=False,
+                env=sub_env,
             )
-            if proc.returncode == 0:
-                break
-            if proc.returncode not in retryable_codes or attempt >= 2:
-                raise RuntimeError(f'candidate_subprocess_failed idx={idx} strategy_key={c["strategy_key"]} returncode={proc.returncode}')
-            log.warning('candidate native crash detected; retrying idx=%s strategy_key=%s attempt=%s returncode=%s', idx, c['strategy_key'], attempt + 2, proc.returncode)
+            last_returncode = proc.returncode
+
+            # 关键变更：用 artifact 判定，不用 returncode。
+            # lightgbm_gpu 经常在 Python 解释器关闭阶段崩（atexit 触发 GPU 清理），
+            # 但 result.json 已经在 main() 里写完了。这种"完成但脏退出"应被接受。
+            ret = _try_load_valid_result(result_path)
+            if ret is not None:
+                rec_status = str(ret['record'].get('status', ''))
+                if rec_status in {'ok', 'skipped_budget_guard'}:
+                    if proc.returncode != 0:
+                        log.warning('候选 %s 进程 exit=%s 但 artifact 完整，接受。strategy_key=%s', c['strategy_name'], proc.returncode, c['strategy_key'])
+                    accepted_record = ret['record']
+                    break
+                # status=failed：内部捕获的 Python 异常，重试一次也没用
+                if rec_status == 'failed':
+                    log.error('候选 %s 内部抛异常：%s', c['strategy_name'], ret['record'].get('error_message', ''))
+                    accepted_record = ret['record']
+                    break
+
+            # artifact 缺失或无效 → 真的需要重试
+            if attempt >= 2:
+                raise RuntimeError(f'candidate_subprocess_failed_no_artifact idx={idx} strategy_key={c["strategy_key"]} returncode={proc.returncode}')
+            log.warning('候选 %s artifact 缺失/无效，重试 attempt=%s returncode=%s', c['strategy_name'], attempt + 2, proc.returncode)
             if result_path.exists():
                 result_path.unlink()
             time.sleep(5)
-        ret = json.loads(result_path.read_text(encoding='utf-8'))
-        results.append(ret['record'])
+
+        if accepted_record is None:
+            raise RuntimeError(f'candidate_subprocess_failed_no_artifact idx={idx} strategy_key={c["strategy_key"]} returncode={last_returncode}')
+        results.append(accepted_record)
     family_gate = _refresh_family_and_gate(config)
     summary = {
         'cycle_id': plan['cycle_id'],

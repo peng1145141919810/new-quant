@@ -310,6 +310,8 @@ def _run_v5_gpu(config: Dict[str, Any], project_root: Path, feedback: Dict[str, 
     pyexe = str(config.get('research_brain', {}).get('python_executable'))
     script = v5_root / 'run_research_hub_v5_1_local.py'
     env = os.environ.copy()
+    # 强制 unbuffered stdout/stderr，避免 supervisor 用 `*> $log` 重定向时拿到 0 字节文件。
+    env['PYTHONUNBUFFERED'] = '1'
     output_root = str(config.get('research_brain', {}).get('hub_output_root', '') or '')
     log_line(
         config,
