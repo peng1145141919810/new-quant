@@ -132,7 +132,7 @@ def build_runtime_config() -> Dict[str, Any]:
             "runtime_explainer_enabled": bool(getattr(LS, "ENABLE_LOCAL_OLLAMA_RUNTIME_EXPLAINER", True)),
             "runtime_explainer_model": ollama_runtime_explainer_model,
             "runtime_explainer_timeout_seconds": int(getattr(LS, "OLLAMA_RUNTIME_EXPLAINER_TIMEOUT_SECONDS", 45) or 45),
-            "runtime_explainer_stages": list(getattr(LS, "OLLAMA_RUNTIME_EXPLAINER_STAGES", ["v6_planning", "v5_gpu", "portfolio_recommendation", "execution_bridge"]) or ["v6_planning", "v5_gpu", "portfolio_recommendation", "execution_bridge"]),
+            "runtime_explainer_stages": list(getattr(LS, "OLLAMA_RUNTIME_EXPLAINER_STAGES", ["research_plan", "gpu_research", "portfolio_recommendation", "execution_bridge"]) or ["research_plan", "gpu_research", "portfolio_recommendation", "execution_bridge"]),
             "v5_review_enabled": bool(getattr(LS, "ENABLE_LOCAL_OLLAMA_V5_REVIEW", True)),
             "v5_review_model": ollama_v5_review_model,
             "v5_review_timeout_seconds": int(getattr(LS, "OLLAMA_V5_REVIEW_TIMEOUT_SECONDS", ollama_research_timeout_seconds) or ollama_research_timeout_seconds),
@@ -228,7 +228,7 @@ def build_runtime_config() -> Dict[str, Any]:
             },
         },
         "research_brain": {"enabled": True, "planning_model": "openai_research", "worker_model": "deepseek_worker"},
-        "supervisor": {"token_plan_min_interval_hours": LS.TOKEN_PLAN_MIN_INTERVAL_HOURS, "run_forever": LS.SUPERVISOR_RUN_FOREVER, "max_ticks": LS.SUPERVISOR_MAX_TICKS, "sleep_seconds": LS.SUPERVISOR_SLEEP_SECONDS, "v5_gpu_max_cycles_per_tick": LS.V5_GPU_MAX_CYCLES_PER_TICK, "v5_gpu_dry_run": LS.V5_GPU_DRY_RUN, "require_gpu": LS.REQUIRE_GPU},
+        "supervisor": {"token_plan_min_interval_hours": LS.TOKEN_PLAN_MIN_INTERVAL_HOURS, "run_forever": LS.SUPERVISOR_RUN_FOREVER, "max_ticks": LS.SUPERVISOR_MAX_TICKS, "sleep_seconds": LS.SUPERVISOR_SLEEP_SECONDS, "gpu_research_max_cycles_per_tick": LS.GPU_RESEARCH_MAX_CYCLES_PER_TICK, "gpu_research_dry_run": LS.GPU_RESEARCH_DRY_RUN, "require_gpu": LS.REQUIRE_GPU},
         "dynamic_strategy": {
             "enabled": LS.ENABLE_DAILY_STRATEGY_FEEDBACK,
             "lookback_days": LS.STRATEGY_FEEDBACK_LOOKBACK_DAYS,

@@ -12,7 +12,7 @@ from .execution_bridge_runner import (
     run_execution_bridge as dispatch_execution_bridge,
 )
 from .data_consistency_guard import assess_automation_data_readiness
-from .local_augmentations import build_v5_cycle_review, emit_runtime_stage_note
+from .local_augmentations import build_cycle_review, emit_runtime_stage_note
 from .logging_utils import log_line
 from .market_state import build_market_state_artifacts, load_latest_market_state
 from .market_pipeline import run_market_pipeline
@@ -283,7 +283,7 @@ def _build_gpu_config(config: Dict[str, Any], project_root: Path, feedback: Dict
     template['train_table_dir'] = str(runtime_cfg['train_table_dir'])
     template['hub_output_root'] = str(runtime_cfg['hub_output_root'])
     template['execution']['python_executable'] = str(runtime_cfg['python_executable'])
-    template['research_brain']['max_cycles'] = int(config.get('supervisor', {}).get('v5_gpu_max_cycles_per_tick', 8) or 8)
+    template['research_brain']['max_cycles'] = int(config.get('supervisor', {}).get('gpu_research_max_cycles_per_tick', 8) or 8)
     template['research_brain']['sleep_seconds'] = 0
     template['llm_brain']['enabled'] = True
     template['llm_brain']['api_key_env'] = str(config['providers']['deepseek_worker']['api_key_env'])
@@ -294,7 +294,7 @@ def _build_gpu_config(config: Dict[str, Any], project_root: Path, feedback: Dict
     template['bridge_inputs'] = {'enabled': True, 'bridge_root': str(runtime_cfg['bridge_input_root'])}
     if feedback:
         _apply_strategy_feedback(template, feedback)
-    effective_max_cycles = int(template.get('research_brain', {}).get('max_cycles', config.get('supervisor', {}).get('v5_gpu_max_cycles_per_tick', 8)) or 8)
+    effective_max_cycles = int(template.get('research_brain', {}).get('max_cycles', config.get('supervisor', {}).get('gpu_research_max_cycles_per_tick', 8)) or 8)
     out_path = brain_root / 'configs' / 'hub_config.integrated_gpu.json'
     out_path.write_text(json.dumps(template, ensure_ascii=False, indent=2), encoding='utf-8')
     local_settings = brain_root / 'hub' / 'local_settings.py'
@@ -315,7 +315,7 @@ def _run_gpu(config: Dict[str, Any], project_root: Path, feedback: Dict[str, Any
     output_root = str(config.get('research_brain', {}).get('hub_output_root', '') or '')
     log_line(
         config,
-        f"Supervisor: V5.1 研究进程已启动，输出根={output_root}，可观察 controller_state.json / registry/experiment_registry.csv / cycles/*/cycle_summary.json",
+        f"Supervisor: GPU 研究进程已启动，输出根={output_root}，可观察 controller_state.json / registry/experiment_registry.csv / cycles/*/cycle_summary.json",
     )
     subprocess.run([pyexe, str(script)], cwd=str(brain_root), check=True, env=env)
 
@@ -466,7 +466,7 @@ def _run_execution_bridge(config: Dict[str, Any], project_root: Path) -> Dict[st
 
 
 def run_resume_downstream(config_path: Path, include_execution: bool = False) -> None:
-    """从最近一次已完成的 V5 结果继续，生成持仓建议，并可选重跑执行桥。"""
+    """从最近一次已完成的 GPU 研究结果继续，生成持仓建议，并可选重跑执行桥。"""
     config = load_config(config_path)
     project_root = config_path.resolve().parent.parent
     stage_total = 1 + (1 if include_execution and bool(config.get('execution_bridge', {}).get('enabled', False)) else 0)
@@ -559,8 +559,8 @@ def run_integrated_supervisor(
         stage_defs.append(('market_pipeline', '市场数据流水线'))
     stage_defs.append(('strategy_feedback', '策略信号刷新'))
     stage_defs.append(('objective_scheduler', '中枢研究预算决策'))
-    stage_defs.append(('v6_planning', 'V6 研究计划'))
-    stage_defs.append(('v5_gpu', 'V5.1 GPU 研究'))
+    stage_defs.append(('research_plan', '研究计划'))
+    stage_defs.append(('gpu_research', 'GPU 研究'))
     if bool(config.get('portfolio_recommendation', {}).get('enabled', False)):
         stage_defs.append(('portfolio_recommendation', '持仓建议生成'))
     if evidence_run_after_portfolio:
@@ -770,50 +770,50 @@ def run_integrated_supervisor(
                 summary=str(exc),
             )
             log_line(config, f"Supervisor: 中枢预算决策失败：{exc}")
-        v6_stage_order = stage_order_map['v6_planning']
-        v6_stage_label = stage_label_map['v6_planning']
+        research_plan_stage_order = stage_order_map['research_plan']
+        research_plan_stage_label = stage_label_map['research_plan']
         if _should_run_token_plan(config):
-            from .orchestrator_v6 import run_v6_cycle
-            _stage_start(config, state, 'v6_planning', v6_stage_label, v6_stage_order, stage_total)
+            from .orchestrator import run_cycle
+            _stage_start(config, state, 'research_plan', research_plan_stage_label, research_plan_stage_order, stage_total)
             try:
-                run_v6_cycle(config_path=config_path, mode='full_cycle')
+                run_cycle(config_path=config_path, mode='full_cycle')
                 _write_stamp(config)
-                state['v6_ran'] = True
-                _stage_finish(config, state, 'v6_planning', v6_stage_label, v6_stage_order, stage_total, summary='full_cycle_completed')
+                state['research_plan_ran'] = True
+                _stage_finish(config, state, 'research_plan', research_plan_stage_label, research_plan_stage_order, stage_total, summary='full_cycle_completed')
             except Exception as exc:
-                state['v6_ran'] = False
-                state['v6_error'] = str(exc)
-                _stage_fail(config, state, 'v6_planning', v6_stage_label, v6_stage_order, stage_total, summary=str(exc))
+                state['research_plan_ran'] = False
+                state['research_plan_error'] = str(exc)
+                _stage_fail(config, state, 'research_plan', research_plan_stage_label, research_plan_stage_order, stage_total, summary=str(exc))
                 raise
         else:
-            state['v6_ran'] = False
-            _stage_skip(config, state, 'v6_planning', v6_stage_label, v6_stage_order, stage_total, summary='沿用 24 小时内最近一次研究计划')
-        _stage_start(config, state, 'v5_gpu', stage_label_map['v5_gpu'], stage_order_map['v5_gpu'], stage_total)
+            state['research_plan_ran'] = False
+            _stage_skip(config, state, 'research_plan', research_plan_stage_label, research_plan_stage_order, stage_total, summary='沿用 24 小时内最近一次研究计划')
+        _stage_start(config, state, 'gpu_research', stage_label_map['gpu_research'], stage_order_map['gpu_research'], stage_total)
         try:
             _run_gpu(config, project_root, feedback=feedback)
-            state['v5_gpu_completed'] = True
+            state['gpu_research_completed'] = True
             review_summary = 'review=not_generated'
             try:
-                review_result = build_v5_cycle_review(config=config)
+                review_result = build_cycle_review(config=config)
                 if bool(review_result.get('ok', False)):
-                    state['v5_cycle_review'] = dict(review_result.get('review', {}) or {})
-                    cycle_id = str(state['v5_cycle_review'].get('cycle_id', '') or '')
+                    state['cycle_review'] = dict(review_result.get('review', {}) or {})
+                    cycle_id = str(state['cycle_review'].get('cycle_id', '') or '')
                     review_summary = f"review=ok cycle_id={cycle_id}" if cycle_id else 'review=ok'
                 else:
                     review_error = str(review_result.get('error', 'review_unavailable') or 'review_unavailable')
-                    state['v5_cycle_review_error'] = review_error
+                    state['cycle_review_error'] = review_error
                     review_summary = f"review={review_error}"
-                    log_line(config, f"Supervisor: V5 本地复盘未生成 {review_error}")
+                    log_line(config, f"Supervisor: GPU 研究本地复盘未生成 {review_error}")
             except Exception as review_exc:
-                state['v5_cycle_review_error'] = str(review_exc)
+                state['cycle_review_error'] = str(review_exc)
                 review_summary = f"review_error={review_exc}"
-                log_line(config, f"Supervisor: V5 本地复盘失败：{review_exc}")
+                log_line(config, f"Supervisor: GPU 研究本地复盘失败：{review_exc}")
             _stage_finish(
                 config,
                 state,
-                'v5_gpu',
-                stage_label_map['v5_gpu'],
-                stage_order_map['v5_gpu'],
+                'gpu_research',
+                stage_label_map['gpu_research'],
+                stage_order_map['gpu_research'],
                 stage_total,
                 summary=(
                     f"hub_output_root={config.get('research_brain', {}).get('hub_output_root', '')} "
@@ -821,13 +821,13 @@ def run_integrated_supervisor(
                 ),
             )
         except Exception as exc:
-            state['v5_gpu_error'] = str(exc)
+            state['gpu_research_error'] = str(exc)
             _stage_fail(
                 config,
                 state,
-                'v5_gpu',
-                stage_label_map['v5_gpu'],
-                stage_order_map['v5_gpu'],
+                'gpu_research',
+                stage_label_map['gpu_research'],
+                stage_order_map['gpu_research'],
                 stage_total,
                 summary=str(exc),
             )

@@ -19,7 +19,7 @@ from .local_augmentations import build_announcement_evidence_cards, build_manual
 from .logging_utils import log_line
 from .market_state import build_market_state_artifacts
 from .research_brief_engine import build_research_brief, save_research_brief
-from .v5_bridge import build_research_actions, save_bridge_outputs
+from .research_bridge import build_research_actions, save_bridge_outputs
 
 
 def _load_research_meta_feedback(config: dict) -> dict:

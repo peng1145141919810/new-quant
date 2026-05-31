@@ -22,7 +22,7 @@ def profile_overrides(profile: str) -> Dict[str, Dict[str, Any]]:
     if resolved == "quick_test":
         return {
             "supervisor": {
-                "v5_gpu_max_cycles_per_tick": int(getattr(LS, "QUICK_TEST_V5_GPU_MAX_CYCLES_PER_TICK", 1) or 1),
+                "gpu_research_max_cycles_per_tick": int(getattr(LS, "QUICK_TEST_GPU_RESEARCH_MAX_CYCLES_PER_TICK", 1) or 1),
                 "token_plan_min_interval_hours": float(getattr(LS, "QUICK_TEST_TOKEN_PLAN_MIN_INTERVAL_HOURS", 24) or 24),
             },
             "event_ingest": {
@@ -39,7 +39,7 @@ def profile_overrides(profile: str) -> Dict[str, Dict[str, Any]]:
     if resolved == "daily_production":
         return {
             "supervisor": {
-                "v5_gpu_max_cycles_per_tick": int(getattr(LS, "DAILY_PRODUCTION_V5_GPU_MAX_CYCLES_PER_TICK", 3) or 3),
+                "gpu_research_max_cycles_per_tick": int(getattr(LS, "DAILY_PRODUCTION_GPU_RESEARCH_MAX_CYCLES_PER_TICK", 3) or 3),
                 "token_plan_min_interval_hours": float(getattr(LS, "DAILY_PRODUCTION_TOKEN_PLAN_MIN_INTERVAL_HOURS", 24) or 24),
             },
             "event_ingest": {
@@ -55,7 +55,7 @@ def profile_overrides(profile: str) -> Dict[str, Dict[str, Any]]:
         }
     return {
         "supervisor": {
-            "v5_gpu_max_cycles_per_tick": int(getattr(LS, "OVERNIGHT_V5_GPU_MAX_CYCLES_PER_TICK", 8) or 8),
+            "gpu_research_max_cycles_per_tick": int(getattr(LS, "OVERNIGHT_GPU_RESEARCH_MAX_CYCLES_PER_TICK", 8) or 8),
             "token_plan_min_interval_hours": float(getattr(LS, "OVERNIGHT_TOKEN_PLAN_MIN_INTERVAL_HOURS", 24) or 24),
         },
         "event_ingest": {

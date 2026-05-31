@@ -275,7 +275,7 @@ def main() -> None:
     print("Config:", config_path)
     print("Mode:", args.mode)
     print("Profile:", args.profile)
-    print("Research cycles:", config.get("supervisor", {}).get("v5_gpu_max_cycles_per_tick"))
+    print("Research cycles:", config.get("supervisor", {}).get("gpu_research_max_cycles_per_tick"))
     print("Plan reuse hours:", config.get("supervisor", {}).get("token_plan_min_interval_hours"))
     print("Execution mode:", config.get("execution_policy", {}).get("account_mode"))
     print("Precision trade:", config.get("execution_policy", {}).get("precision_trade_enabled"))
@@ -362,7 +362,7 @@ def main() -> None:
 
         run_resume_downstream(config_path, include_execution=bool(args.resume_execution))
     else:
-        from engine.orchestrator_v6 import run_v6_cycle as run_legacy_cycle
+        from engine.orchestrator import run_cycle as run_legacy_cycle
 
         run_legacy_cycle(config_path=config_path, mode=args.mode)
     print("===== ASHARE DONE =====")

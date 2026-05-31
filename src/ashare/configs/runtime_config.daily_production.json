@@ -99,8 +99,8 @@
     "runtime_explainer_model": "qwen2.5:7b",
     "runtime_explainer_timeout_seconds": 45,
     "runtime_explainer_stages": [
-      "v6_planning",
-      "v5_gpu",
+      "research_plan",
+      "gpu_research",
       "portfolio_recommendation",
       "execution_bridge"
     ],
@@ -265,8 +265,8 @@
     "run_forever": false,
     "max_ticks": 1,
     "sleep_seconds": 300,
-    "v5_gpu_max_cycles_per_tick": 3,
-    "v5_gpu_dry_run": false,
+    "gpu_research_max_cycles_per_tick": 3,
+    "gpu_research_dry_run": false,
     "require_gpu": true
   },
   "dynamic_strategy": {

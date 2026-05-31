@@ -122,7 +122,7 @@ def _role_max_items(config: Dict[str, Any], role_name: str, fallback: int) -> in
 def _runtime_explainer_stages(config: Dict[str, Any]) -> List[str]:
     cfg = _local_cfg(config)
     stages = _string_list(cfg.get("runtime_explainer_stages"), max_items=12, max_chars=64)
-    return stages or ["v6_planning", "v5_gpu", "portfolio_recommendation", "execution_bridge"]
+    return stages or ["research_plan", "gpu_research", "portfolio_recommendation", "execution_bridge"]
 
 
 def _role_client(config: Dict[str, Any], role_name: str, model: str, timeout_seconds: int) -> LocalOllamaChatClient:
@@ -292,7 +292,7 @@ def build_announcement_evidence_cards(config: Dict[str, Any], raw_items: List[Di
         _write_json(out_path, payload)
         return {"ok": True, "selected_items": 0, "cards": [], "path": str(out_path)}
 
-    log_line(config, f"V6: 本地公告证据卡增强开始 selected={len(selected)}")
+    log_line(config, f"研究计划: 本地公告证据卡增强开始 selected={len(selected)}")
     cards: List[Dict[str, Any]] = []
     for idx, item in enumerate(selected, start=1):
         excerpt = _safe_text(item.get("content"))[:2200]
@@ -336,7 +336,7 @@ def build_announcement_evidence_cards(config: Dict[str, Any], raw_items: List[Di
         cards.append(card)
         log_line(
             config,
-            f"V6: 本地公告证据卡完成 item={idx}/{len(selected)} ok={card['llm_ok']} model={card['llm_model'] or 'fallback'}",
+            f"研究计划: 本地公告证据卡完成 item={idx}/{len(selected)} ok={card['llm_ok']} model={card['llm_model'] or 'fallback'}",
         )
 
     payload = {
@@ -346,7 +346,7 @@ def build_announcement_evidence_cards(config: Dict[str, Any], raw_items: List[Di
         "cards": cards,
     }
     _write_json(out_path, payload)
-    log_line(config, f"V6: 本地公告证据卡增强完成 cards={len(cards)} path={out_path}")
+    log_line(config, f"研究计划: 本地公告证据卡增强完成 cards={len(cards)} path={out_path}")
     return {"ok": True, "selected_items": len(selected), "cards": cards, "path": str(out_path)}
 
 
@@ -433,7 +433,7 @@ def build_manual_review_queue(config: Dict[str, Any], structured_events: List[Di
             }
         )
 
-    log_line(config, f"V6: 人工复核分流开始 selected={len(compact_items)}")
+    log_line(config, f"研究计划: 人工复核分流开始 selected={len(compact_items)}")
     system_prompt = (
         "你是量化事件抽取后的人工复核分流器。"
         "只输出一个 JSON 对象，不要输出解释，不要输出 markdown。"
@@ -502,12 +502,12 @@ def build_manual_review_queue(config: Dict[str, Any], structured_events: List[Di
     }
     _write_json(out_path, payload)
     high_priority = sum(item.get("review_priority") == "high" for item in review_queue)
-    log_line(config, f"V6: 人工复核分流完成 queue_size={len(review_queue)} high_priority={high_priority} path={out_path}")
+    log_line(config, f"研究计划: 人工复核分流完成 queue_size={len(review_queue)} high_priority={high_priority} path={out_path}")
     return {"ok": True, "queue_size": len(review_queue), "path": str(out_path), "review_queue": review_queue}
 
 
 _RUNTIME_STAGE_WATCH = {
-    "v6_planning": {
+    "research_plan": {
         "watch_files": [
             "data/event_lake/research/context_pack/research_context_pack.json",
             "data/event_lake/research/briefs/research_brief_diagnostic.json",
@@ -515,20 +515,20 @@ _RUNTIME_STAGE_WATCH = {
         ],
         "risk_hint": "如果长时间无新日志，先看 research_brief_diagnostic.json 是否卡在上游模型调用。",
     },
-    "v5_gpu": {
+    "gpu_research": {
         "watch_files": [
             "data/research_hub/controller_state.json",
             "data/research_hub/registry/experiment_registry.csv",
             "data/research_hub/cycles/*/cycle_summary.json",
         ],
-        "risk_hint": "V5 是长阶段，重点看 controller_state.json 是否推进到新 cycle。",
+        "risk_hint": "GPU 研究是长阶段，重点看 controller_state.json 是否推进到新 cycle。",
     },
     "portfolio_recommendation": {
         "watch_files": [
             "data/portfolio_recommendation/portfolio_recommendation.json",
             "data/portfolio_recommendation/target_positions.csv",
         ],
-        "risk_hint": "如果组合文件未刷新，先回看 V5 最新 cycle_summary.json。",
+        "risk_hint": "如果组合文件未刷新，先回看 GPU 研究最新 cycle_summary.json。",
     },
     "execution_bridge": {
         "watch_files": [
@@ -613,17 +613,17 @@ def emit_runtime_stage_note(
     return note
 
 
-def _fallback_v5_review(payload: Dict[str, Any]) -> Dict[str, Any]:
+def _fallback_review(payload: Dict[str, Any]) -> Dict[str, Any]:
     top_results = list(payload.get("top_results", []) or [])
     issues = _string_list(payload.get("diagnosis_issues"), max_items=6, max_chars=80)
-    headline = "本轮 V5 研究已完成，但仍需结合 cycle_summary.json 做人工复核。"
+    headline = "本轮 GPU 研究已完成，但仍需结合 cycle_summary.json 做人工复核。"
     if top_results:
         top = top_results[0]
         headline = (
-            f"本轮 V5 完成，当前最佳候选 {top.get('strategy_name', '')} "
+            f"本轮 GPU 研究完成，当前最佳候选 {top.get('strategy_name', '')} "
             f"route={top.get('research_route', '')} total_score={top.get('total_score', 0.0)}。"
         )
-    strengths = ["已有可落地的最佳候选输出。"] if top_results else ["V5 已顺利完成一轮候选生成。"]
+    strengths = ["已有可落地的最佳候选输出。"] if top_results else ["GPU 研究已顺利完成一轮候选生成。"]
     weaknesses = [f"诊断问题: {', '.join(issues)}"] if issues else ["尚未形成足够明确的下轮偏置。"]
     next_focus = ["优先检查最佳候选的特征、模型与训练逻辑组合是否稳定。", "对照 cycle_summary.json 看是否存在单一路线过拟合。"]
     return {
@@ -631,11 +631,11 @@ def _fallback_v5_review(payload: Dict[str, Any]) -> Dict[str, Any]:
         "strengths": strengths,
         "weaknesses": weaknesses,
         "next_focus": next_focus,
-        "operator_note": "先看 latest_v5_cycle_review.json，再对照 controller_state.json 和最新 cycle_summary.json。",
+        "operator_note": "先看 latest_cycle_review.json，再对照 controller_state.json 和最新 cycle_summary.json。",
     }
 
 
-def build_v5_cycle_review(config: Dict[str, Any]) -> Dict[str, Any]:
+def build_cycle_review(config: Dict[str, Any]) -> Dict[str, Any]:
     hub_root = Path(str(config.get("research_brain", {}).get("hub_output_root", "") or "").strip())
     if not hub_root.exists():
         return {"ok": False, "error": "missing_v5_hub_output_root"}
@@ -678,7 +678,7 @@ def build_v5_cycle_review(config: Dict[str, Any]) -> Dict[str, Any]:
     )
     user_prompt = json.dumps(
         {
-            "task": "总结本轮 V5 研究结果，给操作员一份简洁复盘",
+            "task": "总结本轮 GPU 研究结果，给操作员一份简洁复盘",
             "schema": {
                 "headline": "一句话结论",
                 "strengths": ["最多 3 条"],
@@ -700,8 +700,8 @@ def build_v5_cycle_review(config: Dict[str, Any]) -> Dict[str, Any]:
     )
     payload = dict(result.get("data", {}) or {}) if bool(result.get("ok", False)) else {}
     if not payload:
-        payload = _fallback_v5_review(compact_payload)
-    fallback = _fallback_v5_review(compact_payload)
+        payload = _fallback_review(compact_payload)
+    fallback = _fallback_review(compact_payload)
     review = {
         "generated_at": _now_text(),
         "cycle_id": cycle_id,
@@ -719,9 +719,9 @@ def build_v5_cycle_review(config: Dict[str, Any]) -> Dict[str, Any]:
         "compact_cycle_summary": compact_payload,
     }
     review_root = ensure_dir(hub_root / "reviews")
-    latest_path = review_root / "latest_v5_cycle_review.json"
-    timestamped_path = review_root / f"v5_cycle_review_{cycle_id}.json"
+    latest_path = review_root / "latest_cycle_review.json"
+    timestamped_path = review_root / f"cycle_review_{cycle_id}.json"
     _write_json(latest_path, review)
     _write_json(timestamped_path, review)
-    log_line(config, f"Supervisor: V5 本地复盘已生成 cycle_id={cycle_id} model={review['llm_model'] or 'fallback'}")
+    log_line(config, f"Supervisor: GPU 研究本地复盘已生成 cycle_id={cycle_id} model={review['llm_model'] or 'fallback'}")
     return {"ok": True, "review": review, "path": str(latest_path)}

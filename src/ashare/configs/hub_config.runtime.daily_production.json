@@ -99,8 +99,8 @@
     "runtime_explainer_model": "qwen2.5:7b",
     "runtime_explainer_timeout_seconds": 45,
     "runtime_explainer_stages": [
-      "v6_planning",
-      "v5_gpu",
+      "research_plan",
+      "gpu_research",
       "portfolio_recommendation",
       "execution_bridge"
     ],
@@ -138,7 +138,7 @@
     "lookback_hours": 24,
     "save_raw_text": true,
     "max_single_text_chars": 40000,
-    "max_pdf_fetch_per_run": 2,
+    "max_pdf_fetch_per_run": 6,
     "download_pdf_for_high_value_announcements": true,
     "max_cninfo_pages_per_market": 3,
     "enable_cninfo": true,
@@ -196,8 +196,8 @@
     "enabled": true,
     "low_confidence_threshold": 0.55,
     "manual_review_threshold": 0.45,
-    "max_events_per_run": 6,
-    "batch_size": 2,
+    "max_events_per_run": 12,
+    "batch_size": 4,
     "llm_min_score": 1.35,
     "max_content_chars_per_event": 1800,
     "save_extract_summary": true
@@ -212,7 +212,7 @@
   },
   "research_context_pack": {
     "recent_event_days": 7,
-    "max_priority_events": 4,
+    "max_priority_events": 8,
     "include_market_state": true,
     "include_family_state": true,
     "include_data_gap_report": true
@@ -265,8 +265,8 @@
     "run_forever": false,
     "max_ticks": 1,
     "sleep_seconds": 300,
-    "v5_gpu_max_cycles_per_tick": 1,
-    "v5_gpu_dry_run": false,
+    "gpu_research_max_cycles_per_tick": 3,
+    "gpu_research_dry_run": false,
     "require_gpu": true
   },
   "dynamic_strategy": {
@@ -1019,13 +1019,11 @@
     "health_probe_script_path": "H:\\Ashare\\src\\ashare\\run_gmtrade_health_probe.py"
   },
   "runtime_selection": {
-    "profile": "quick_test",
+    "profile": "daily_production",
     "default_mode": "integrated_supervisor",
     "execution_mode": "precision",
     "precision_trade_enabled": true,
     "execution_namespace": "main",
-    "ignore_market_panic_reduce_only": false,
-    "allow_unfinished_orders_reconcile": false,
     "shadow_run": false
   }
 }
