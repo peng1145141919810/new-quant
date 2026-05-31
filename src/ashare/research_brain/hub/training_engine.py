@@ -36,6 +36,10 @@ class ResourceBudgetSkip(RuntimeError):
 
 DATE_CAP_HEAVY_FAMILIES = {'random_forest', 'extra_trees'}
 GPU_FAMILIES = {'lightgbm_gpu', 'xgboost_gpu'}
+# 树模型原生支持缺失值，应让 NaN 透传由模型自己分裂学习，而不是填 0（填 0 会把
+# "缺失"伪装成一个极端数值、制造假信号）。线性模型（如 ridge_ranker）无法吃 NaN，
+# 用【训练集每列中位数】回填（中位数来自 train，无未来泄漏）。
+TREE_FAMILIES = {'lightgbm_gpu', 'lightgbm_auto', 'xgboost_gpu', 'hist_gbdt'}
 
 
 def _env_flag(name: str, default: bool = False) -> bool:
@@ -309,8 +313,20 @@ def _assert_codegen_valid(candidate: Dict[str, Any]) -> None:
     raise ResourceBudgetSkip(f'invalid generated modules: {names}', meta=meta)
 
 
-def _clean_feature_frame(df: pd.DataFrame, cols: List[str]) -> pd.DataFrame:
-    return df[cols].replace([np.inf, -np.inf], np.nan).fillna(0.0).astype(float)
+def _clean_feature_frame(
+    df: pd.DataFrame,
+    cols: List[str],
+    fill_values: Optional[pd.Series] = None,
+) -> pd.DataFrame:
+    """整理特征矩阵。
+
+    fill_values 为 None  → 保留 NaN（树模型路线，让模型自己学缺失分裂）。
+    fill_values 为 Series → 按该值回填（线性模型路线，传训练集中位数，避免泄漏）。
+    """
+    out = df[cols].replace([np.inf, -np.inf], np.nan).astype(float)
+    if fill_values is not None:
+        out = out.fillna(fill_values).fillna(0.0)
+    return out
 
 
 def _project_runtime_frame(
@@ -628,6 +644,22 @@ def train_and_predict(
     train_df, valid_df, test_df = split_by_dates(df, date_col=date_col, embargo_days=split_embargo_days)
     time_alignment["split_embargo_days"] = int(split_embargo_days)
 
+    # 剔除"没有真实未来收益"的样本（停牌、每段尾部 horizon 天等）。
+    # 否则在 rank 标签模式下它们会被填成 0（中位数排名）硬塞进训练，污染信号、
+    # 也让 test IC 把这些假样本算进去。注意只清训练/验证/测试三段，绝不动用于
+    # latest 预测的 df —— 最新交易日的未来收益天然为空，但它不需要标签。
+    def _drop_unlabeled(frame: pd.DataFrame) -> pd.DataFrame:
+        if realized_label_col in frame.columns:
+            mask = pd.to_numeric(frame[realized_label_col], errors="coerce").notna()
+            return frame.loc[mask].copy()
+        return frame
+
+    n_before = len(train_df) + len(valid_df) + len(test_df)
+    train_df = _drop_unlabeled(train_df)
+    valid_df = _drop_unlabeled(valid_df)
+    test_df = _drop_unlabeled(test_df)
+    time_alignment["rows_dropped_unlabeled"] = int(n_before - (len(train_df) + len(valid_df) + len(test_df)))
+
     train_plan = _load_training_override(train_override_path)
     if candidate['training_logic'] == 'feature_select' or train_plan.get('feature_cap'):
         cap = int(train_plan.get('feature_cap', 60) or 60)
@@ -643,11 +675,20 @@ def train_and_predict(
         constraints=constraints,
     )
 
-    X_train = _clean_feature_frame(train_df, selected)
+    # 树模型让 NaN 透传；线性模型用训练集中位数回填（无未来泄漏）。
+    is_tree_model = str(candidate['model_family']) in TREE_FAMILIES
+    if is_tree_model:
+        fill_values: Optional[pd.Series] = None
+    else:
+        fill_values = (
+            train_df[selected].replace([np.inf, -np.inf], np.nan).astype(float).median()
+        )
+
+    X_train = _clean_feature_frame(train_df, selected, fill_values=fill_values)
     y_train = train_df[training_label_col].astype(float)
-    X_valid = _clean_feature_frame(valid_df, selected)
+    X_valid = _clean_feature_frame(valid_df, selected, fill_values=fill_values)
     y_valid = valid_df[training_label_col].astype(float)
-    X_test = _clean_feature_frame(test_df, selected)
+    X_test = _clean_feature_frame(test_df, selected, fill_values=fill_values)
     y_test = test_df[training_label_col].astype(float)
 
     if candidate['training_logic'] in {'weighted_recent', 'regularized_recent'} or train_plan.get('sample_weight_mode') == 'recent_exponential':
@@ -697,7 +738,7 @@ def train_and_predict(
 
     latest_date = df[date_col].max()
     latest_source_df = df.loc[df[date_col] == latest_date].copy()
-    X_latest = _clean_feature_frame(latest_source_df, selected)
+    X_latest = _clean_feature_frame(latest_source_df, selected, fill_values=fill_values)
     latest_df = _project_runtime_frame(latest_source_df, code_col=code_col, label_col=label_col)
     latest_df['pred_score'] = _predict_scores(model=model, X=X_latest, realized_family=realized_family)
 
