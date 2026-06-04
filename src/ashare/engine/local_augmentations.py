@@ -692,7 +692,7 @@ def build_cycle_review(config: Dict[str, Any]) -> Dict[str, Any]:
     )
     result = _call_role_json(
         config=config,
-        role_name="v5_review",
+        role_name="research_review",
         system_prompt=system_prompt,
         user_prompt=user_prompt,
         fallback_model="deepseek-r1:14b",

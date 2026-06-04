@@ -127,7 +127,7 @@
     "cycle_candidate_budget": 12,
     "parent_pool_size": 4,
     "route_min_candidates": 1,
-    "max_cycles": 1,
+    "max_cycles": 3,
     "sleep_seconds": 0,
     "gpu_primary_family": "xgboost_gpu"
   },

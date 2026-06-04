@@ -35,10 +35,9 @@ from .portfolio_construction_pipeline import (
 from .llm_operating_brain import build_operating_brain
 from .evidence_audit import apply_evidence_gate
 from .portfolio_pre_release_objective import apply_pre_release_proxy_objective
-from .trade_discipline import apply_trade_discipline_weights, build_trade_discipline
+from .decision import decide_target_weights, load_decision_constraints
 from .portfolio import build_portfolio_artifacts
 from .technical_confirmation import build_technical_confirmation_artifacts
-from .global_objective import build_unified_objective_bundle
 
 
 def _series_or_zero(df: pd.DataFrame, col: str) -> pd.Series:
@@ -217,6 +216,86 @@ def _symbol_col(df: pd.DataFrame) -> str:
     if 'code' in df.columns:
         return 'code'
     return str(df.columns[0])
+
+
+def _assign_decision_weights(
+    pos_df: pd.DataFrame,
+    config: Dict[str, Any],
+    market_state: Dict[str, Any],
+    account_ctx: Dict[str, Any],
+    single_name_cap: float,
+    total_exposure_cap: float,
+) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+    """单遍决策定权（替代旧 trade_discipline/global_objective 连乘链）。
+
+    把候选交给 engine.decision.decide_target_weights 一次定权：按分数分配、
+    单名封顶取 min、regime 只过一次。约束以 config.decision_engine 为准，并与
+    调用方传入的 cap 取 min（绝不放大）。
+
+    Args:
+        pos_df: 候选持仓表（含 portfolio_weight 列与一个分数列）。
+        config: 运行时配置。
+        market_state: 市场状态快照（取 regime）。
+        account_ctx: 账户上下文（nav/cash）。
+        single_name_cap: 调用方单名上限。
+        total_exposure_cap: 调用方总仓位上限。
+
+    Returns:
+        (pos_df, summary): 写好 portfolio_weight 的表 + 决策摘要。
+    """
+    from dataclasses import replace
+
+    from live_execution_bridge.models import AccountState
+
+    if pos_df is None or pos_df.empty:
+        return pos_df, {"applied": False, "reason": "empty_candidates"}
+
+    sym_col = _symbol_col(pos_df)
+    score_series = None
+    for col in ("composite_score", "pred_score", "score", "seed_weight_norm", "portfolio_weight"):
+        if col in pos_df.columns:
+            score_series = pd.to_numeric(pos_df[col], errors="coerce").fillna(0.0)
+            break
+    if score_series is None:
+        score_series = pd.Series(1.0, index=pos_df.index, dtype="float64")
+
+    candidates = [
+        {"symbol": str(pos_df.loc[idx, sym_col]), "score": float(score_series.loc[idx]), "raw": {}}
+        for idx in pos_df.index
+    ]
+
+    cons = load_decision_constraints(config)
+    cons = replace(
+        cons,
+        single_name_cap=min(cons.single_name_cap, float(single_name_cap)) if single_name_cap else cons.single_name_cap,
+        total_exposure_cap=min(cons.total_exposure_cap, float(total_exposure_cap)) if total_exposure_cap else cons.total_exposure_cap,
+    ).validated()
+
+    acct = AccountState(
+        account_id=str(account_ctx.get("account_id", "") or ""),
+        cash=float(account_ctx.get("cash") or 0.0),
+        nav_value=float(account_ctx.get("nav") or 0.0) or None,
+        positions=[],
+    )
+    regime = (
+        str(market_state.get("market_regime") or market_state.get("market_safety_regime") or "active")
+    )
+
+    result = decide_target_weights(candidates, acct, regime, cons)
+    weight_map = {t.symbol: t.target_weight for t in result.targets}
+
+    pos_df = pos_df.copy()
+    pos_df["portfolio_weight"] = pos_df[sym_col].astype(str).map(weight_map).fillna(0.0)
+    pos_df = pos_df[pd.to_numeric(pos_df["portfolio_weight"], errors="coerce").fillna(0.0) > 0].copy()
+    return pos_df, {
+        "applied": True,
+        "posture": result.posture,
+        "notes": list(result.notes),
+        "single_name_cap": cons.single_name_cap,
+        "total_exposure_cap": cons.total_exposure_cap,
+        "max_names": cons.max_names,
+        "n_selected": int(len(pos_df)),
+    }
 
 
 def _load_performance_feedback(config: Dict[str, Any], bridge_root: Path | None) -> Dict[str, Any]:
@@ -1007,55 +1086,31 @@ def build_portfolio_recommendation(config: Dict[str, Any], bridge_root: Path | N
         alpha_lifecycle=preliminary_alpha_lifecycle,
         summary={},
     )
-    preliminary_trade_discipline = build_trade_discipline(
-        target_df=pos_df,
-        position_df=prev_df,
-        market_state=market_state,
-        account_ctx=account_ctx,
-        alpha_lifecycle=preliminary_alpha_lifecycle,
-        operating_brain=operating_brain,
-    )
+    # 旧的 trade_discipline 连乘链已移除，改为单遍决策引擎定权。
+    preliminary_trade_discipline = {"applied": False, "reason": "legacy_discipline_layer_removed"}
     pos_df = pos_df.head(max_names).copy()
     pos_df = clean_target_position_columns(pos_df)
+    # 这些旧分配器一律置为未启用占位（保留 summary 字段形状，下游/审计不报错）。
+    registered_family_allocator = {'applied': False, 'reason': 'decision_engine_single_pass'}
+    alpha_lifecycle_allocator = {'applied': False, 'reason': 'decision_engine_single_pass'}
+    trade_discipline_allocator = {'applied': False, 'reason': 'decision_engine_single_pass'}
+    evidence_gate_summary = {'applied': False, 'reason': 'decision_engine_single_pass'}
+    diversification_summary = {'applied': False, 'reason': 'decision_engine_single_pass'}
+    pre_release_proxy_summary: Dict[str, Any] = {'applied': False, 'reason': 'decision_engine_single_pass'}
+    reweight_before = 0.0
+    reweight_after = 0.0
     if 'portfolio_weight' in pos_df.columns:
-        operating_focus_families = list((((operating_brain.get('review', {}) or {}).get('research_brain', {}) or {}).get('focus_families', []) or []))
-        pos_df, registered_family_allocator = apply_registered_family_budget(
-            pos_df,
-            weight_column='portfolio_weight',
-            focus_families=operating_focus_families,
-        )
-        pos_df, alpha_lifecycle_allocator = apply_alpha_lifecycle_weight_bias(
-            df=pos_df,
-            lifecycle=preliminary_alpha_lifecycle,
-            weight_column='portfolio_weight',
-        )
-        pos_df, trade_discipline_allocator = apply_trade_discipline_weights(
-            df=pos_df,
-            discipline=preliminary_trade_discipline,
-            weight_column='portfolio_weight',
-        )
-        pos_df, evidence_gate_summary = apply_evidence_gate(pos_df, config=config)
-        pos_df['portfolio_weight'] = pd.to_numeric(pos_df['portfolio_weight'], errors='coerce').fillna(0.0).clip(upper=single_name_cap)
-        total_weight = float(pos_df['portfolio_weight'].sum())
-        if total_weight > total_exposure_cap and total_weight > 0:
-            pos_df['portfolio_weight'] = pos_df['portfolio_weight'] * (total_exposure_cap / total_weight)
-        post_filter_reweight = bool(rec_cfg.get("enable_post_filter_reweight", True))
-        min_fill_ratio = float(rec_cfg.get("min_exposure_fill_ratio", 0.75) or 0.75)
-        target_fill = min(total_exposure_cap, total_exposure_cap * max(min_fill_ratio, 0.0))
-        reweight_before = float(pos_df['portfolio_weight'].sum())
-        reweight_after = reweight_before
-        if post_filter_reweight and target_fill > 0 and reweight_before < target_fill:
-            pos_df, reweight_before, reweight_after = rebalance_to_target_fill(
-                df=pos_df,
-                target_total=target_fill,
-                single_name_cap=single_name_cap,
-            )
-        pos_df, diversification_summary = diversify_portfolio_weights(
-            df=pos_df,
-            account_profile=account_profile,
-            total_exposure_cap=total_exposure_cap,
+        # 单遍定权：按分数分配、单名封顶取 min、regime 只过一次。
+        pos_df, decision_weight_summary = _assign_decision_weights(
+            pos_df=pos_df,
+            config=config,
+            market_state=market_state,
+            account_ctx=account_ctx,
             single_name_cap=single_name_cap,
+            total_exposure_cap=total_exposure_cap,
         )
+        reweight_before = float(pos_df['portfolio_weight'].sum()) if not pos_df.empty else 0.0
+        # 仅保留机械的可执行下限/取整（纯落地约束，不是砍仓层）。
         pos_df, executable_floor_summary = enforce_min_executable_weights(
             df=pos_df,
             total_exposure_cap=total_exposure_cap,
@@ -1065,37 +1120,12 @@ def build_portfolio_recommendation(config: Dict[str, Any], bridge_root: Path | N
             min_trade_value=max(float(broker_cfg.get('min_trade_value', 2000.0) or 2000.0), 0.0),
             weight_buffer=min(max(float(rec_cfg.get('account_size_min_weight_buffer', 1.05) or 1.05), 1.0), 2.0),
         )
-        pre_release_proxy_summary: Dict[str, Any] = {"applied": False}
-        if bool(rec_cfg.get("pre_release_intraday_proxy_objective_enabled", False)):
-            try:
-                pos_df, pre_release_proxy_summary = apply_pre_release_proxy_objective(
-                    pos_df=pos_df,
-                    prev_df=prev_df,
-                    config=config,
-                    rec_cfg=rec_cfg,
-                    account_ctx=account_ctx,
-                    total_exposure_cap=float(total_exposure_cap),
-                    single_name_cap=float(single_name_cap),
-                )
-            except Exception as exc:
-                pre_release_proxy_summary = {
-                    "applied": False,
-                    "error": str(exc),
-                    "fail_open": bool(rec_cfg.get("pre_release_proxy_fail_open", True)),
-                }
-                if not bool(rec_cfg.get("pre_release_proxy_fail_open", True)):
-                    raise
-        total_weight = float(pos_df['portfolio_weight'].sum())
+        reweight_after = float(pos_df['portfolio_weight'].sum()) if not pos_df.empty else 0.0
+        total_weight = reweight_after
     else:
-        reweight_before = 0.0
-        reweight_after = 0.0
-        registered_family_allocator = {'applied': False, 'reason': 'missing_portfolio_weight'}
-        alpha_lifecycle_allocator = {'applied': False, 'reason': 'missing_portfolio_weight'}
-        trade_discipline_allocator = {'applied': False, 'reason': 'missing_portfolio_weight'}
-        evidence_gate_summary = {'applied': False, 'reason': 'missing_portfolio_weight'}
-        diversification_summary = {'applied': False, 'reason': 'missing_portfolio_weight'}
+        decision_weight_summary = {'applied': False, 'reason': 'missing_portfolio_weight'}
         executable_floor_summary = {'applied': False, 'reason': 'missing_portfolio_weight'}
-        pre_release_proxy_summary = {'applied': False, 'reason': 'missing_portfolio_weight'}
+        total_weight = 0.0
     rebalance_df = _diff_positions(prev_df=prev_df, new_df=pos_df)
     if not rebalance_df.empty:
         key_col = _symbol_col(pos_df)
@@ -1125,14 +1155,7 @@ def build_portfolio_recommendation(config: Dict[str, Any], bridge_root: Path | N
         alpha_attribution=alpha_attribution,
         market_state=market_state,
     )
-    trade_discipline = build_trade_discipline(
-        target_df=pos_df,
-        position_df=prev_df,
-        market_state=market_state,
-        account_ctx=account_ctx,
-        alpha_lifecycle=alpha_lifecycle,
-        operating_brain=operating_brain,
-    )
+    trade_discipline = dict(preliminary_trade_discipline)
 
     summary = {
         'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -1191,6 +1214,7 @@ def build_portfolio_recommendation(config: Dict[str, Any], bridge_root: Path | N
             'target_fill': float(target_fill) if 'target_fill' in locals() else 0.0,
         },
         'diversification_objective': diversification_summary,
+        'decision_weight_summary': decision_weight_summary,
         'executable_weight_floor': executable_floor_summary,
         'pre_release_proxy_objective': pre_release_proxy_summary,
         'account_candidate_selection': account_candidate_selection,
@@ -1223,16 +1247,11 @@ def build_portfolio_recommendation(config: Dict[str, Any], bridge_root: Path | N
     harvest_risk_path = out_root / 'harvest_risk_assessment.json'
     econometric_guardrails_path = out_root / 'econometric_guardrails.json'
     objective_snapshot_path = out_root / 'global_objective_snapshot.json'
-    objective_bundle = build_unified_objective_bundle(
-        config=config,
-        stage='portfolio_recommendation',
-        source_summary=summary,
-        market_state=market_state,
-        account_snapshot=account_ctx,
-    )
-    harvest_risk = dict(objective_bundle.get('harvest_risk', {}) or {})
-    econometric_guardrails = dict(objective_bundle.get('econometric_guardrails', {}) or {})
-    global_objective = dict(objective_bundle.get('global_objective', {}) or {})
+    # 旧三联打分引擎（global_objective/harvest_risk/econometric_guardrails）已移除，
+    # 集中度/风险约束已在 decision engine 单遍内完成。保留空占位与文件路径以兼容下游。
+    harvest_risk: Dict[str, Any] = {"applied": False, "reason": "merged_into_decision_engine"}
+    econometric_guardrails: Dict[str, Any] = {"applied": False, "reason": "merged_into_decision_engine"}
+    global_objective: Dict[str, Any] = {"applied": False, "reason": "merged_into_decision_engine"}
     summary['harvest_risk'] = harvest_risk
     summary['econometric_guardrails'] = econometric_guardrails
     summary['global_objective'] = global_objective

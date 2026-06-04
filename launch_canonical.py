@@ -7,6 +7,17 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
+# 把临时/缓存目录钉死在 H 盘（专用 NVMe），避免训练 spill 写 C 盘 TEMP。
+# 必须在 spawn 任何子进程之前设置——子进程会继承本进程的 environ。
+import os as _os
+_ASHARE_TMP = Path(__file__).resolve().parent / "tmp" / "runtime"
+try:
+    _ASHARE_TMP.mkdir(parents=True, exist_ok=True)
+    for _v in ("TMP", "TEMP", "TMPDIR", "JOBLIB_TEMP_FOLDER", "XDG_CACHE_HOME"):
+        _os.environ[_v] = str(_ASHARE_TMP)
+except Exception:
+    pass
+
 from tools.preflight_check import run_preflight
 from tools.register_run import finalize_registered_run, start_registered_run
 

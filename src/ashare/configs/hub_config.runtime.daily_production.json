@@ -104,9 +104,9 @@
       "portfolio_recommendation",
       "execution_bridge"
     ],
-    "v5_review_enabled": true,
-    "v5_review_model": "deepseek-r1:14b",
-    "v5_review_timeout_seconds": 180
+    "research_review_enabled": true,
+    "research_review_model": "deepseek-r1:14b",
+    "research_review_timeout_seconds": 180
   },
   "eastmoney": {
     "enabled": true,
@@ -254,6 +254,9 @@
     }
   },
   "research_brain": {
+    "enabled": true,
+    "planning_model": "openai_research",
+    "worker_model": "deepseek_worker",
     "project_root": "H:\\Ashare\\src\\ashare\\research_brain",
     "hub_output_root": "H:\\Ashare\\data\\research_hub_integrated",
     "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table",
@@ -1024,6 +1027,8 @@
     "execution_mode": "precision",
     "precision_trade_enabled": true,
     "execution_namespace": "main",
+    "ignore_market_panic_reduce_only": false,
+    "allow_unfinished_orders_reconcile": false,
     "shadow_run": false
   }
 }

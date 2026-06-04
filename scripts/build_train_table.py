@@ -458,7 +458,7 @@ def phase_check() -> int:
         for f in failures:
             _log(f"  ✗ {f}")
         return 1
-    _log("=== 覆盖率自检通过 ✅ 数据从根上是干净的 ===")
+    _log("=== 覆盖率自检通过 [OK] 数据从根上是干净的 ===")
     return 0
 
 

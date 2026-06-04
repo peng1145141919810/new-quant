@@ -12,6 +12,7 @@
 - Prior workspace `F:\quant_data\AshareC#`: historical reference only, read-only.
 
 ## Recent Entries
+- `CDL-20260531-050` — Codex ran the user-authorized `daily_production` refresh, confirmed SQL/train-table freshness, fixed the Windows console check failure, and closed active runtime naming gaps left after Claude's cleanup. Author: Codex.
 - `CDL-20260531-049` — 全库 V5/V5.1/V6 版本后缀命名债务清零（代码符号/数据目录/持久化契约/文档四阶段）；附带修复 train_table_dir 指向破损 v1 表的隐性 bug。Author: Claude.
 - `CDL-20260529-048` — tightened `CLAUDE_CODEX_DIALOGUE.md` into an active-thread board with 25-message / ~25KB archive triggers and compact archive rules. Author: Codex.
 - `CDL-20260529-047` — V5.1 stock-ranker now defaults to cross-sectional alpha labels and excludes direct market-beta features from training while preserving raw realized returns for backtests. Author: Codex.
@@ -72,6 +73,7 @@
 - LLM tracing: `src\ashare\engine\llm_trace.py`
 
 ## Update Index
+- `CDL-20260531-050`: refreshed SQL via the shared `daily_production` pre-research bundle, verified `research_data_v1.sqlite3` through trade date `2026-05-29`, confirmed clean `train_table` coverage, fixed `build_train_table.py check` GBK output, and removed active runtime naming leftovers (`hub_config.v6.runtime`, `trade_release_v1`, `event_lake_v6`, `v5_review`, stale profile keys)
 - `CDL-20260529-048`: made `CLAUDE_CODEX_DIALOGUE.md` an active-thread board, added archive triggers, compact archive format, and future session reading boundaries
 - `CDL-20260529-047`: changed V5.1 alpha training defaults to daily cross-sectional rank labels, excluded direct market-beta features from the stock-ranker, and preserved realized raw returns for portfolio backtests
 - `CDL-20260509-049`: made post-portfolio evidence audit default-on, portfolio rebuild after audit default-on, and audit-failure execution blocking default-on
@@ -125,6 +127,9 @@
 - `CDL-20260410-001`: split dev log into stable/history/index, rewrote primary readmes and operator guide, updated doc sync tooling
 
 ## Retrieval Hints
+- Search `CDL-20260531-050` in `CODEX_DEV_UPDATES.md` for the 2026-05-31 user-authorized `daily_production` refresh, SQL freshness proof, train-table coverage proof, and active runtime naming-debt follow-up.
+- Search `manual_daily_production_refresh_20260531.json` under `data\daily_cache` for the refresh artifact from that run.
+- Search `research_review_enabled`, `runtime_config_alias_paths`, and `hub_config.runtime` for the post-cleanup runtime config naming surface.
 - Search `CDL-20260529-048` in `CODEX_DEV_UPDATES.md` and `维护规则` in `CLAUDE_CODEX_DIALOGUE.md` for the current cross-AI dialogue archive policy.
 - Archive closed cross-AI threads to `CLAUDE_CODEX_DIALOGUE_ARCHIVE.md` when the dialogue file exceeds 25 messages, about 25 KB, or when long entries already have CDL coverage.
 - Search `CDL-20260529-047` in `CODEX_DEV_UPDATES.md` for the alpha-label / market-beta separation patch.

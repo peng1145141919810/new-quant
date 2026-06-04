@@ -16,9 +16,8 @@
   "paths": {
     "repo_root": "H:\\Ashare",
     "live_data_root": "H:\\Ashare\\data",
-    "active_v6_root": "H:\\Ashare\\src\\ashare",
+    "active_runtime_root": "H:\\Ashare\\src\\ashare",
     "workspace_runtime_root": "H:\\Ashare\\src\\ashare",
-    "active_v5_runtime_root": "H:\\Ashare\\src\\ashare\\research_brain",
     "research_runtime_root": "H:\\Ashare\\src\\ashare\\research_brain",
     "archive_roots": [
       "F:\\quant_data\\早期实验数据\\Ashare_legacy_code_20260321"

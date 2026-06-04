@@ -6,13 +6,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from .config_utils import ensure_dir, load_config
-from .constraint_brain import apply_to_config as brain_apply
-from .constraint_brain import evaluate as brain_evaluate
-from .execution_llm_review import review_execution_plan
 from .execution_bridge_runner import execution_policy, run_execution_bridge
-from .execution_ems import build_execution_management_decision
-from .global_objective import build_unified_objective_bundle
-from .intelligent_scheduler import build_execution_scheduler_verdict
 from .market_state import load_latest_market_state
 from .portfolio_release import load_latest_release, load_release_by_id, record_release_execution
 from .runtime_protocol import artifact_identity, release_artifact_identity
@@ -101,41 +95,14 @@ def _account_snapshot_from_safety(safety: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def _default_llm_review() -> Dict[str, Any]:
-    return {
-        "enabled": False,
-        "applied": False,
-        "review": {
-            "review_summary": "llm_review_skipped",
-            "risk_level": "medium",
-            "turnover_multiplier": 1.0,
-            "blocked_symbols": [],
-            "favored_symbols": [],
-            "reduce_only": False,
-            "risk_flags": [],
-            "decision_basis": [],
-            "uncertainty_flags": ["llm_review_skipped"],
-            "overfit_guard": "scheduler_fallback_to_structured_layers",
-            "candidate_pool_assessment": {},
-        },
-    }
-
-
-def _status_from_scheduler(verdict: Dict[str, Any], *, dispatched: bool, report_ok: bool = True, shadow_run: bool = False) -> str:
-    final_verdict = str(verdict.get("final_verdict", "") or "").strip().lower()
-    if final_verdict == "block":
+def _dispatch_status(verdict: Dict[str, Any], *, dispatched: bool, report_ok: bool = True, shadow_run: bool = False) -> str:
+    if str(verdict.get("block_reason", "") or "").strip():
         return "blocked"
-    if final_verdict == "defer":
-        return "skipped"
     if not dispatched:
         return "skipped"
     if not report_ok:
         return "execution_error"
     return "shadow_executed" if shadow_run else "executed"
-
-
-def _load_intraday_phase_state(config: Dict[str, Any]) -> Dict[str, Any]:
-    return _load_json(_trade_clock_root(config) / "intraday_state" / "latest" / "intraday_phase_state.json")
 
 
 def assess_execution_gate(
@@ -276,68 +243,30 @@ def run_execution_only(
     portfolio_summary = _load_portfolio_summary(release_doc)
     market_state = _market_state_runtime(release_doc=release_doc, config=config)
     account_snapshot = _account_snapshot_from_safety(safety)
-    llm_review = (
-        review_execution_plan(
-            config=config,
-            release_doc=release_doc,
-            market_state=market_state,
-            account_state=account_snapshot,
-            safety=safety,
-        )
-        if release_doc and not gate_only
-        else _default_llm_review()
-    )
-    brain_decision = brain_evaluate(
-        config=config,
-        safety=safety,
-        market_state=market_state,
-        llm_review=llm_review,
-        account_snapshot=account_snapshot,
-        intraday_state=_load_intraday_phase_state(config),
-        clock_snapshot=_load_json(_trade_clock_root(config) / "clock_account_snapshot.json"),
-        trade_discipline=dict(portfolio_summary.get("trade_discipline", {}) or {}),
-    )
-    objective_bundle = build_unified_objective_bundle(
-        config=config,
-        stage="execution_dispatch",
-        source_summary=portfolio_summary,
-        market_state=market_state,
-        execution_review=llm_review,
-        account_snapshot=account_snapshot,
-    )
-    harvest_risk = dict(objective_bundle.get("harvest_risk", {}) or {})
-    econometric_guardrails = dict(objective_bundle.get("econometric_guardrails", {}) or {})
-    global_objective = dict(objective_bundle.get("global_objective", {}) or {})
-    scheduler_verdict = build_execution_scheduler_verdict(
-        gate=gate,
-        safety=safety,
-        release_doc=release_doc,
-        market_state=market_state,
-        account_snapshot=account_snapshot,
-        llm_review=llm_review,
-        brain_decision=brain_decision,
-        trade_discipline=dict(portfolio_summary.get("trade_discipline", {}) or {}),
-        operating_brain=dict(release_doc.get("llm_operating_brain", {}) or {}),
-        global_objective=global_objective,
-        harvest_risk=harvest_risk,
-        econometric_guardrails=econometric_guardrails,
-        trigger_label=trigger_label,
-        trigger_source=trigger_source,
-        intent_source=intent_source,
-        execution_namespace=namespace,
-        shadow_run=shadow_run,
-    )
-    ems_decision = build_execution_management_decision(
-        config=config,
-        scheduler_verdict=scheduler_verdict,
-        release_doc=release_doc,
-        portfolio_summary=portfolio_summary,
-        market_state=market_state,
-        account_snapshot=account_snapshot,
-        harvest_risk=harvest_risk,
-        global_objective=global_objective,
-    )
-    execution_config = brain_apply(config, brain_decision)
+
+    # --- 单遍发车闸门（替代旧仲裁塔）。是否发车只由两件事决定：
+    #     1) 交易窗口/release 闸门 ok；2) 安全层允许执行。
+    #     仓位大小已在上游 decision engine 定好，这里不再二次砍仓。
+    gate_should = bool(gate.get("should_execute", False))
+    safety_allow = bool(safety.get("allow_execution", False))
+    has_release = bool(release_doc)
+    block_reason = ""
+    if not has_release:
+        block_reason = "no_release"
+    elif not gate_should:
+        block_reason = str(gate.get("reason", "") or "gate_not_ready")
+    elif not safety_allow:
+        block_reason = str(safety.get("halt_reason", "") or "safety_block")
+    should_dispatch = has_release and gate_should and safety_allow
+    verdict = {
+        "should_dispatch": should_dispatch,
+        "block_reason": block_reason,
+        "posture": str(safety.get("market_safety_regime", "") or market_state.get("market_regime", "") or ""),
+        "system_mode": str(safety.get("system_mode", "") or ""),
+        "execution_namespace": namespace,
+        "shadow_run": shadow_run,
+    }
+    execution_config = config
     release_identity = release_artifact_identity(release_doc, producer="execution_manager.release") if release_doc else artifact_identity(
         run_id="",
         trade_date=str(gate.get("release_trade_date", "") or dict(gate.get("release", {}) or {}).get("trade_date", "") or ""),
@@ -365,27 +294,7 @@ def run_execution_only(
         "intent_source": str(intent_source or "release"),
         "intraday_tactical_orders_path": str(tac_path or ""),
         "artifact_identity": release_identity,
-        "constraint_brain": brain_decision.to_audit_dict(),
-        "scheduler_verdict": scheduler_verdict,
-        "global_objective": global_objective,
-        "harvest_risk": harvest_risk,
-        "econometric_guardrails": econometric_guardrails,
-        "execution_management": {
-            "posture": str(ems_decision.get("posture", "") or ""),
-            "pacing": str(ems_decision.get("pacing", "") or ""),
-            "urgency": str(ems_decision.get("urgency", "") or ""),
-            "allowed_actions": list(ems_decision.get("allowed_actions", []) or []),
-        },
-        "llm_execution_review": {
-            "enabled": bool(llm_review.get("enabled", False)),
-            "applied": bool(llm_review.get("applied", False)),
-            "provider": str(llm_review.get("provider", "") or ""),
-            "model": str(llm_review.get("model", "") or ""),
-            "artifact_path": str(llm_review.get("artifact_path", "") or ""),
-            "review_summary": str((llm_review.get("review") or {}).get("review_summary", "") or ""),
-            "risk_level": str((llm_review.get("review") or {}).get("risk_level", "") or ""),
-            "candidate_pool_assessment": dict((llm_review.get("review") or {}).get("candidate_pool_assessment", {}) or {}),
-        },
+        "dispatch_verdict": verdict,
         "trade_discipline": dict(portfolio_summary.get("trade_discipline", {}) or {}),
     }
     latest_t_audit = _latest_t_audit_summary(config)
@@ -405,26 +314,16 @@ def run_execution_only(
         "shadow_run": shadow_run,
         "market_state": market_state,
         "release": release_context,
-        "artifact_identity": dict(scheduler_verdict.get("artifact_identity", {}) or {}),
-        "scheduler_verdict": scheduler_verdict,
-        "global_objective": global_objective,
-        "harvest_risk": harvest_risk,
-        "econometric_guardrails": econometric_guardrails,
-        "execution_management": ems_decision,
+        "artifact_identity": dict(release_identity or {}),
+        "dispatch_verdict": verdict,
     }
     if gate_only:
         payload = dict(base_payload)
         payload["status"] = "gate_only"
         return payload
-    ems_root = ensure_dir(_trade_clock_root(config) / "ems" / namespace / datetime.now().strftime("%Y%m%d_%H%M%S"))
-    ems_path = ems_root / "execution_management_decision.json"
-    ems_path.write_text(json.dumps(ems_decision, ensure_ascii=False, indent=2), encoding="utf-8")
-    _mirror_json_to_sql(config, ems_path, ems_decision)
-    release_context["execution_management_path"] = str(ems_path)
-    base_payload["execution_management_path"] = str(ems_path)
-    if not bool(scheduler_verdict.get("should_dispatch", False)):
+    if not should_dispatch:
         payload = dict(base_payload)
-        payload["status"] = _status_from_scheduler(scheduler_verdict, dispatched=False, shadow_run=shadow_run)
+        payload["status"] = _dispatch_status(verdict, dispatched=False, shadow_run=shadow_run)
         return payload
     if tac_path:
         execution_config = dict(execution_config)
@@ -468,8 +367,8 @@ def run_execution_only(
             "allow_unfinished_orders_reconcile": bool(config.get("execution_policy", {}).get("allow_unfinished_orders_reconcile", False)),
             "shadow_run": shadow_run,
             "error": str(exc),
-            "artifact_identity": dict(scheduler_verdict.get("artifact_identity", {}) or {}),
-            "scheduler_verdict": scheduler_verdict,
+            "artifact_identity": dict(release_identity or {}),
+            "dispatch_verdict": verdict,
         }
     if not bool(report.get("ok", False)):
         payload = dict(base_payload)
@@ -492,19 +391,14 @@ def run_execution_only(
             release_id=str(release_identity.get("release_id", "") or ""),
             phase="execution_dispatch",
             producer="execution_manager.dispatch",
-            parent_lineage_token=str(scheduler_verdict.get("artifact_identity", {}).get("lineage_token", "") or ""),
+            parent_lineage_token=str(release_identity.get("lineage_token", "") or ""),
         ),
         "trigger_label": str(trigger_label or "manual"),
         "trigger_source": str(trigger_source or "manual"),
         "gate": gate,
         "safety": safety,
         "release": release_context,
-        "scheduler_verdict": scheduler_verdict,
-        "global_objective": global_objective,
-        "harvest_risk": harvest_risk,
-        "econometric_guardrails": econometric_guardrails,
-        "execution_management": ems_decision,
-        "llm_execution_review": llm_review,
+        "dispatch_verdict": verdict,
         "execution_report": report,
         "allow_unfinished_orders_reconcile": bool(config.get("execution_policy", {}).get("allow_unfinished_orders_reconcile", False)),
     }
@@ -525,14 +419,9 @@ def run_execution_only(
                 "artifact_identity": dict(dispatch_doc.get("artifact_identity", {}) or {}),
                 "trigger_label": str(trigger_label or "manual"),
                 "trigger_source": str(trigger_source or "manual"),
-                "scheduler_verdict": scheduler_verdict,
-                "global_objective": global_objective,
-                "harvest_risk": harvest_risk,
-                "econometric_guardrails": econometric_guardrails,
-                "execution_management": ems_decision,
+                "dispatch_verdict": verdict,
                 "execution_report_path": str(report.get("execution_report_path", "") or ""),
                 "dispatch_path": str(dispatch_path),
-                "execution_management_path": str(ems_path),
                 "n_orders": int(report.get("n_orders", 0) or 0),
                 "n_fills": int(report.get("n_fills", 0) or 0),
             },
@@ -540,10 +429,9 @@ def run_execution_only(
     payload = dict(base_payload)
     payload.update(
         {
-            "status": _status_from_scheduler(scheduler_verdict, dispatched=True, report_ok=True, shadow_run=shadow_run),
+            "status": _dispatch_status(verdict, dispatched=True, report_ok=True, shadow_run=shadow_run),
             "dispatch_path": str(dispatch_path),
             "latest_dispatch_path": str(latest_path),
-            "execution_management_path": str(ems_path),
             "release_execution_paths": history_paths,
             "execution_report": report,
         }

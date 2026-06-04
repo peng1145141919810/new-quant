@@ -7,6 +7,16 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
+# 临时/缓存目录钉在 H 盘（专用 NVMe），避免训练 spill 写 C 盘 TEMP。
+# main_research_runner 可被直接当入口，所以这里也设一遍；放在 spawn 子进程之前。
+_ASHARE_TMP = Path(__file__).resolve().parent / "tmp" / "runtime"
+try:
+    _ASHARE_TMP.mkdir(parents=True, exist_ok=True)
+    for _v in ("TMP", "TEMP", "TMPDIR", "JOBLIB_TEMP_FOLDER", "XDG_CACHE_HOME"):
+        os.environ[_v] = str(_ASHARE_TMP)
+except Exception:
+    pass
+
 
 def _package_root() -> Path:
     repo_root = Path(__file__).resolve().parent

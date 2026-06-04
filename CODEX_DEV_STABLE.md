@@ -17,20 +17,20 @@
 - Snapshot time: `2026-05-31`
 - Workspace root: `H:\Ashare` (active)
 - Prior workspace root: `F:\quant_data\AshareC#` (historical reference, read-only)
-- Major change this snapshot: full version-suffix naming cleanup across code + data dirs + docs. All V5/V5.1/V6 suffix tokens removed from module names, config keys, supervisor-state keys, stage ids, data directories, and documentation. See `CDL-20260531-049`.
+- Major change this snapshot: version-suffix naming cleanup is mostly complete on the active runtime path, and `CDL-20260531-050` closed the main live gaps left by `CDL-20260531-049` (`hub_config.v6.runtime.*`, `trade_release_v1`, `event_lake_v6`, runtime `v5_review`, and stale profile keys). Some historical docs still use old terminology.
 - New governance doc: `CLAUDE_CODEX_DIALOGUE.md` (async Claude↔Codex note channel)
 - Dialogue maintenance policy: `CLAUDE_CODEX_DIALOGUE.md` is an active-thread board, not a second dev log. Archive closed threads to `CLAUDE_CODEX_DIALOGUE_ARCHIVE.md` when it exceeds 25 messages, about 25 KB, or when long entries already have a CDL record; see `CDL-20260529-048`.
 - Formal operator entry: `launch_canonical.py`
 - Wrapped business root: `main_research_runner.py`
 - Trade clock entry: `trade_clock_service.py`
 - Active runtime root: `src\ashare`
-- Formal run trace root: `outputs\canonical_runs` (does not yet exist on H:; will be created on first canonical run)
+- Formal run trace root: `outputs\canonical_runs`
 - Formal run manifest: `outputs\canonical_runs\<run_id>\run_manifest.json`
 - Workspace default launcher mode/profile: `integrated_supervisor` / `quick_test`
 - Trade-clock service default profile: `daily_production`
 - Canonical data root in manifest: `data` (now under `H:\Ashare\data`, ~21.6 GB total)
-- DROPPED: control-plane helper `ashare_control`, public portal source `site_portal`, site publish stage `outputs\site_publish_stage`, C# governance/orchestration skeleton (entire `csharp_runtime_skeleton`), Python RPC bridge `python_rpc_bridge.py`.
-- Runtime state on H: is empty by design: no live release, no OMS ledgers, no execution reports, no trade-clock runtime state. First H:-side runs must regenerate these from scratch.
+- DROPPED: public portal source `site_portal`, site publish stage `outputs\site_publish_stage`, C# governance/orchestration skeleton (entire `csharp_runtime_skeleton`), Python RPC bridge `python_rpc_bridge.py`. The lightweight `ashare_control` helper remains active for runtime-config aliases and control-plane snapshot generation.
+- Runtime state on H: is sparse by design. Data refresh and probes may create `data\daily_cache`, `data\trade_clock`, SQL runtime-artifact rows, and snapshots, but no full H-side research/release/execution chain has been run unless explicitly recorded.
 
 ### H: Workspace Bootstrap Status (as of CDL-20260529-046)
 - **DONE** Venvs installed on H:
@@ -43,12 +43,13 @@
 - **DONE** Preflight green: `launch_canonical.py --preflight-only --profile quick_test` → exit 0, all 28 checks pass
 - **N/A** `D:\AshareHotData\research_hub_integrated\runs` NVMe junction — no longer needed. H: is itself a dedicated NVMe SSD (aigo P7000Z 2TB), so the original motivation (move hot V5 writes off F:'s HDD onto NVMe) is solved by living on H: directly. V5 will write under `H:\Ashare\data\research_hub_integrated\` and that path is already on NVMe.
 - **DONE** First H-side alpha methodology patch: V5.1 configs now default to `alpha_label_mode=cross_section_rank` and `feature_market_policy=exclude_from_stock_ranker`; see `CDL-20260529-047`.
+- **DONE** `daily_production` pre-research refresh authorized by user and run on `2026-05-31`; market SQL tables are current through latest A-share trading day `2026-05-29`, source fetch log updated through `2026-05-31 17:40:01`, and `train_table` coverage check passed. See `CDL-20260531-050`.
 
 ### Physical Disk Layout (verified 2026-05-29)
 - `C:` and `D:` — both partitions on Lexar THOR PRO 1TB NVMe SSD (shared spindle)
 - `F:` — Seagate ST4000DM004 4TB HDD (slow; old workspace lives here, read-only)
 - `H:` — **aigo P7000Z 2TB NVMe SSD, dedicated** — this is the active workspace. Do not assume H: is HDD.
-- **PENDING** No real chain run executed yet — first `research_only` will likely hit data-consistency gate due to 20-day-stale SQLite (`research_data_v1` last touched 2026-05-09)
+- **PENDING** No full H-side `research_only` / integrated chain has been run yet. The earlier 20-day-stale SQLite blocker is cleared as of `2026-05-31`; first research validation should use current SQL/train-table data.
 - **PENDING** `git remote add origin <url>` if user wants a remote; currently local-only repo
 
 ## Session Start Checklist
@@ -213,6 +214,8 @@
 - Research fact layer SQLite: `data\sql_store\research_fact_layers_v1.sqlite3`
 - Affordable data SQLite: `data\sql_store\affordable_data_v1.sqlite3`
 - Unified per-source fetch log table: `data\sql_store\research_fact_layers_v1.sqlite3::source_fetch_run_log`
+- As of `2026-05-31 17:40`, the user-authorized `daily_production` pre-research refresh completed with `ok=true`: `market_enriched_daily`, `market_hs300_daily`, `market_price_snapshot`, `valuation_daily`, and `crowding_daily` in `research_data_v1.sqlite3` are current through latest A-share trading day `2026-05-29`; `source_fetch_run_log` has 686 rows and max `finished_at=2026-05-31 17:40:01`.
+- The clean `data\ml_datasets\train_table` contains 15,627,132 rows; `scripts\build_train_table.py check` passed after the console-unsafe emoji was replaced with ASCII `[OK]`.
 - As of `2026-05-09 12:52`, a direct derived-alpha refresh from `affordable_data_v1.sqlite3` updated runtime alpha tables in `research_data_v1.sqlite3`: `valuation_daily` and `crowding_daily` now reach `2026-05-08`; `expectation_revision_daily` now has affordable-derived forecast/express rows through `2026-05-07`.
 
 ## Current Architecture Truth
@@ -304,7 +307,7 @@
 - Do not run the full integrated pipeline by default.
 - Use lightweight validation first: file inspection, targeted commands, `python -m py_compile`, and small probes.
 - Do not modify `F:\quant_data\Ashare` from this workspace.
-- Keep the heaviest V5 run artifacts on NVMe when possible; on this machine only `data\research_hub_integrated\runs` is intentionally hot-moved to `D:` and the broader `data` tree remains on `F:` to conserve SSD capacity.
+- Keep heavy research artifacts under the active H: workspace unless the user explicitly authorizes a new hot-path move. H: is already a dedicated NVMe SSD; do not recreate old F:/D: junction assumptions by default.
 - Do not switch the broker bridge to the main Python environment; keep `GMTRADE_PYTHON_EXECUTABLE` on the dedicated Gmtrade / 掘金 adapter interpreter (on this machine the template points at Python 3.9; prefer a dedicated `gmtrade39` venv `Scripts\\python.exe` when you maintain one).
 - Do not echo secrets into user-facing output.
 - Do not re-enable full `pred_test.csv` emission unless you are doing bounded debugging; the old default was a major HDD / storage-stack pressure source during the crash investigation.
@@ -329,13 +332,14 @@
 
 ## Known Issues
 - `README.md` and several legacy sub-readmes had mojibake and stale path assumptions before this rewrite; older copies should not be trusted over this file.
-- `tools\preflight_check.py` still contains legacy import targets under `hub_v6.*`; treat it as a lightweight guardrail, not a full proof that naming migration is complete.
+- `tools\preflight_check.py` now passes against the active `src\ashare` runtime root. Naming migration is still not proven complete by preflight alone; use targeted `rg` scans for old runtime tokens before declaring cleanup finished.
 - The 2026-04-11 crash investigation found repeated native failures under Python **3.14** (`python314.dll` `0xC0000005`, `ntdll.dll` `0xC0000374`) during V5 GPU runs, followed later by a system `MEMORY_MANAGEMENT (0x1A)` bluescreen and `RstMwService.exe` crash. The workspace now defaults research execution to Python **3.13** (`.venv313`) while leaving `GMTRADE_PYTHON_EXECUTABLE` on Python **3.9**.
 - On this machine, `C:\Users\Administrator\AppData\Local\Programs\Python\Python39\python.exe` now has `gmtrade 3.0.6` installed and passes the health probe again. If broker health regresses on another machine, verify that exact interpreter first before debugging token/account settings.
 - `sql_store.sqlite_connection` enables WAL, `busy_timeout`, and a longer busy wait on connect; `market_pipeline.sync_enriched_daily_from_tushare` holds one SQLite connection for the whole enriched sync to cut down `database is locked` races when the trade clock or RPC bridge touches `research_data_v1.sqlite3` at the same time.
 - The earlier automation split where `integrated_supervisor` refreshed only `market_pipeline` while `clock_supervisor` separately owned `affordable_data_bundle + external_research_refresh + research_fact_refresh` is now removed; both paths share the same pre-research refresh bundle. If databases are still stale after this point, the cause is the refresh jobs themselves not being run successfully or their local source files already being old, not entrypoint divergence.
 - As of `2026-04-12`, automation also enforces a data-consistency gate before research/release-sensitive phases. If the current trade date does not have same-day refresh evidence for `affordable_data_refresh`, `external_research_refresh`, `research_fact_refresh`, and `industry_hard_factor_refresh`, the morning chain now fails closed instead of quietly trading on a previous-evening snapshot and missing overnight news.
 - As of `2026-05-09`, the explicit user-authorized repair run refreshed market data through trade date `2026-05-08`: run `20260509_000722_b2aef930` updated `market_enriched_daily`, `market_hs300_daily`, `market_price_snapshot`, and training rows after the market refresh was moved before the data-consistency gate. Older SQL freshness notes below are retained as historical context, not current market-table truth.
+- As of `2026-05-31`, the H: workspace SQL freshness blocker is cleared: `daily_production` pre-research refresh ended `ok=true`, market SQL tables are at `2026-05-29` (latest A-share trading day before Sunday `2026-05-31`), and `train_table` coverage check passed.
 - Historical SQL freshness audit from `2026-04-11 20:35`:
   - `data\sql_store\research_data_v1.sqlite3`: after the market-pipeline mirror fix and validation run, `market_enriched_daily` / `market_hs300_daily` / `market_price_snapshot` are all at `2026-04-10`; this appears consistent with the latest trade date currently available to the local market source path during the validation run
   - `data\sql_store\affordable_data_v1.sqlite3`: after the script-bootstrap fix and direct validation run, affordable datasets are refreshing again and recent primary dates moved up to `2026-04-10` / `2026-04-11`

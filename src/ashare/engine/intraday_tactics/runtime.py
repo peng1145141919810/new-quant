@@ -9,7 +9,6 @@ from typing import Any, Dict, List
 import pandas as pd
 
 from ..config_utils import load_config
-from ..outer_intelligence import arbitrate_intraday_intents
 from ..sql_store import mirror_runtime_dataframe, mirror_runtime_json_artifact, mirror_runtime_jsonl_records
 from ..trading_clock import clock_now
 from .audit import build_latest_audit_summary, write_tactical_audit_jsonl
@@ -68,7 +67,8 @@ def run_intraday_tactics_pipeline(
     latest.mkdir(parents=True, exist_ok=True)
 
     raw = run_triggers(ctx=ctx, policy=policy, tactical_phase=tactical_phase, now=now_dt.replace(tzinfo=None))
-    raw, intelligence_summary = arbitrate_intraday_intents(raw, ctx=ctx, policy=policy)
+    # outer_intelligence 盘中仲裁已移除：触发意图直接进入机械冲突仲裁。
+    intelligence_summary = {"enabled": False, "applied": False, "reason": "outer_intelligence_removed"}
     winners, conflicts, supp = arbitrate(raw, ctx=ctx)
     nav = float(dict(ctx.get("clock_account_snapshot", {}) or {}).get("nav", 0) or 0)
     winners = _apply_policy_caps(winners, policy, nav)

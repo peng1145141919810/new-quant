@@ -40,10 +40,12 @@ data/event_lake/logs/
 src/ashare/configs/generated_runtime/
 src/ashare/configs/*.autogen.json
 src/ashare/configs/gmtrade_runtime_config.autogen.json
-src/ashare/configs/runtime_config.runtime.*.json
-src/ashare/configs/hub_config.v6.runtime.*.json
-!src/ashare/configs/hub_config.v6.runtime.daily_production.json
-!src/ashare/configs/hub_config.v6.runtime.quick_test.json
+src/ashare/configs/runtime_config.*.json
+src/ashare/configs/hub_config.runtime.*.json
+!src/ashare/configs/runtime_config.daily_production.json
+!src/ashare/configs/runtime_config.quick_test.json
+!src/ashare/configs/hub_config.runtime.daily_production.json
+!src/ashare/configs/hub_config.runtime.quick_test.json
 
 # ====== 大型数据（git 不擅长存 GB 级 SQLite/CSV）======
 data/sql_store/*.sqlite3

@@ -40,7 +40,7 @@ def build_runtime_config() -> Dict[str, Any]:
     ollama_evidence_card_model = str(getattr(LS, "OLLAMA_EVIDENCE_CARD_MODEL", ollama_research_model) or ollama_research_model)
     ollama_review_router_model = str(getattr(LS, "OLLAMA_REVIEW_ROUTER_MODEL", ollama_event_extract_model) or ollama_event_extract_model)
     ollama_runtime_explainer_model = str(getattr(LS, "OLLAMA_RUNTIME_EXPLAINER_MODEL", ollama_event_extract_model) or ollama_event_extract_model)
-    ollama_v5_review_model = str(getattr(LS, "OLLAMA_V5_REVIEW_MODEL", ollama_research_model) or ollama_research_model)
+    ollama_research_review_model = str(getattr(LS, "OLLAMA_RESEARCH_REVIEW_MODEL", ollama_research_model) or ollama_research_model)
     cfg: Dict[str, Any] = {
         "project_name": "quant_research_engine_lean_portfolio_integrated",
         "project_root": str(LS.PROJECT_ROOT),
@@ -133,9 +133,14 @@ def build_runtime_config() -> Dict[str, Any]:
             "runtime_explainer_model": ollama_runtime_explainer_model,
             "runtime_explainer_timeout_seconds": int(getattr(LS, "OLLAMA_RUNTIME_EXPLAINER_TIMEOUT_SECONDS", 45) or 45),
             "runtime_explainer_stages": list(getattr(LS, "OLLAMA_RUNTIME_EXPLAINER_STAGES", ["research_plan", "gpu_research", "portfolio_recommendation", "execution_bridge"]) or ["research_plan", "gpu_research", "portfolio_recommendation", "execution_bridge"]),
-            "v5_review_enabled": bool(getattr(LS, "ENABLE_LOCAL_OLLAMA_V5_REVIEW", True)),
-            "v5_review_model": ollama_v5_review_model,
-            "v5_review_timeout_seconds": int(getattr(LS, "OLLAMA_V5_REVIEW_TIMEOUT_SECONDS", ollama_research_timeout_seconds) or ollama_research_timeout_seconds),
+            "research_review_enabled": bool(
+                getattr(LS, "ENABLE_LOCAL_OLLAMA_RESEARCH_REVIEW", True)
+            ),
+            "research_review_model": ollama_research_review_model,
+            "research_review_timeout_seconds": int(
+                getattr(LS, "OLLAMA_RESEARCH_REVIEW_TIMEOUT_SECONDS", ollama_research_timeout_seconds)
+                or ollama_research_timeout_seconds
+            ),
         },
         "eastmoney": {
             "enabled": bool(getattr(LS, "ENABLE_EASTMONEY_INTRADAY_KLINE", True)),
@@ -227,7 +232,16 @@ def build_runtime_config() -> Dict[str, Any]:
                 "top_k": int(getattr(LS, "INDUSTRY_ROUTER_BACKTEST_TOP_K", 3) or 3),
             },
         },
-        "research_brain": {"enabled": True, "planning_model": "openai_research", "worker_model": "deepseek_worker"},
+        "research_brain": {
+            "enabled": True,
+            "planning_model": "openai_research",
+            "worker_model": "deepseek_worker",
+            "project_root": getattr(LS, "RESEARCH_BRAIN_PROJECT_ROOT", str(Path(LS.PROJECT_ROOT) / "research_brain")),
+            "hub_output_root": getattr(LS, "RESEARCH_BRAIN_OUTPUT_ROOT", str(Path(LS.DATA_ROOT) / "research_hub_integrated")),
+            "train_table_dir": LS.TRAIN_TABLE_DIR,
+            "bridge_input_root": getattr(LS, "RESEARCH_BRAIN_BRIDGE_INPUT_ROOT", LS.BRIDGE_ROOT),
+            "python_executable": LS.PYTHON_EXECUTABLE,
+        },
         "supervisor": {"token_plan_min_interval_hours": LS.TOKEN_PLAN_MIN_INTERVAL_HOURS, "run_forever": LS.SUPERVISOR_RUN_FOREVER, "max_ticks": LS.SUPERVISOR_MAX_TICKS, "sleep_seconds": LS.SUPERVISOR_SLEEP_SECONDS, "gpu_research_max_cycles_per_tick": LS.GPU_RESEARCH_MAX_CYCLES_PER_TICK, "gpu_research_dry_run": LS.GPU_RESEARCH_DRY_RUN, "require_gpu": LS.REQUIRE_GPU},
         "dynamic_strategy": {
             "enabled": LS.ENABLE_DAILY_STRATEGY_FEEDBACK,
@@ -237,7 +251,6 @@ def build_runtime_config() -> Dict[str, Any]:
             "aggressive_daily_return_threshold": LS.AGGRESSIVE_DAILY_RETURN_THRESHOLD,
             "aggressive_three_day_return_threshold": LS.AGGRESSIVE_THREE_DAY_RETURN_THRESHOLD,
         },
-        "research_brain": {"project_root": LS.V5_PROJECT_ROOT, "hub_output_root": LS.V5_HUB_OUTPUT_ROOT, "train_table_dir": LS.TRAIN_TABLE_DIR, "bridge_input_root": LS.V5_BRIDGE_INPUT_ROOT, "python_executable": LS.PYTHON_EXECUTABLE},
         "market_pipeline": {
             "enabled": LS.ENABLE_MARKET_PIPELINE,
             "enriched_dir": LS.ENRICHED_DAILY_DIR,
@@ -719,6 +732,16 @@ def build_runtime_config() -> Dict[str, Any]:
             "enabled": bool(getattr(LS, "ENABLE_TECHNICAL_CONFIRMATION", True)),
             "config_path": str(getattr(LS, "TECHNICAL_CONFIRMATION_CONFIG_PATH", Path(LS.PROJECT_ROOT) / "configs" / "technical_confirmation" / "default.json")),
         },
+        "decision_engine": {
+            "max_names": int(getattr(LS, "DECISION_ENGINE_MAX_NAMES", 5) or 5),
+            "min_names": int(getattr(LS, "DECISION_ENGINE_MIN_NAMES", 3) or 3),
+            "single_name_cap": float(getattr(LS, "DECISION_ENGINE_SINGLE_NAME_CAP", 0.25) or 0.25),
+            "total_exposure_cap": float(getattr(LS, "DECISION_ENGINE_TOTAL_EXPOSURE_CAP", 1.0) or 1.0),
+            "min_name_weight": float(getattr(LS, "DECISION_ENGINE_MIN_NAME_WEIGHT", 0.08) or 0.08),
+            "caution_exposure_scale": float(getattr(LS, "DECISION_ENGINE_CAUTION_EXPOSURE_SCALE", 0.6) or 0.6),
+            "panic_only_reduce": bool(getattr(LS, "DECISION_ENGINE_PANIC_ONLY_REDUCE", True)),
+            "cash_floor": float(getattr(LS, "DECISION_ENGINE_CASH_FLOOR", 0.0) or 0.0),
+        },
         "portfolio_control": {
             "enabled": bool(getattr(LS, "ENABLE_PORTFOLIO_CONTROL", True)),
             "drift_threshold": float(getattr(LS, "PORTFOLIO_CONTROL_DRIFT_THRESHOLD", 0.005) or 0.005),
@@ -731,9 +754,9 @@ def build_runtime_config() -> Dict[str, Any]:
             "enable_dev_log_snapshot": bool(getattr(LS, "PORTFOLIO_CONTROL_ENABLE_DEV_LOG_SNAPSHOT", True)),
             "dev_log_top_holdings": int(getattr(LS, "PORTFOLIO_CONTROL_DEV_LOG_TOP_HOLDINGS", 8) or 8),
             "allow_odd_lot_exit": bool(getattr(LS, "PORTFOLIO_CONTROL_ALLOW_ODD_LOT_EXIT", True)),
-            "bootstrap_diversification_enabled": bool(getattr(LS, "PORTFOLIO_CONTROL_BOOTSTRAP_DIVERSIFICATION_ENABLED", True)),
+            "bootstrap_diversification_enabled": bool(getattr(LS, "PORTFOLIO_CONTROL_BOOTSTRAP_DIVERSIFICATION_ENABLED", False)),
             "bootstrap_max_current_exposure_ratio": float(getattr(LS, "PORTFOLIO_CONTROL_BOOTSTRAP_MAX_CURRENT_EXPOSURE_RATIO", 0.05) or 0.05),
-            "bootstrap_min_names": int(getattr(LS, "PORTFOLIO_CONTROL_BOOTSTRAP_MIN_NAMES", 5) or 5),
+            "bootstrap_min_names": int(getattr(LS, "PORTFOLIO_CONTROL_BOOTSTRAP_MIN_NAMES", 3) or 3),
             "bootstrap_slot_budget_ratio": float(getattr(LS, "PORTFOLIO_CONTROL_BOOTSTRAP_SLOT_BUDGET_RATIO", 0.9) or 0.9),
             "small_account_slicing_enabled": bool(getattr(LS, "PORTFOLIO_CONTROL_SMALL_ACCOUNT_SLICING_ENABLED", True)),
             "small_account_nav_threshold": float(getattr(LS, "PORTFOLIO_CONTROL_SMALL_ACCOUNT_NAV_THRESHOLD", 50000.0) or 50000.0),

@@ -98,9 +98,9 @@
       "portfolio_recommendation",
       "execution_bridge"
     ],
-    "v5_review_enabled": true,
-    "v5_review_model": "deepseek-r1:14b",
-    "v5_review_timeout_seconds": 180
+    "research_review_enabled": true,
+    "research_review_model": "deepseek-r1:14b",
+    "research_review_timeout_seconds": 180
   },
   "event_ingest": {
     "enabled_sources": [

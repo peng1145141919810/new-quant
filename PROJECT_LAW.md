@@ -61,7 +61,7 @@
 - `live`
   - `launch_canonical.py`、`main_research_runner.py`、`trade_clock_service.py`
   - `src/ashare/`
-  - `data/sql_store/`、`data/daily_csv_qfq/`、`data/enriched_daily_csv_qfq/`、`data/event_lake_v6/`、`data/affordable_feeds/`、`data/auxiliary_data/`、`data/ml_datasets/`
+  - `data/sql_store/`、`data/daily_csv_qfq/`、`data/enriched_daily_csv_qfq/`、`data/event_lake/`、`data/affordable_feeds/`、`data/auxiliary_data/`、`data/ml_datasets/`
   - 所有 Codex 三件套 + `CLAUDE_CODEX_DIALOGUE.md` + 本文件
 - `pending-cleanup`
   - 6 个 supervisor/scheduler 互相争 authority（目标 #1）
@@ -70,9 +70,9 @@
   - 散落各处的 `F:\quant_data\AshareC#` 硬编码路径
   - `local_settings.py` 的 F 盘 venv 路径
 - `experiment`
-  - `data/ml_datasets/train_table_v1/`（V5 训练样本，不是 canonical truth）
+  - `data/_archive/train_table_v1/`（旧破损训练样本归档，不是 canonical truth）
 - `deprecated`
-  - 任何引用 `csharp_runtime_skeleton` / `python_rpc_bridge` / `site_portal` / `ashare_control` / `operator_chat_backend` / `portal_backend` 的代码——这些后端已删，相关引用要清理后删除
+  - 任何引用 `csharp_runtime_skeleton` / `python_rpc_bridge` / `site_portal` / `operator_chat_backend` / `portal_backend` 的代码——这些后端已删，相关引用要清理后删除。`ashare_control` 是现存轻量运行辅助层，不在此 deprecated 列表。
 
 ## 非目标（明确不做）
 

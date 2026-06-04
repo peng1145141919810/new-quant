@@ -619,9 +619,9 @@ _DEFAULT_RESEARCH_PYTHON = REPO_ROOT / ".venv313" / "Scripts" / "python.exe"
 if not _DEFAULT_RESEARCH_PYTHON.exists():
     _DEFAULT_RESEARCH_PYTHON = REPO_ROOT / ".venv" / "Scripts" / "python.exe"
 PYTHON_EXECUTABLE = os.environ.get("ASHARE_RESEARCH_PYTHON", str(_DEFAULT_RESEARCH_PYTHON.resolve()))
-V5_PROJECT_ROOT = str(PACKAGE_ROOT / "research_brain")
-V5_HUB_OUTPUT_ROOT = str(DATA_ROOT / "research_hub_integrated")
-V5_BRIDGE_INPUT_ROOT = BRIDGE_ROOT
+RESEARCH_BRAIN_PROJECT_ROOT = str(PACKAGE_ROOT / "research_brain")
+RESEARCH_BRAIN_OUTPUT_ROOT = str(DATA_ROOT / "research_hub_integrated")
+RESEARCH_BRAIN_BRIDGE_INPUT_ROOT = BRIDGE_ROOT
 # 掘金 Gmtrade 桥接专用解释器（与主栈隔离；若使用独立 venv，请改为该 venv 的 Scripts\python.exe）。
 GMTRADE_PYTHON_EXECUTABLE = r"C:\Users\Administrator\AppData\Local\Programs\Python\Python39\python.exe"
 GMTRADE_RUNTIME_CONFIG_TEMPLATE = str(PACKAGE_ROOT / "configs" / "gmtrade_runtime_config.example.json")
@@ -663,9 +663,9 @@ ENABLE_LOCAL_OLLAMA_RUNTIME_EXPLAINER = True
 OLLAMA_RUNTIME_EXPLAINER_MODEL = "qwen2.5:7b"
 OLLAMA_RUNTIME_EXPLAINER_TIMEOUT_SECONDS = 45
 OLLAMA_RUNTIME_EXPLAINER_STAGES = ["research_plan", "gpu_research", "portfolio_recommendation", "execution_bridge"]
-ENABLE_LOCAL_OLLAMA_V5_REVIEW = True
-OLLAMA_V5_REVIEW_MODEL = "deepseek-r1:14b"
-OLLAMA_V5_REVIEW_TIMEOUT_SECONDS = 180
+ENABLE_LOCAL_OLLAMA_RESEARCH_REVIEW = True
+OLLAMA_RESEARCH_REVIEW_MODEL = "deepseek-r1:14b"
+OLLAMA_RESEARCH_REVIEW_TIMEOUT_SECONDS = 180
 LLM_TRACE_ARTIFACT_ROOT = str(Path(TRADE_CLOCK_ROOT) / "llm_trace")
 LLM_TRACE_PROMPT_CHAR_CAP = 4000
 LLM_TRACE_RAW_RESPONSE_CHAR_CAP = 4000

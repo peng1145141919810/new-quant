@@ -8,6 +8,54 @@
 
 ## Change Log
 
+### CDL-20260531-050
+- Local time: `2026-05-31 17:45`
+- Type: `data-refresh-and-naming-debt-followup`
+- Scope: `daily_production refresh, runtime-config alias cleanup, active runtime naming cleanup`
+- Author: `Codex`
+- Touched paths:
+  - `ashare_control\control_plane.py`
+  - `trade_clock_service.py`
+  - `.gitignore`
+  - `RUN_PROFILES.yaml`
+  - `SYSTEM_MANIFEST.yaml`
+  - `scripts\build_research_sqlite_store.py`
+  - `scripts\build_train_table.py`
+  - `scripts\probe_t_audit.py`
+  - `scripts\show_trade_clock_status.ps1`
+  - `scripts\dev_env_utf8.ps1`
+  - `src\ashare\engine\config_builder.py`
+  - `src\ashare\engine\local_augmentations.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `src\ashare\configs\hub_config.runtime.*.json`
+  - `src\ashare\configs\runtime_config.*.json`
+  - `src\ashare\configs\probe_intraday_tactics.quick_test.json`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+  - `CLAUDE_CODEX_DIALOGUE.md`
+- What changed:
+  - Ran the user-authorized `daily_production` pre-research refresh bundle. It completed `ok=true` with no warnings: affordable, external, research-fact, market-pipeline, and derived-alpha stages all reported success.
+  - Confirmed market SQL freshness in `data\sql_store\research_data_v1.sqlite3`: `market_enriched_daily`, `market_hs300_daily`, `market_price_snapshot`, `valuation_daily`, and `crowding_daily` are current through latest A-share trading day `2026-05-29`. The run was on Sunday `2026-05-31`, so no newer trading date was expected.
+  - Confirmed `research_fact_layers_v1.sqlite3::source_fetch_run_log` advanced to 686 rows with max `finished_at=2026-05-31 17:40:01`.
+  - Ran `scripts\build_train_table.py check`; the clean train table has 15,627,132 rows, recent two-year key coverage passed (`total_mv/circ_mv/turnover_rate/close=1.000`, `pe_ttm=0.737 >= 0.70`, `pb=0.994`), and per-stock low `total_mv` coverage is `0/5599`.
+  - Fixed a console-unsafe emoji in `build_train_table.py` that made the successful check exit non-zero under Windows GBK output.
+  - Closed active runtime naming gaps left by the previous cleanup: runtime configs now generate `hub_config.runtime.<profile>.json`, trade-clock uses the same alias, `.gitignore` tracks the new generated-config pattern, stale `trade_release_v1` / `event_lake_v6` script references were removed, and runtime review config keys now use `research_review_*` instead of `v5_review_*`.
+  - Removed stale profile keys (`v6_plan_reuse_hours`, `v5_cycles`) from `RUN_PROFILES.yaml` and renamed manifest runtime path labels away from versioned names.
+- Validation:
+  - `daily_production` pre-research refresh bundle: `ok=true`, `warning_count=0`; artifact written to `data\daily_cache\manual_daily_production_refresh_20260531.json`.
+  - SQL probe after refresh confirmed max dates and source log counts.
+  - `.venv313\Scripts\python.exe scripts\build_train_table.py check` exits 0.
+  - Targeted `py_compile` passed for touched Python entrypoints/scripts.
+  - `launch_canonical.py --preflight-only --profile quick_test --mode integrated_supervisor` passed.
+  - Targeted `rg` over active runtime/code/config returned no hits for `hub_config.v6.runtime`, `trade_release_v1`, `event_lake_v6`, `V5_PROJECT_ROOT`, `v5_review`, `v6_plan_reuse_hours`, or `v5_cycles`.
+- Compatibility:
+  - No new scheduler, gate, service, or abstraction layer was added.
+  - Historical docs and archived entry names may still mention V5/V6; active runtime-path cleanup should not be interpreted as all historical documentation being rewritten.
+  - `img.png` remains untracked and was not touched.
+- Rollback:
+  - Revert this CDL patch set and regenerate runtime configs from the previous `config_builder.py` if the new naming surface is rejected. Data refresh writes are runtime data and are not reverted by git.
+
 ### CDL-20260531-049
 - Local time: `2026-05-31`
 - Type: `naming-cleanup`

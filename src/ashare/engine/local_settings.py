@@ -66,6 +66,16 @@ globals()["AUDIT_SITE_PUBLISH_RUN_AFTER_SUMMARY"] = False
 # csharp_runtime_skeleton 不存在；hot-reload 不要扫这个根
 globals()["TRADE_CLOCK_RUNTIME_HOT_RELOAD_ENABLED"] = False
 
+# 小账户改造：单遍 decision engine 已统一管控持仓数与集中度，
+# 关闭下游 portfolio_control 的“强制铺成 N 只种子仓”逻辑，避免把集中组合摊散。
+globals()["PORTFOLIO_CONTROL_BOOTSTRAP_DIVERSIFICATION_ENABLED"] = False
+globals()["PORTFOLIO_CONTROL_BOOTSTRAP_MIN_NAMES"] = 3
+# decision engine 单名/持仓数约束（micro 1-2万账户：单只≤25%、3-5只、panic只减不加）
+globals()["DECISION_ENGINE_MAX_NAMES"] = 5
+globals()["DECISION_ENGINE_MIN_NAMES"] = 3
+globals()["DECISION_ENGINE_SINGLE_NAME_CAP"] = 0.25
+globals()["DECISION_ENGINE_PANIC_ONLY_REDUCE"] = True
+
 # 远程 trade-clock delegate（SSH 到 43.129.28.141）默认关掉，
 # 本地全自动是 H 盘的目标，不依赖远端 worker
 globals()["ENABLE_TRADE_CLOCK_REMOTE_DELEGATE"] = False
