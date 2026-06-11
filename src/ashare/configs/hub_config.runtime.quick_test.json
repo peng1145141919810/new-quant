@@ -765,6 +765,16 @@
     "enabled": true,
     "config_path": "H:\\Ashare\\src\\ashare\\configs\\technical_confirmation\\default.json"
   },
+  "decision_engine": {
+    "max_names": 5,
+    "min_names": 3,
+    "single_name_cap": 0.25,
+    "total_exposure_cap": 1.0,
+    "min_name_weight": 0.08,
+    "caution_exposure_scale": 0.6,
+    "panic_only_reduce": true,
+    "cash_floor": 0.0
+  },
   "portfolio_control": {
     "enabled": true,
     "drift_threshold": 0.005,
@@ -777,9 +787,9 @@
     "enable_dev_log_snapshot": true,
     "dev_log_top_holdings": 8,
     "allow_odd_lot_exit": true,
-    "bootstrap_diversification_enabled": true,
+    "bootstrap_diversification_enabled": false,
     "bootstrap_max_current_exposure_ratio": 0.05,
-    "bootstrap_min_names": 8,
+    "bootstrap_min_names": 3,
     "bootstrap_slot_budget_ratio": 0.95,
     "small_account_slicing_enabled": true,
     "small_account_nav_threshold": 50000.0,

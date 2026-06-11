@@ -261,7 +261,7 @@ def _build_signal_advisor_chain(
             category="risk",
             status="warning" if _text(profile).lower() == "quick_test" else "ok",
             summary="quick_test_prefers_stable_families" if _text(profile).lower() == "quick_test" else "full_route_space_allowed",
-            reasons=["ban_xgboost_gpu_for_quick_test", "ban_generated_family_for_quick_test"] if _text(profile).lower() == "quick_test" else [],
+            reasons=["ban_generated_family_for_quick_test"] if _text(profile).lower() == "quick_test" else [],
             evidence={
                 "profile": _text(profile),
                 "quick_test": _text(profile).lower() == "quick_test",
@@ -468,7 +468,7 @@ def build_research_budget_decision(
     final_verdict = "balanced"
     if guardrail_penalty >= 0.70 or harvest_score >= 0.70:
         max_cycles = max(1, base_cycles - 1)
-        candidate_budget = max(8, base_budget - 2)
+        candidate_budget = max(1, base_budget - 2)
         final_verdict = "defensive"
         reasons.append("tighten_cycles_under_high_adversarial_risk")
     elif _float(objective_scores.get("overall"), 0.0) >= 0.72 and guardrail_penalty <= 0.30:
@@ -480,9 +480,18 @@ def build_research_budget_decision(
     preferred_models = list(strategy_signals.get("preferred_model_signals", []) or bridge_feedback.get("preferred_model_signals", []) or [])
     ban_models = list(strategy_signals.get("ban_model_signals", []) or bridge_feedback.get("ban_model_signals", []) or [])
     if _text(profile).lower() == "quick_test":
-        preferred_models = _merge_unique(["ridge_ranker", "lightgbm_gpu"], preferred_models)
-        ban_models = _merge_unique(ban_models, ["xgboost_gpu", "generated_family"])
+        # xgboost_gpu 不再 ban：当初 ban 是因为它老崩（-999 / Input y contains NaN），
+        # 该崩溃已由 training_engine._drop_unlabeled 修好。继续 ban 等于防一个不存在的崩溃，
+        # 还会让 model 路线拿不到异构对照（只剩 ridge/lightgbm）。generated_family 仍 ban（未验稳）。
+        preferred_models = _merge_unique(["xgboost_gpu", "lightgbm_gpu", "ridge_ranker"], preferred_models)
+        ban_models = _merge_unique(ban_models, ["generated_family"])
         reasons.append("quick_test_prefers_stable_model_families")
+        # 验证轮：quick_test 只跑 1 个候选、1 个 cycle，最快确认链路+内存不爆。
+        # runtime config 的 research_brain 段没有 cycle_candidate_budget，base_budget
+        # 会落到 fallback=12；在这里硬钳成 1，不影响 overnight/daily 正式跑。
+        candidate_budget = 1
+        max_cycles = 1
+        reasons.append("quick_test_single_candidate_fast_validation")
     if guardrail_penalty >= 0.60:
         ban_models = _merge_unique(ban_models, ["generated_family"])
         preferred_models = _merge_unique(["ridge_ranker", "lightgbm_gpu"], preferred_models)
@@ -528,7 +537,15 @@ def build_research_budget_decision(
         portfolio_overrides["total_exposure_cap"] = round(max(portfolio_overrides["total_exposure_cap"], 0.95), 4)
         portfolio_overrides["max_names"] = max(int(portfolio_overrides["max_names"]), 18)
 
-    route_budget = _allocate_route_budget(normalized_weights, candidate_budget, route_min_candidates)
+    _route_weights_for_budget = normalized_weights
+    if _text(profile).lower() == "quick_test" and normalized_weights:
+        # 验证轮真正只跑 1 个候选：7 个 research route 各保底 min_each=1 会撑出 7 个候选，
+        # 单纯把 candidate_budget 钳到 1 没用。这里只在 quick_test 把分配权重收窄到
+        # 权重最高的单一 route，让 _allocate_route_budget 只产 1 个候选；不改
+        # normalized_weights 本身，避免影响别处对 route_weights 的记录与正式 profile。
+        _qt_top_route = max(normalized_weights, key=lambda _r: normalized_weights[_r])
+        _route_weights_for_budget = {_qt_top_route: 1.0}
+    route_budget = _allocate_route_budget(_route_weights_for_budget, candidate_budget, route_min_candidates)
     scheduler_identity = artifact_identity(
         run_id=_text(_dict(signal_context.get("latest_portfolio_recommendation")).get("run_id")),
         trade_date=_text(_dict(_dict(signal_context.get("latest_portfolio_recommendation")).get("artifact_identity")).get("trade_date")),

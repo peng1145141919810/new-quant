@@ -18,6 +18,29 @@ except Exception:
     pass
 
 
+def _prevent_system_sleep() -> bool:
+    """跑研究轮期间禁止系统自动休眠（仅 Windows）。
+
+    背景：休眠会挂起 Python 进程并销毁 GPU 的 OpenCL 上下文；唤醒时多个占用
+    十几 GB 内存的 GPU 候选同时恢复会把内存/显存打爆导致死机。这里用
+    SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED) 告诉系统“有任务
+    在跑别睡”，本进程退出后该状态自动解除，不影响平时使用。
+    """
+    if os.name != "nt":
+        return False
+    try:
+        import ctypes
+
+        ES_CONTINUOUS = 0x80000000
+        ES_SYSTEM_REQUIRED = 0x00000001
+        res = ctypes.windll.kernel32.SetThreadExecutionState(
+            ES_CONTINUOUS | ES_SYSTEM_REQUIRED
+        )
+        return res != 0
+    except Exception:
+        return False
+
+
 def _package_root() -> Path:
     repo_root = Path(__file__).resolve().parent
     manifest_path = repo_root / "SYSTEM_MANIFEST.yaml"
@@ -268,6 +291,7 @@ def _result_exit_code(mode: str, payload: Dict[str, Any]) -> int:
 
 def main() -> None:
     args = parse_args()
+    _awake = _prevent_system_sleep()
     config_path = _effective_config_path(
         args.config,
         args.profile,
@@ -293,6 +317,7 @@ def main() -> None:
     print("Ignore PANIC reduce-only:", config.get("execution_policy", {}).get("ignore_market_panic_reduce_only"))
     print("Allow unfinished reconcile:", config.get("execution_policy", {}).get("allow_unfinished_orders_reconcile"))
     print("Shadow run:", config.get("execution_policy", {}).get("shadow_run"))
+    print("Keep-awake (no auto-sleep):", "ON" if _awake else "OFF")
     print("Log root:", config.get("paths", {}).get("log_root"))
     print("Control plane snapshot:", snapshot_path)
     print("Supervisor state:", Path(str(config.get("paths", {}).get("research_root", ""))) / "supervisor" / "supervisor_state.json")

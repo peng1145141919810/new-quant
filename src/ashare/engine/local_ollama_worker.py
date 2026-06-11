@@ -85,28 +85,59 @@ def _ollama_ready(base_url: str, timeout_seconds: float = 1.5, cache_ttl_seconds
     return ok
 
 
-def build_prompt(title: str) -> str:
-    """构造标题级事件抽取提示词。
+def _normalize_direction(raw: Any) -> str:
+    """把模型返回的中文方向词归一到内部枚举。
+
+    Args:
+        raw: 模型原始方向字段。
+
+    Returns:
+        str: positive/negative/uncertain，无法判断时返回空串交给规则兜底。
+    """
+    t = str(raw or "").strip().lower()
+    if not t:
+        return ""
+    if any(k in t for k in ("利好", "正面", "积极", "利多", "positive", "bull")):
+        return "positive"
+    if any(k in t for k in ("利空", "负面", "消极", "利淡", "negative", "bear")):
+        return "negative"
+    if any(k in t for k in ("中性", "不确定", "neutral", "uncertain")):
+        return "uncertain"
+    return ""
+
+
+def build_prompt(title: str, body: str = "") -> str:
+    """构造事件抽取提示词（标题 + 可选正文摘录）。
 
     Args:
         title: 标题文本。
+        body: 公告/新闻正文（可为空）。下载到的 PDF 正文会从这里喂进来。
 
     Returns:
         str: 提示词。
     """
+    body_text = str(body or "").strip()
+    if body_text:
+        material = f"标题：{title}\n\n正文摘录（可能截断，仅用于判断方向与重要性）：\n{body_text[:1500]}"
+    else:
+        material = f"标题：{title}"
     return f"""
 你是量化研究系统里的事件预处理器。
 请只输出 JSON，不要输出解释，不要输出 markdown，不要输出代码块。
 
-对下面这条标题做结构化提取：
+对下面这条公告/新闻做结构化提取：
 
-标题：{title}
+{material}
+
+判断方向时要理解语义，注意"终止/取消/暂停/放弃"等否定词会反转含义：
+例如"终止减持计划"对股价是利好，"终止股份回购"是利空。
 
 输出格式必须严格为：
 {{
   "event_type": "从以下类别中选一个：财务业绩/分红回购/增减持/并购重组/重大合同/监管处罚/停复牌/诉讼仲裁/其他",
   "entity": "主体名称，未知就填空字符串",
-  "importance": 0到10之间的整数，
+  "direction": "从以下选一个：利好/利空/中性",
+  "importance": 0到10之间的整数,
   "summary": "一句中文摘要"
 }}
 """.strip()
@@ -134,6 +165,7 @@ def rule_fallback_for_title(title: str) -> Dict[str, Any]:
     return {
         "event_type": event_type,
         "entity": "",
+        "direction": "",
         "importance": importance,
         "summary": title[:60],
         "extract_backend": "rule_fallback",
@@ -141,12 +173,13 @@ def rule_fallback_for_title(title: str) -> Dict[str, Any]:
     }
 
 
-def parse_single_title(title: str, config: Dict[str, Any]) -> Dict[str, Any]:
-    """调用本地 Ollama 处理单条标题。
+def parse_single_title(title: str, config: Dict[str, Any], body: str = "") -> Dict[str, Any]:
+    """调用本地 Ollama 处理单条公告/新闻。
 
     Args:
         title: 标题文本。
         config: 运行配置。
+        body: 正文（可选，下载到的 PDF 正文喂这里）。
 
     Returns:
         Dict[str, Any]: 结构化结果。
@@ -167,7 +200,7 @@ def parse_single_title(title: str, config: Dict[str, Any]) -> Dict[str, Any]:
 
     payload = {
         "model": model,
-        "messages": [{"role": "user", "content": build_prompt(title)}],
+        "messages": [{"role": "user", "content": build_prompt(title, body)}],
         "stream": False,
         "options": {"temperature": 0},
     }
@@ -199,6 +232,7 @@ def parse_single_title(title: str, config: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "event_type": event_type,
         "entity": str(parsed.get("entity", "") or ""),
+        "direction": _normalize_direction(parsed.get("direction")),
         "importance": importance,
         "summary": str(parsed.get("summary", title) or title)[:80],
         "extract_backend": f"ollama_{model.replace(':', '_')}",
@@ -219,13 +253,14 @@ def batch_parse_titles(items: List[Dict[str, Any]], config: Dict[str, Any]) -> L
     outputs: List[Dict[str, Any]] = []
     for item in items:
         title = str(item.get("title") or item.get("raw_title") or "").strip()
+        body = str(item.get("content") or item.get("raw_text") or "").strip()
         if not title:
             enriched = dict(item)
             enriched.update(rule_fallback_for_title(title=""))
             outputs.append(enriched)
             continue
         try:
-            parsed = parse_single_title(title=title, config=config)
+            parsed = parse_single_title(title=title, config=config, body=body)
             enriched = dict(item)
             enriched.update(parsed)
             outputs.append(enriched)

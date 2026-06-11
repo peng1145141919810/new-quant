@@ -5,7 +5,8 @@
   "hub_output_root": "H:\\Ashare\\data\\research_hub_integrated",
   "execution": {
     "python_executable": "H:\\Ashare\\.venv313\\Scripts\\python.exe",
-    "heartbeat_seconds": 30
+    "heartbeat_seconds": 30,
+    "max_parallel_candidates": 2
   },
   "strategy": {
     "strategy_name": "autonomous_research_brain_v5_1",
@@ -17,10 +18,16 @@
     "feature_market_policy": "exclude_from_stock_ranker",
     "feature_liquidity_policy": "exclude_from_stock_ranker",
     "top_k": 20,
+    "portfolio_weight_scheme": "score_tilt",
+    "portfolio_weight_power": 1.5,
     "portfolio_holding_days": 5,
     "portfolio_min_listed_days": 120,
     "portfolio_min_amount_mean_20": 10000000,
     "portfolio_max_vol_20": 0.12,
+    "portfolio_min_price": 3.0,
+    "portfolio_exclude_boards": [
+      "BSE"
+    ],
     "portfolio_base_exposure": 1.0,
     "portfolio_weak_market_exposure": 0.5,
     "portfolio_dd_stage1": 0.1,
@@ -30,6 +37,7 @@
     "portfolio_single_name_cap": 0.1,
     "portfolio_single_industry_cap": 0.25,
     "portfolio_max_names_per_industry": 5,
+    "portfolio_inverse_vol_tilt_power": 0.5,
     "backtest_buy_fee_rate": 0.0003,
     "backtest_sell_fee_rate": 0.0003,
     "backtest_sell_tax_rate": 0.001,
@@ -124,25 +132,25 @@
     "max_drawdown_abs": 0.22
   },
   "research_brain": {
-    "cycle_candidate_budget": 12,
+    "cycle_candidate_budget": 1,
     "parent_pool_size": 4,
     "route_min_candidates": 1,
-    "max_cycles": 3,
+    "max_cycles": 1,
     "sleep_seconds": 0,
     "gpu_primary_family": "xgboost_gpu"
   },
   "route_space": {
     "feature_profiles": [
       "baseline_plus",
-      "momentum_cross_section",
       "vol_liq_quality",
       "defensive_residual",
       "interaction_sparse",
       "generated_feature_pack"
     ],
     "model_families": [
-      "ridge_ranker",
-      "lightgbm_gpu"
+      "xgboost_gpu",
+      "lightgbm_gpu",
+      "ridge_ranker"
     ],
     "training_logics": [
       "baseline",
