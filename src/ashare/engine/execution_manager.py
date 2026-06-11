@@ -11,6 +11,7 @@ from .market_state import load_latest_market_state
 from .portfolio_release import load_latest_release, load_release_by_id, record_release_execution
 from .runtime_protocol import artifact_identity, release_artifact_identity
 from .safety_guard import (
+    apply_execution_safety_overrides,
     assess_system_safety,
     load_system_safety_state,
     record_incident,
@@ -246,6 +247,7 @@ def run_execution_only(
 
     # --- 单遍发车闸门（替代旧仲裁塔）。是否发车只由两件事决定：
     #     1) 交易窗口/release 闸门 ok；2) 安全层允许执行。
+    #     shadow_run 旁路 1)/2)（沿袭旧调度器：影子干跑要在窗口外也产出对比），但仍需有效 release。
     #     仓位大小已在上游 decision engine 定好，这里不再二次砍仓。
     gate_should = bool(gate.get("should_execute", False))
     safety_allow = bool(safety.get("allow_execution", False))
@@ -253,11 +255,13 @@ def run_execution_only(
     block_reason = ""
     if not has_release:
         block_reason = "no_release"
+    elif shadow_run:
+        block_reason = ""
     elif not gate_should:
         block_reason = str(gate.get("reason", "") or "gate_not_ready")
     elif not safety_allow:
         block_reason = str(safety.get("halt_reason", "") or "safety_block")
-    should_dispatch = has_release and gate_should and safety_allow
+    should_dispatch = has_release and (shadow_run or (gate_should and safety_allow))
     verdict = {
         "should_dispatch": should_dispatch,
         "block_reason": block_reason,
@@ -266,7 +270,9 @@ def run_execution_only(
         "execution_namespace": namespace,
         "shadow_run": shadow_run,
     }
-    execution_config = config
+    # 安全覆盖必须落进发车配置：PANIC/DEGRADED/手动 reduce_only 时
+    # portfolio_control.reduce_only=True、换手率上限按 effective_turnover_multiplier 收紧。
+    execution_config = apply_execution_safety_overrides(config, safety)
     release_identity = release_artifact_identity(release_doc, producer="execution_manager.release") if release_doc else artifact_identity(
         run_id="",
         trade_date=str(gate.get("release_trade_date", "") or dict(gate.get("release", {}) or {}).get("trade_date", "") or ""),

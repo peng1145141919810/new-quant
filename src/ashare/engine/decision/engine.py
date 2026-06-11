@@ -145,9 +145,7 @@ def decide_target_weights(
     else:
         base = [s / total_score for s in scores]
 
-    # 单名封顶后会有剩余权重，迭代把剩余按未封顶名再分配（水填充）。
     caps = [c.single_name_cap] * n
-    weights = _water_fill(base, caps)
 
     # --- regime 缩放（只此一次）。
     exposure_cap = c.total_exposure_cap
@@ -158,16 +156,9 @@ def decide_target_weights(
     # 现金底线。
     exposure_cap = min(exposure_cap, 1.0 - c.cash_floor)
 
-    # --- 归一到 exposure_cap，并保持单名不超 cap。
-    s = sum(weights)
-    if s > 0:
-        weights = [w / s * exposure_cap for w in weights]
-    # 归一后可能又顶到 cap，再水填充一次确保单名 <= cap。
-    weights = _water_fill(
-        [w / exposure_cap if exposure_cap > 0 else 0.0 for w in weights],
-        caps,
-    )
-    weights = [w * exposure_cap for w in weights]
+    # --- 在 exposure_cap 内按分数水填充。单名 cap 是绝对上限，降档敞口下
+    #     换算成相对上限再填充，避免可行的减仓目标被二次打折成欠配。
+    weights = _fill_to_exposure(base, caps, exposure_cap)
 
     # --- 去碎仓：低于 min_name_weight 的剔除，权重回填给其余名。
     targets_raw = list(zip(chosen, weights))
@@ -176,12 +167,11 @@ def decide_target_weights(
         kept = [targets_raw[0]]
     if len(kept) < len(targets_raw):
         notes.append(f"剔除碎仓 {len(targets_raw) - len(kept)} 只（< {c.min_name_weight:.2f}）")
-        kw = _water_fill(
+        kw = _fill_to_exposure(
             [1.0 / len(kept)] * len(kept),
             [c.single_name_cap] * len(kept),
+            exposure_cap,
         )
-        ks = sum(kw)
-        kw = [x / ks * exposure_cap for x in kw] if ks > 0 else kw
         kept = [(kept[i][0], kw[i]) for i in range(len(kept))]
 
     targets = [
@@ -231,3 +221,15 @@ def _water_fill(base: List[float], caps: List[float]) -> List[float]:
             share = (caps[i] - w[i]) / room_total
             w[i] += overflow * share
     return w
+
+
+def _fill_to_exposure(base: List[float], caps: List[float], exposure_cap: float) -> List[float]:
+    """把 exposure_cap 总仓位按 base 比例分给各名，caps 为绝对单名上限。
+
+    把绝对 cap 换算成相对 exposure 的上限再水填充，保证单名 <= cap 且
+    总和 = exposure_cap（caps 总额不足时 = sum(caps)）。
+    """
+    if exposure_cap <= 0:
+        return [0.0] * len(base)
+    rel_caps = [min(cap / exposure_cap, 1.0) for cap in caps]
+    return [w * exposure_cap for w in _water_fill(base, rel_caps)]

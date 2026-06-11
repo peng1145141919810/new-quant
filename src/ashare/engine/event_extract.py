@@ -618,26 +618,41 @@ def save_event_store(config: Dict[str, Any], events: List[Dict[str, Any]]) -> Pa
     root = Path(str(config["paths"]["event_store_root"]))
     ensure_dir(root)
     out_path = root / "event_store.jsonl"
-    # 按 event_id 去重：先读历史已有 id，避免同一条事件反复追加堆积
-    existing_ids: set[str] = set()
+    # 按 event_id 去重：同 id 用本次结果覆盖旧记录（抽取规则/LLM 修复后重跑必须能
+    # 刷新存量分类，不能静默丢弃），并顺带折叠历史重复行；无 event_id 的原样追加。
+    incoming: Dict[str, Dict[str, Any]] = {}
+    passthrough: List[Dict[str, Any]] = []
+    for item in events:
+        eid = _safe_text(item.get("event_id"))
+        if eid:
+            incoming[eid] = item  # 同批内后出现者覆盖
+        else:
+            passthrough.append(item)
+    lines: List[str] = []
+    replaced: set[str] = set()
     if out_path.exists():
         with out_path.open("r", encoding="utf-8") as f:
             for line in f:
-                line = line.strip()
-                if not line:
+                raw = line.strip()
+                if not raw:
                     continue
+                eid = ""
                 try:
-                    eid = _safe_text(json.loads(line).get("event_id"))
+                    eid = _safe_text(json.loads(raw).get("event_id"))
                 except Exception:
+                    eid = ""
+                if eid and eid in incoming:
+                    if eid not in replaced:
+                        lines.append(json.dumps(incoming[eid], ensure_ascii=False))
+                        replaced.add(eid)
                     continue
-                if eid:
-                    existing_ids.add(eid)
-    with out_path.open("a", encoding="utf-8") as f:
-        for item in events:
-            eid = _safe_text(item.get("event_id"))
-            if eid and eid in existing_ids:
-                continue
-            f.write(json.dumps(item, ensure_ascii=False) + "\n")
-            if eid:
-                existing_ids.add(eid)
+                lines.append(raw)
+    for eid, item in incoming.items():
+        if eid not in replaced:
+            lines.append(json.dumps(item, ensure_ascii=False))
+    for item in passthrough:
+        lines.append(json.dumps(item, ensure_ascii=False))
+    tmp_path = out_path.with_suffix(".jsonl.tmp")
+    tmp_path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
+    tmp_path.replace(out_path)
     return out_path

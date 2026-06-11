@@ -225,6 +225,7 @@ def _assign_decision_weights(
     account_ctx: Dict[str, Any],
     single_name_cap: float,
     total_exposure_cap: float,
+    prev_df: pd.DataFrame | None = None,
 ) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """单遍决策定权（替代旧 trade_discipline/global_objective 连乘链）。
 
@@ -239,13 +240,14 @@ def _assign_decision_weights(
         account_ctx: 账户上下文（nav/cash）。
         single_name_cap: 调用方单名上限。
         total_exposure_cap: 调用方总仓位上限。
+        prev_df: 上一次目标持仓（panic 时维持现有持仓的依据）。
 
     Returns:
         (pos_df, summary): 写好 portfolio_weight 的表 + 决策摘要。
     """
     from dataclasses import replace
 
-    from live_execution_bridge.models import AccountState
+    from live_execution_bridge.models import AccountState, Position
 
     if pos_df is None or pos_df.empty:
         return pos_df, {"applied": False, "reason": "empty_candidates"}
@@ -271,11 +273,28 @@ def _assign_decision_weights(
         total_exposure_cap=min(cons.total_exposure_cap, float(total_exposure_cap)) if total_exposure_cap else cons.total_exposure_cap,
     ).validated()
 
+    # 现有持仓从上次目标表还原（panic 时 decide_target_weights 的目标=维持持仓）。
+    # shares=1、last_price=权重×nav 只是把权重编码成市值，引擎只读 market_value()/nav()。
+    nav_base = float(account_ctx.get("nav") or 0.0)
+    if nav_base <= 0:
+        nav_base = 1.0
+    held_positions: list[Position] = []
+    if prev_df is not None and not prev_df.empty and "portfolio_weight" in prev_df.columns:
+        prev_sym_col = _symbol_col(prev_df)
+        for _, row in prev_df.iterrows():
+            try:
+                w = float(row.get("portfolio_weight") or 0.0)
+            except (TypeError, ValueError):
+                continue
+            sym = str(row.get(prev_sym_col, "") or "").strip()
+            if w <= 0 or not sym:
+                continue
+            held_positions.append(Position(symbol=sym, shares=1, avg_cost=0.0, last_price=w * nav_base))
     acct = AccountState(
         account_id=str(account_ctx.get("account_id", "") or ""),
         cash=float(account_ctx.get("cash") or 0.0),
-        nav_value=float(account_ctx.get("nav") or 0.0) or None,
-        positions=[],
+        nav_value=nav_base,
+        positions=held_positions,
     )
     regime = (
         str(market_state.get("market_regime") or market_state.get("market_safety_regime") or "active")
@@ -285,6 +304,15 @@ def _assign_decision_weights(
     weight_map = {t.symbol: t.target_weight for t in result.targets}
 
     pos_df = pos_df.copy()
+    # panic 目标里可能含不在今日候选中的持仓名，缺行会被下游 diff 判成清仓卖出——
+    # 从 prev_df 把这些行带原列补回。
+    missing_syms = sorted(set(weight_map) - set(pos_df[sym_col].astype(str)))
+    if missing_syms and prev_df is not None and not prev_df.empty:
+        prev_sym_col = _symbol_col(prev_df)
+        carry = prev_df[prev_df[prev_sym_col].astype(str).isin(missing_syms)].copy()
+        if not carry.empty:
+            carry = carry.rename(columns={prev_sym_col: sym_col}) if prev_sym_col != sym_col else carry
+            pos_df = pd.concat([pos_df, carry], ignore_index=True)
     pos_df["portfolio_weight"] = pos_df[sym_col].astype(str).map(weight_map).fillna(0.0)
     pos_df = pos_df[pd.to_numeric(pos_df["portfolio_weight"], errors="coerce").fillna(0.0) > 0].copy()
     return pos_df, {
@@ -1108,8 +1136,30 @@ def build_portfolio_recommendation(config: Dict[str, Any], bridge_root: Path | N
             account_ctx=account_ctx,
             single_name_cap=single_name_cap,
             total_exposure_cap=total_exposure_cap,
+            prev_df=prev_df,
         )
         reweight_before = float(pos_df['portfolio_weight'].sum()) if not pos_df.empty else 0.0
+        # 证据闸门/盘中代理目标不是被删的仲裁塔，是独立的惩罚层；开关在各自函数/配置里。
+        pos_df, evidence_gate_summary = apply_evidence_gate(pos_df, config=config)
+        if bool(rec_cfg.get('pre_release_intraday_proxy_objective_enabled', False)):
+            try:
+                pos_df, pre_release_proxy_summary = apply_pre_release_proxy_objective(
+                    pos_df=pos_df,
+                    prev_df=prev_df,
+                    config=config,
+                    rec_cfg=rec_cfg,
+                    account_ctx=account_ctx,
+                    total_exposure_cap=float(total_exposure_cap),
+                    single_name_cap=float(single_name_cap),
+                )
+            except Exception as exc:
+                pre_release_proxy_summary = {
+                    'applied': False,
+                    'error': str(exc),
+                    'fail_open': bool(rec_cfg.get('pre_release_proxy_fail_open', True)),
+                }
+                if not bool(rec_cfg.get('pre_release_proxy_fail_open', True)):
+                    raise
         # 仅保留机械的可执行下限/取整（纯落地约束，不是砍仓层）。
         pos_df, executable_floor_summary = enforce_min_executable_weights(
             df=pos_df,
