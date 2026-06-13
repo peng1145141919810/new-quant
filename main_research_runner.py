@@ -7,6 +7,39 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
+# 临时/缓存目录钉在 H 盘（专用 NVMe），避免训练 spill 写 C 盘 TEMP。
+# main_research_runner 可被直接当入口，所以这里也设一遍；放在 spawn 子进程之前。
+_ASHARE_TMP = Path(__file__).resolve().parent / "tmp" / "runtime"
+try:
+    _ASHARE_TMP.mkdir(parents=True, exist_ok=True)
+    for _v in ("TMP", "TEMP", "TMPDIR", "JOBLIB_TEMP_FOLDER", "XDG_CACHE_HOME"):
+        os.environ[_v] = str(_ASHARE_TMP)
+except Exception:
+    pass
+
+
+def _prevent_system_sleep() -> bool:
+    """跑研究轮期间禁止系统自动休眠（仅 Windows）。
+
+    背景：休眠会挂起 Python 进程并销毁 GPU 的 OpenCL 上下文；唤醒时多个占用
+    十几 GB 内存的 GPU 候选同时恢复会把内存/显存打爆导致死机。这里用
+    SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED) 告诉系统“有任务
+    在跑别睡”，本进程退出后该状态自动解除，不影响平时使用。
+    """
+    if os.name != "nt":
+        return False
+    try:
+        import ctypes
+
+        ES_CONTINUOUS = 0x80000000
+        ES_SYSTEM_REQUIRED = 0x00000001
+        res = ctypes.windll.kernel32.SetThreadExecutionState(
+            ES_CONTINUOUS | ES_SYSTEM_REQUIRED
+        )
+        return res != 0
+    except Exception:
+        return False
+
 
 def _package_root() -> Path:
     repo_root = Path(__file__).resolve().parent
@@ -258,6 +291,7 @@ def _result_exit_code(mode: str, payload: Dict[str, Any]) -> int:
 
 def main() -> None:
     args = parse_args()
+    _awake = _prevent_system_sleep()
     config_path = _effective_config_path(
         args.config,
         args.profile,
@@ -275,7 +309,7 @@ def main() -> None:
     print("Config:", config_path)
     print("Mode:", args.mode)
     print("Profile:", args.profile)
-    print("Research cycles:", config.get("supervisor", {}).get("v5_gpu_max_cycles_per_tick"))
+    print("Research cycles:", config.get("supervisor", {}).get("gpu_research_max_cycles_per_tick"))
     print("Plan reuse hours:", config.get("supervisor", {}).get("token_plan_min_interval_hours"))
     print("Execution mode:", config.get("execution_policy", {}).get("account_mode"))
     print("Precision trade:", config.get("execution_policy", {}).get("precision_trade_enabled"))
@@ -283,6 +317,7 @@ def main() -> None:
     print("Ignore PANIC reduce-only:", config.get("execution_policy", {}).get("ignore_market_panic_reduce_only"))
     print("Allow unfinished reconcile:", config.get("execution_policy", {}).get("allow_unfinished_orders_reconcile"))
     print("Shadow run:", config.get("execution_policy", {}).get("shadow_run"))
+    print("Keep-awake (no auto-sleep):", "ON" if _awake else "OFF")
     print("Log root:", config.get("paths", {}).get("log_root"))
     print("Control plane snapshot:", snapshot_path)
     print("Supervisor state:", Path(str(config.get("paths", {}).get("research_root", ""))) / "supervisor" / "supervisor_state.json")
@@ -362,7 +397,7 @@ def main() -> None:
 
         run_resume_downstream(config_path, include_execution=bool(args.resume_execution))
     else:
-        from engine.orchestrator_v6 import run_v6_cycle as run_legacy_cycle
+        from engine.orchestrator import run_cycle as run_legacy_cycle
 
         run_legacy_cycle(config_path=config_path, mode=args.mode)
     print("===== ASHARE DONE =====")

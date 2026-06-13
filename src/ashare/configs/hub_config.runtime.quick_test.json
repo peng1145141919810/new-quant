@@ -1,7 +1,7 @@
 {
   "project_name": "quant_research_engine_lean_portfolio_integrated",
   "project_root": "H:\\Ashare\\src\\ashare",
-  "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table_v1",
+  "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table",
   "hub_output_root": "H:\\Ashare\\data\\ml_runs\\research_engine",
   "execution": {
     "python_executable": "H:\\Ashare\\.venv313\\Scripts\\python.exe",
@@ -9,28 +9,28 @@
     "max_cycles": 1
   },
   "paths": {
-    "raw_event_root": "H:\\Ashare\\data\\event_lake_v6\\raw",
-    "event_store_root": "H:\\Ashare\\data\\event_lake_v6\\curated",
-    "inventory_root": "H:\\Ashare\\data\\event_lake_v6\\inventory",
-    "research_root": "H:\\Ashare\\data\\event_lake_v6\\research",
-    "bridge_root": "H:\\Ashare\\data\\event_lake_v6\\bridge",
-    "market_state_root": "H:\\Ashare\\data\\market_state_v6",
-    "daily_cache_root": "H:\\Ashare\\data\\daily_cache_v6",
-    "log_root": "H:\\Ashare\\data\\event_lake_v6\\logs",
-    "portfolio_output_root": "H:\\Ashare\\data\\portfolio_recommendation_v6",
+    "raw_event_root": "H:\\Ashare\\data\\event_lake\\raw",
+    "event_store_root": "H:\\Ashare\\data\\event_lake\\curated",
+    "inventory_root": "H:\\Ashare\\data\\event_lake\\inventory",
+    "research_root": "H:\\Ashare\\data\\event_lake\\research",
+    "bridge_root": "H:\\Ashare\\data\\event_lake\\bridge",
+    "market_state_root": "H:\\Ashare\\data\\market_state",
+    "daily_cache_root": "H:\\Ashare\\data\\daily_cache",
+    "log_root": "H:\\Ashare\\data\\event_lake\\logs",
+    "portfolio_output_root": "H:\\Ashare\\data\\portfolio_recommendation",
     "live_execution_root": "H:\\Ashare\\data\\live_execution_bridge",
     "live_price_snapshot_path": "H:\\Ashare\\data\\live_execution_bridge\\daily_price_snapshot.csv",
-    "trade_release_root": "H:\\Ashare\\data\\trade_release_v1",
+    "trade_release_root": "H:\\Ashare\\data\\trade_release",
     "trade_clock_root": "H:\\Ashare\\data\\trade_clock",
     "automation_runs_root": "H:\\Ashare\\outputs\\automation_runs",
-    "trading_calendar_cache_path": "H:\\Ashare\\data\\market_state_v6\\trading_calendar_a_share.csv",
-    "industry_router_output_root": "H:\\Ashare\\data\\event_lake_v6\\research\\industry_router",
-    "technical_confirmation_root": "H:\\Ashare\\data\\event_lake_v6\\research\\technical_confirmation",
+    "trading_calendar_cache_path": "H:\\Ashare\\data\\market_state\\trading_calendar_a_share.csv",
+    "industry_router_output_root": "H:\\Ashare\\data\\event_lake\\research\\industry_router",
+    "technical_confirmation_root": "H:\\Ashare\\data\\event_lake\\research\\technical_confirmation",
     "oms_output_root": "H:\\Ashare\\data\\live_execution_bridge\\oms_v1",
     "affordable_sqlite_path": "H:\\Ashare\\data\\sql_store\\affordable_data_v1.sqlite3",
     "research_fact_sqlite_path": "H:\\Ashare\\data\\sql_store\\research_fact_layers_v1.sqlite3",
     "affordable_snapshot_root": "H:\\Ashare\\data\\affordable_feeds\\latest",
-    "manual_event_proxy_path": "H:\\Ashare\\data\\event_lake_v6\\research\\manual_event_proxy\\manual_event_proxy.jsonl",
+    "manual_event_proxy_path": "H:\\Ashare\\data\\event_lake\\research\\manual_event_proxy\\manual_event_proxy.jsonl",
     "external_research_root": "H:\\Ashare\\data\\external_research_feeds\\latest",
     "data_sqlite_path": "H:\\Ashare\\data\\sql_store\\research_data_v1.sqlite3"
   },
@@ -99,14 +99,14 @@
     "runtime_explainer_model": "qwen2.5:7b",
     "runtime_explainer_timeout_seconds": 45,
     "runtime_explainer_stages": [
-      "v6_planning",
-      "v5_gpu",
+      "research_plan",
+      "gpu_research",
       "portfolio_recommendation",
       "execution_bridge"
     ],
-    "v5_review_enabled": true,
-    "v5_review_model": "deepseek-r1:14b",
-    "v5_review_timeout_seconds": 180
+    "research_review_enabled": true,
+    "research_review_model": "deepseek-r1:14b",
+    "research_review_timeout_seconds": 180
   },
   "eastmoney": {
     "enabled": true,
@@ -224,14 +224,14 @@
   },
   "integrated_thesis": {
     "enabled": true,
-    "output_root": "H:\\Ashare\\data\\event_lake_v6\\research\\integrated_thesis",
+    "output_root": "H:\\Ashare\\data\\event_lake\\research\\integrated_thesis",
     "portfolio_budget_overlay": true,
     "soft_gate_admission": true
   },
   "industry_router": {
     "enabled": true,
     "contract_root": "H:\\Ashare\\src\\ashare\\configs\\industry_router",
-    "output_root": "H:\\Ashare\\data\\event_lake_v6\\research\\industry_router",
+    "output_root": "H:\\Ashare\\data\\event_lake\\research\\industry_router",
     "history_lookback_days": 14,
     "enable_context_pack": true,
     "enable_backtest": true,
@@ -254,10 +254,13 @@
     }
   },
   "research_brain": {
+    "enabled": true,
+    "planning_model": "openai_research",
+    "worker_model": "deepseek_worker",
     "project_root": "H:\\Ashare\\src\\ashare\\research_brain",
     "hub_output_root": "H:\\Ashare\\data\\research_hub_integrated",
-    "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table_v1",
-    "bridge_input_root": "H:\\Ashare\\data\\event_lake_v6\\bridge",
+    "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table",
+    "bridge_input_root": "H:\\Ashare\\data\\event_lake\\bridge",
     "python_executable": "H:\\Ashare\\.venv313\\Scripts\\python.exe"
   },
   "supervisor": {
@@ -265,8 +268,8 @@
     "run_forever": false,
     "max_ticks": 1,
     "sleep_seconds": 300,
-    "v5_gpu_max_cycles_per_tick": 1,
-    "v5_gpu_dry_run": false,
+    "gpu_research_max_cycles_per_tick": 1,
+    "gpu_research_dry_run": false,
     "require_gpu": true
   },
   "dynamic_strategy": {
@@ -717,7 +720,7 @@
     "max_sources_per_symbol": 8,
     "fetch_timeout_seconds": 12,
     "max_page_chars": 8000,
-    "artifact_root": "H:\\Ashare\\data\\portfolio_recommendation_v6\\evidence_audit_v1",
+    "artifact_root": "H:\\Ashare\\data\\portfolio_recommendation\\evidence_audit_v1",
     "allow_domains": [
       "cninfo.com.cn",
       "sse.com.cn",
@@ -751,7 +754,7 @@
     "admission_replacement_enabled": true,
     "soft_crowding_penalty_enabled": true,
     "rich_audit_enabled": true,
-    "output_root": "H:\\Ashare\\data\\portfolio_recommendation_v6\\portfolio",
+    "output_root": "H:\\Ashare\\data\\portfolio_recommendation\\portfolio",
     "pilot_max_weight": 0.04,
     "build_speed": 1.25,
     "trim_speed": 0.72,
@@ -761,6 +764,16 @@
   "technical_confirmation": {
     "enabled": true,
     "config_path": "H:\\Ashare\\src\\ashare\\configs\\technical_confirmation\\default.json"
+  },
+  "decision_engine": {
+    "max_names": 5,
+    "min_names": 3,
+    "single_name_cap": 0.25,
+    "total_exposure_cap": 1.0,
+    "min_name_weight": 0.08,
+    "caution_exposure_scale": 0.6,
+    "panic_only_reduce": true,
+    "cash_floor": 0.0
   },
   "portfolio_control": {
     "enabled": true,
@@ -774,9 +787,9 @@
     "enable_dev_log_snapshot": true,
     "dev_log_top_holdings": 8,
     "allow_odd_lot_exit": true,
-    "bootstrap_diversification_enabled": true,
+    "bootstrap_diversification_enabled": false,
     "bootstrap_max_current_exposure_ratio": 0.05,
-    "bootstrap_min_names": 8,
+    "bootstrap_min_names": 3,
     "bootstrap_slot_budget_ratio": 0.95,
     "small_account_slicing_enabled": true,
     "small_account_nav_threshold": 50000.0,

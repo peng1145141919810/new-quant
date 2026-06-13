@@ -1,7 +1,7 @@
 {
   "project_name": "quant_research_engine_lean_portfolio_integrated",
   "project_root": "H:\\Ashare\\src\\ashare",
-  "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table_v1",
+  "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table",
   "hub_output_root": "H:\\Ashare\\data\\ml_runs\\research_engine",
   "execution": {
     "python_executable": "H:\\Ashare\\.venv313\\Scripts\\python.exe",
@@ -9,28 +9,28 @@
     "max_cycles": 1
   },
   "paths": {
-    "raw_event_root": "H:\\Ashare\\data\\event_lake_v6\\raw",
-    "event_store_root": "H:\\Ashare\\data\\event_lake_v6\\curated",
-    "inventory_root": "H:\\Ashare\\data\\event_lake_v6\\inventory",
-    "research_root": "H:\\Ashare\\data\\event_lake_v6\\research",
-    "bridge_root": "H:\\Ashare\\data\\event_lake_v6\\bridge",
-    "market_state_root": "H:\\Ashare\\data\\market_state_v6",
-    "daily_cache_root": "H:\\Ashare\\data\\daily_cache_v6",
-    "log_root": "H:\\Ashare\\data\\event_lake_v6\\logs",
-    "portfolio_output_root": "H:\\Ashare\\data\\portfolio_recommendation_v6",
+    "raw_event_root": "H:\\Ashare\\data\\event_lake\\raw",
+    "event_store_root": "H:\\Ashare\\data\\event_lake\\curated",
+    "inventory_root": "H:\\Ashare\\data\\event_lake\\inventory",
+    "research_root": "H:\\Ashare\\data\\event_lake\\research",
+    "bridge_root": "H:\\Ashare\\data\\event_lake\\bridge",
+    "market_state_root": "H:\\Ashare\\data\\market_state",
+    "daily_cache_root": "H:\\Ashare\\data\\daily_cache",
+    "log_root": "H:\\Ashare\\data\\event_lake\\logs",
+    "portfolio_output_root": "H:\\Ashare\\data\\portfolio_recommendation",
     "live_execution_root": "H:\\Ashare\\data\\live_execution_bridge",
     "live_price_snapshot_path": "H:\\Ashare\\data\\live_execution_bridge\\daily_price_snapshot.csv",
-    "trade_release_root": "H:\\Ashare\\data\\trade_release_v1",
+    "trade_release_root": "H:\\Ashare\\data\\trade_release",
     "trade_clock_root": "H:\\Ashare\\data\\trade_clock",
     "automation_runs_root": "H:\\Ashare\\outputs\\automation_runs",
-    "trading_calendar_cache_path": "H:\\Ashare\\data\\market_state_v6\\trading_calendar_a_share.csv",
-    "industry_router_output_root": "H:\\Ashare\\data\\event_lake_v6\\research\\industry_router",
-    "technical_confirmation_root": "H:\\Ashare\\data\\event_lake_v6\\research\\technical_confirmation",
+    "trading_calendar_cache_path": "H:\\Ashare\\data\\market_state\\trading_calendar_a_share.csv",
+    "industry_router_output_root": "H:\\Ashare\\data\\event_lake\\research\\industry_router",
+    "technical_confirmation_root": "H:\\Ashare\\data\\event_lake\\research\\technical_confirmation",
     "oms_output_root": "H:\\Ashare\\data\\live_execution_bridge\\oms_v1",
     "affordable_sqlite_path": "H:\\Ashare\\data\\sql_store\\affordable_data_v1.sqlite3",
     "research_fact_sqlite_path": "H:\\Ashare\\data\\sql_store\\research_fact_layers_v1.sqlite3",
     "affordable_snapshot_root": "H:\\Ashare\\data\\affordable_feeds\\latest",
-    "manual_event_proxy_path": "H:\\Ashare\\data\\event_lake_v6\\research\\manual_event_proxy\\manual_event_proxy.jsonl",
+    "manual_event_proxy_path": "H:\\Ashare\\data\\event_lake\\research\\manual_event_proxy\\manual_event_proxy.jsonl",
     "external_research_root": "H:\\Ashare\\data\\external_research_feeds\\latest",
     "data_sqlite_path": "H:\\Ashare\\data\\sql_store\\research_data_v1.sqlite3"
   },
@@ -99,14 +99,14 @@
     "runtime_explainer_model": "qwen2.5:7b",
     "runtime_explainer_timeout_seconds": 45,
     "runtime_explainer_stages": [
-      "v6_planning",
-      "v5_gpu",
+      "research_plan",
+      "gpu_research",
       "portfolio_recommendation",
       "execution_bridge"
     ],
-    "v5_review_enabled": true,
-    "v5_review_model": "deepseek-r1:14b",
-    "v5_review_timeout_seconds": 180
+    "research_review_enabled": true,
+    "research_review_model": "deepseek-r1:14b",
+    "research_review_timeout_seconds": 180
   },
   "eastmoney": {
     "enabled": true,
@@ -224,14 +224,14 @@
   },
   "integrated_thesis": {
     "enabled": true,
-    "output_root": "H:\\Ashare\\data\\event_lake_v6\\research\\integrated_thesis",
+    "output_root": "H:\\Ashare\\data\\event_lake\\research\\integrated_thesis",
     "portfolio_budget_overlay": true,
     "soft_gate_admission": true
   },
   "industry_router": {
     "enabled": true,
     "contract_root": "H:\\Ashare\\src\\ashare\\configs\\industry_router",
-    "output_root": "H:\\Ashare\\data\\event_lake_v6\\research\\industry_router",
+    "output_root": "H:\\Ashare\\data\\event_lake\\research\\industry_router",
     "history_lookback_days": 14,
     "enable_context_pack": true,
     "enable_backtest": true,
@@ -254,10 +254,13 @@
     }
   },
   "research_brain": {
+    "enabled": true,
+    "planning_model": "openai_research",
+    "worker_model": "deepseek_worker",
     "project_root": "H:\\Ashare\\src\\ashare\\research_brain",
     "hub_output_root": "H:\\Ashare\\data\\research_hub_integrated",
-    "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table_v1",
-    "bridge_input_root": "H:\\Ashare\\data\\event_lake_v6\\bridge",
+    "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table",
+    "bridge_input_root": "H:\\Ashare\\data\\event_lake\\bridge",
     "python_executable": "H:\\Ashare\\.venv313\\Scripts\\python.exe"
   },
   "supervisor": {
@@ -265,8 +268,8 @@
     "run_forever": false,
     "max_ticks": 1,
     "sleep_seconds": 300,
-    "v5_gpu_max_cycles_per_tick": 3,
-    "v5_gpu_dry_run": false,
+    "gpu_research_max_cycles_per_tick": 3,
+    "gpu_research_dry_run": false,
     "require_gpu": true
   },
   "dynamic_strategy": {
@@ -368,6 +371,13 @@
     "hard_factor_lookback_days": 5,
     "timeout_minutes": 90
   },
+  "derived_alpha_refresh": {
+    "enabled": true,
+    "run_before_research": true,
+    "fail_open": false,
+    "affordable_sqlite_path": "H:\\Ashare\\data\\sql_store\\affordable_data_v1.sqlite3",
+    "runtime_sqlite_path": "H:\\Ashare\\data\\sql_store\\research_data_v1.sqlite3"
+  },
   "external_research_refresh": {
     "enabled": true,
     "run_before_research": true,
@@ -392,8 +402,8 @@
     "policy_path": "H:\\Ashare\\src\\ashare\\configs\\t_overlay\\t_audit_policy.json"
   },
   "audit_site_publish": {
-    "enabled": true,
-    "run_after_summary": true,
+    "enabled": false,
+    "run_after_summary": false,
     "fail_open": true,
     "script_path": "H:\\Ashare\\scripts\\publish_audit_report_to_site.ps1",
     "powershell_executable": "powershell.exe",
@@ -585,9 +595,16 @@
     "account_size_min_weight_buffer": 1.05,
     "account_size_max_single_name_cap": 0.35,
     "broad_candidate_pool_limit": 48,
+    "hard_data_candidate_pool_enabled": true,
+    "hard_data_candidate_weights": {
+      "seed_weight": 0.18,
+      "pred_score": 0.42,
+      "valuation": 0.24,
+      "liquidity": 0.16
+    },
     "llm_candidate_weak_accept_threshold": 6,
-    "enable_intelligent_outer_allocator": true,
-    "intelligent_outer_allocator_replaces_internal_gates": true,
+    "enable_intelligent_outer_allocator": false,
+    "intelligent_outer_allocator_replaces_internal_gates": false,
     "pre_release_intraday_proxy_objective_enabled": true,
     "pre_release_proxy_max_spread_pct": 0.028,
     "pre_release_proxy_turnover_enforce": true,
@@ -598,7 +615,7 @@
     "pre_release_proxy_fail_open": true
   },
   "portfolio_candidate_llm_review": {
-    "enabled": true,
+    "enabled": false,
     "provider": "deepseek_worker",
     "timeout_seconds": 45,
     "max_input_rows": 18,
@@ -611,7 +628,7 @@
   "strategy_activation": {
     "enabled": true,
     "blend_weight": 0.32,
-    "llm_enabled": true,
+    "llm_enabled": false,
     "llm_provider": "deepseek_worker",
     "llm_timeout_seconds": 40,
     "llm_max_input_rows": 16,
@@ -658,12 +675,12 @@
       }
     },
     "meta_weights": {
-      "valuation_signal_score": 0.14,
-      "revision_signal_score": 0.2,
-      "order_flow_signal_score": 0.23,
-      "event_drive_signal_score": 0.21,
-      "industry_signal_score": 0.12,
-      "liquidity_signal_score": 0.1
+      "valuation_signal_score": 0.56,
+      "revision_signal_score": 0.08,
+      "order_flow_signal_score": 0.0,
+      "event_drive_signal_score": 0.0,
+      "industry_signal_score": 0.0,
+      "liquidity_signal_score": 0.36
     },
     "priority_weights": {
       "selection_score_base": 0.66,
@@ -690,13 +707,54 @@
       "low_cash_multiplier": 0.88
     }
   },
+  "evidence_audit": {
+    "enabled": true,
+    "portfolio_gate_enabled": true,
+    "run_after_portfolio_recommendation": true,
+    "rebuild_portfolio_after_audit": true,
+    "block_execution_on_failure": true,
+    "llm_provider": "deepseek_worker",
+    "llm_timeout_seconds": 60,
+    "max_candidates": 40,
+    "max_results_per_query": 3,
+    "max_sources_per_symbol": 8,
+    "fetch_timeout_seconds": 12,
+    "max_page_chars": 8000,
+    "artifact_root": "H:\\Ashare\\data\\portfolio_recommendation\\evidence_audit_v1",
+    "allow_domains": [
+      "cninfo.com.cn",
+      "sse.com.cn",
+      "szse.cn",
+      "eastmoney.com",
+      "stcn.com",
+      "cs.com.cn",
+      "thepaper.cn",
+      "gov.cn",
+      "ccgp.gov.cn"
+    ],
+    "grade_weight_multipliers": {
+      "A": 1.1,
+      "B": 1.04,
+      "C": 0.92,
+      "D": 0.55,
+      "F": 0.0
+    },
+    "query_templates": [
+      "{base} {code} 公告 业绩预告 业绩快报 利润增长",
+      "{base} {code} 年报 季报 营收 净利润 现金流 毛利率",
+      "{base} {code} 中标 合同 订单 客户 供货",
+      "{base} {code} 减持 质押 冻结 立案 调查 处罚 诉讼",
+      "{base} {code} 退市风险 ST 非标审计 业绩亏损",
+      "{base} {code} 涨价 产能 扩产 停产 产品价格"
+    ]
+  },
   "portfolio": {
     "enabled": true,
     "lifecycle_state_machine_enabled": true,
     "admission_replacement_enabled": true,
     "soft_crowding_penalty_enabled": true,
     "rich_audit_enabled": true,
-    "output_root": "H:\\Ashare\\data\\portfolio_recommendation_v6\\portfolio",
+    "output_root": "H:\\Ashare\\data\\portfolio_recommendation\\portfolio",
     "pilot_max_weight": 0.04,
     "build_speed": 1.25,
     "trim_speed": 0.72,
@@ -957,8 +1015,8 @@
   "execution_bridge": {
     "enabled": false,
     "mode": "gmtrade_sim",
-    "python_executable": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python39\\python.exe",
-    "config_template_path": "H:\\Ashare\\src\\ashare\\configs\\gmtrade_runtime_config.local.json",
+    "python_executable": "H:\\Ashare\\.venv\\gmtrade39\\Scripts\\python.exe",
+    "config_template_path": "H:\\Ashare\\src\\ashare\\configs\\gmtrade_runtime_config.example.json",
     "autogen_config_path": "H:\\Ashare\\src\\ashare\\configs\\gmtrade_runtime_config.autogen.json",
     "script_path": "H:\\Ashare\\src\\ashare\\run_gmtrade_portfolio_bridge.py",
     "health_probe_script_path": "H:\\Ashare\\src\\ashare\\run_gmtrade_health_probe.py"

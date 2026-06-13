@@ -57,7 +57,7 @@ class ControlPlaneSnapshot:
 
 def runtime_config_alias_paths(config_dir: Path, profile: str) -> list[Path]:
     return [
-        config_dir / f"hub_config.v6.runtime.{profile}.json",
+        config_dir / f"hub_config.runtime.{profile}.json",
         config_dir / f"runtime_config.{profile}.json",
     ]
 

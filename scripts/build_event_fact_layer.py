@@ -204,7 +204,7 @@ def _candidate_event_store_paths(config: Dict[str, Any]) -> List[Path]:
     local_root_raw = str(config.get("paths", {}).get("event_store_root", "") or "").strip()
     if local_root_raw:
         paths.append(Path(local_root_raw).resolve() / "event_store.jsonl")
-    paths.append(Path(r"F:\quant_data\Ashare\data\event_lake_v6\curated\event_store.jsonl"))
+    paths.append(Path(r"F:\quant_data\Ashare\data\event_lake\curated\event_store.jsonl"))
     out: List[Path] = []
     for path in paths:
         if path.exists() and path not in out:

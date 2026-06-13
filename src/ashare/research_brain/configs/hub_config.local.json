@@ -1,11 +1,12 @@
 {
   "project_name": "quant_research_hub_v5_1_xgb_lock",
   "project_root": "H:\\Ashare\\src\\ashare\\research_brain",
-  "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table_v1",
+  "train_table_dir": "H:\\Ashare\\data\\ml_datasets\\train_table",
   "hub_output_root": "H:\\Ashare\\data\\research_hub_integrated",
   "execution": {
     "python_executable": "H:\\Ashare\\.venv313\\Scripts\\python.exe",
-    "heartbeat_seconds": 30
+    "heartbeat_seconds": 30,
+    "max_parallel_candidates": 2
   },
   "strategy": {
     "strategy_name": "autonomous_research_brain_v5_1",
@@ -13,14 +14,18 @@
     "train_output_subdir": "research_brain_v5_1",
     "label_col": "future_ret_5",
     "label_horizon": 5,
-    "alpha_label_mode": "cross_section_rank",
+    "alpha_label_mode": "industry_neutral_rank",
     "feature_market_policy": "exclude_from_stock_ranker",
     "feature_liquidity_policy": "exclude_from_stock_ranker",
     "top_k": 20,
+    "portfolio_weight_scheme": "score_tilt",
+    "portfolio_weight_power": 1.5,
     "portfolio_holding_days": 5,
     "portfolio_min_listed_days": 120,
     "portfolio_min_amount_mean_20": 10000000,
     "portfolio_max_vol_20": 0.12,
+    "portfolio_min_price": 3.0,
+    "portfolio_exclude_boards": ["BSE"],
     "portfolio_base_exposure": 1.0,
     "portfolio_weak_market_exposure": 0.5,
     "portfolio_dd_stage1": 0.1,
@@ -30,6 +35,7 @@
     "portfolio_single_name_cap": 0.1,
     "portfolio_single_industry_cap": 0.25,
     "portfolio_max_names_per_industry": 5,
+    "portfolio_inverse_vol_tilt_power": 0.5,
     "backtest_buy_fee_rate": 0.0003,
     "backtest_sell_fee_rate": 0.0003,
     "backtest_sell_tax_rate": 0.001,
@@ -117,24 +123,23 @@
     "champion_max_drawdown_abs": 0.22,
     "retire_below_total_score": 10.0
   },
-  "_deployment_gate_calibration_note": "min_sharpe 阈值在 CDL-20260530-049 后从 1.0 下调到 0.4：砍掉 hs300_* 和 liquidity 特征后，组合不再吃 market beta，因此 backtest Sharpe 物理上不会再到 1.0。post-fix 实测最佳 lightgbm Sharpe 0.52 / 真实 alpha IC 0.086。0.4 是 0.52 留 23% 安全边际后的下限。",
+  "_deployment_gate_calibration_note": "min_sharpe 从 1.0 下调到 0.4：砍掉 hs300_* 和 liquidity 特征后组合不再吃 market beta，backtest Sharpe 物理上不会再到 1.0。post-fix 实测最佳 lightgbm Sharpe 0.52。0.4 是 0.52 留 23% 安全边际。这个文件是 supervisor._build_gpu_config 每次运行的源头模板，hub_config.integrated_gpu.json 是它的运行时副本。",
   "deployment_gate": {
     "min_total_score": 45.0,
     "min_sharpe": 0.4,
     "max_drawdown_abs": 0.22
   },
   "research_brain": {
-    "cycle_candidate_budget": 12,
+    "cycle_candidate_budget": 3,
     "parent_pool_size": 4,
     "route_min_candidates": 1,
-    "max_cycles": 1,
+    "max_cycles": null,
     "sleep_seconds": 0,
     "gpu_primary_family": "xgboost_gpu"
   },
   "route_space": {
     "feature_profiles": [
       "baseline_plus",
-      "momentum_cross_section",
       "vol_liq_quality",
       "defensive_residual",
       "interaction_sparse",
@@ -142,7 +147,8 @@
     ],
     "model_families": [
       "ridge_ranker",
-      "lightgbm_gpu"
+      "lightgbm_gpu",
+      "xgboost_gpu"
     ],
     "training_logics": [
       "baseline",
@@ -172,12 +178,12 @@
     ]
   },
   "llm_brain": {
-    "enabled": true,
-    "base_url": "https://api.deepseek.com",
-    "api_key_env": "DEEPSEEK_API_KEY",
-    "model": "deepseek-chat",
-    "temperature": 0.15,
-    "timeout_seconds": 90,
+    "enabled": false,
+    "base_url": "https://api.openai.com/v1",
+    "api_key_env": "OPENAI_API_KEY",
+    "model": "gpt-5.4-thinking",
+    "temperature": 0.2,
+    "timeout_seconds": 120,
     "provider_tiers": [
       {
         "provider": "local_ollama",
@@ -211,9 +217,5 @@
     "enabled": false,
     "candidate_urls": [],
     "max_chars_per_page": 5000
-  },
-  "bridge_inputs": {
-    "enabled": true,
-    "bridge_root": "H:\\Ashare\\data\\event_lake_v6\\bridge"
   }
 }

@@ -6,7 +6,6 @@ import pandas as pd
 
 from .alpha_registry import enrich_alpha_registry, summarize_alpha_registry
 from .candidate_pool_llm_review import review_candidate_pool
-from .outer_intelligence import score_candidate_pool
 from .strategy_activation import activate_candidate_pool
 
 
@@ -72,15 +71,9 @@ def activate_and_rank_candidate_pool(
             thesis_summary=thesis_summary,
             candidate_rows=review_rows,
         )
-    outer_summary: Dict[str, Any] = {"enabled": False, "applied": False}
-    if bool(rec_cfg.get("enable_intelligent_outer_allocator", True)):
-        ranked, outer_summary = score_candidate_pool(
-            candidate_df=ranked,
-            market_state=market_state,
-            account_ctx=account_ctx,
-            thesis_summary=thesis_summary,
-            rec_cfg=rec_cfg,
-        )
+    # outer_intelligence 账户分档 haircut 已移除：候选排序保持研究/激活原序，
+    # 仓位集中度与上限统一交由 decision engine 单遍处理。
+    outer_summary: Dict[str, Any] = {"enabled": False, "applied": False, "reason": "outer_intelligence_removed"}
     ranked = enrich_alpha_registry(ranked)
     ranked = sort_candidate_pool(
         ranked,

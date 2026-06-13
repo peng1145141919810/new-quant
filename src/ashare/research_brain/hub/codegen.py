@@ -725,14 +725,19 @@ class CodegenLab:
         attempts: list[Dict[str, Any]] = []
         tiers = [tier for tier in self._provider_tiers() if tier.enabled]
         if not tiers:
+            # 没有可用 LLM 供应商（llm_brain 关闭或都没配 key）：直接用确定性 fallback
+            # 模块，照样把可用的 feat_* 特征写出来，让候选能跑而不是被 skip。
             spec_path.write_text(_spec_to_json(fallback), encoding="utf-8")
+            module_path.write_text(self._compiler(kind)(self._validator(kind)(fallback)), encoding="utf-8")
+            fb_validation = _load_module_validation(module_path)
+            fb_ok = bool(fb_validation.get("ok"))
             return {
-                "ok": False,
-                "error": "no_enabled_codegen_provider",
+                "ok": fb_ok,
+                "error": "" if fb_ok else ("no_enabled_codegen_provider; " + str(fb_validation.get("error", ""))),
                 "spec_path": str(spec_path),
                 "module_path": str(module_path),
                 "spec_kind": kind,
-                "selected_provider": "",
+                "selected_provider": "fallback",
                 "repair_attempts": attempts,
                 "repair_exhausted": True,
                 "fallback_used": True,
@@ -798,9 +803,16 @@ class CodegenLab:
 
         spec_path.write_text(_spec_to_json(fallback), encoding="utf-8")
         module_path.write_text(self._compiler(kind)(self._validator(kind)(fallback)), encoding="utf-8")
+        # LLM 各层都没产出可用 spec（例如 "openai returned empty payload"）。这里退化到
+        # 确定性内置 fallback 模块——feature_pack 仍能产出 feat_* 特征、train_override 用
+        # 默认计划、generated_model 用内置模型。只要 fallback 模块本身能编译加载，就标记
+        # ok=True 让候选带着它继续跑，而不是整支候选被 skip 浪费掉。fallback_used /
+        # repair_exhausted 仍保留，诊断时一眼看出是 LLM 失败后走的兜底。
+        fb_validation = _load_module_validation(module_path)
+        fb_ok = bool(fb_validation.get("ok"))
         return {
-            "ok": False,
-            "error": last_error,
+            "ok": fb_ok,
+            "error": "" if fb_ok else (last_error or str(fb_validation.get("error", ""))),
             "spec_path": str(spec_path),
             "module_path": str(module_path),
             "spec_kind": kind,
@@ -832,4 +844,86 @@ class CodegenLab:
             "generated_model_path": model_result["module_path"],
             "generated_model_spec_path": model_result["spec_path"],
             "validations": validations,
+        }
+
+    def _rebuild_artifact_from_spec(
+        self, workspace_dir: Path, artifact_name: str, kind: str, source_spec_path: Path
+    ) -> Dict[str, Any]:
+        """从已存档的 spec.json 确定性地重新编译一个 artifact（不调用 LLM）。
+
+        读源 spec → 跑现成校验器 → 跑现成编译器 → 写 spec.json + .py 到目标 workspace，
+        再加载校验编译产物能跑。任何一步失败都抛异常，由调用方决定是否退回 LLM 路线。
+        """
+        spec_path = workspace_dir / f"{artifact_name}.spec.json"
+        module_path = workspace_dir / f"{artifact_name}.py"
+        raw_spec = json.loads(source_spec_path.read_text(encoding="utf-8"))
+        normalized_spec = self._validator(kind)(dict(raw_spec))
+        module_source = self._compiler(kind)(normalized_spec)
+        spec_path.write_text(_spec_to_json(normalized_spec), encoding="utf-8")
+        module_path.write_text(str(module_source), encoding="utf-8")
+        module_validation = _load_module_validation(module_path)
+        if not module_validation.get("ok"):
+            raise ValueError(module_validation.get("error", "recompiled module validation failed"))
+        return {
+            "ok": True,
+            "error": "",
+            "spec_path": str(spec_path),
+            "module_path": str(module_path),
+            "spec_kind": kind,
+            "selected_provider": "archived_spec",
+            "selected_model": "",
+            "selected_intent": {},
+            "repair_attempts": [],
+            "repair_exhausted": False,
+            "fallback_used": False,
+            "reused_from": str(source_spec_path),
+        }
+
+    def build_workspace_from_specs(
+        self, workspace_dir: Path, source_specs_dir: Path, context: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """用已存档的冠军 spec.json 确定性复刻 lab（不调用 LLM）。
+
+        逐个 artifact：存档 spec 存在且能重新编译，就直接复用（真 verbatim 复刻冠军基因）；
+        缺失或编译失败的，单独退回正常 LLM/fallback 路线，互不影响。
+        """
+        workspace_dir.mkdir(parents=True, exist_ok=True)
+        artifacts = [
+            ("feature_pack", "feature_spec"),
+            ("train_override", "train_override_spec"),
+            ("generated_model", "model_spec"),
+        ]
+        results: Dict[str, Dict[str, Any]] = {}
+        reused_any = False
+        for artifact_name, kind in artifacts:
+            source_spec_path = source_specs_dir / f"{artifact_name}.spec.json"
+            if source_spec_path.exists():
+                try:
+                    results[artifact_name] = self._rebuild_artifact_from_spec(
+                        workspace_dir, artifact_name, kind, source_spec_path
+                    )
+                    reused_any = True
+                    continue
+                except Exception as exc:
+                    # 存档损坏/不再合法：退回正常生成，并把原因记下来方便诊断
+                    results[artifact_name] = self._build_artifact(workspace_dir, artifact_name, kind, context)
+                    results[artifact_name]["archive_reuse_error"] = str(exc)
+                    continue
+            results[artifact_name] = self._build_artifact(workspace_dir, artifact_name, kind, context)
+
+        write_json(workspace_dir / "workspace_validation.json", results)
+        feature_result = results["feature_pack"]
+        train_result = results["train_override"]
+        model_result = results["generated_model"]
+        return {
+            "workspace_dir": str(workspace_dir),
+            "feature_pack_path": feature_result["module_path"],
+            "feature_pack_spec_path": feature_result["spec_path"],
+            "train_override_path": train_result["module_path"],
+            "train_override_spec_path": train_result["spec_path"],
+            "generated_model_path": model_result["module_path"],
+            "generated_model_spec_path": model_result["spec_path"],
+            "validations": results,
+            "reused_from_archive": reused_any,
+            "archive_source_dir": str(source_specs_dir),
         }

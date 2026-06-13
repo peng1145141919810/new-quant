@@ -50,17 +50,17 @@ def load_tactical_context(config: Dict[str, Any], trade_date: str) -> Dict[str, 
     proxy_root = Path(str(config.get("paths", {}).get("intraday_proxy_root", "") or tc_root / "intraday_proxy")).resolve()
     intraday_state = Path(str(config.get("intraday_state_machine", {}).get("artifact_root", "") or tc_root / "intraday_state")).resolve()
 
-    release = _read_json(data_root / "trade_release_v1" / "latest_release.json")
+    release = _read_json(data_root / "trade_release" / "latest_release.json")
     if release and not _trade_date_match(release, trade_date):
         release = {}
     release_id = str(release.get("release_id", "") or "")
-    manifest = _read_json(data_root / "trade_release_v1" / "releases" / release_id / "release_manifest.json") if release_id else {}
+    manifest = _read_json(data_root / "trade_release" / "releases" / release_id / "release_manifest.json") if release_id else {}
     if manifest and not _trade_date_match(manifest, trade_date):
         manifest = {}
         release = {}
         release_id = ""
 
-    portfolio_root = Path(str(config.get("paths", {}).get("portfolio_output_root", "") or data_root / "portfolio_recommendation_v6")).resolve()
+    portfolio_root = Path(str(config.get("paths", {}).get("portfolio_output_root", "") or data_root / "portfolio_recommendation")).resolve()
     target_csv = _artifact_path(manifest, "target_positions_path", portfolio_root / "target_positions.csv") if manifest else (portfolio_root / "target_positions.csv")
     lifecycle_csv = _artifact_path(manifest, "position_lifecycle_path", portfolio_root / "portfolio" / "latest_position_lifecycle.csv") if manifest else (portfolio_root / "portfolio" / "latest_position_lifecycle.csv")
     portfolio_summary_path = _artifact_path(manifest, "portfolio_summary_path", portfolio_root / "portfolio_recommendation.json") if manifest else (portfolio_root / "portfolio_recommendation.json")

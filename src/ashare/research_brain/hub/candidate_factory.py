@@ -12,8 +12,10 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import random
+import shutil
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from hub.codegen import CodegenLab
 from hub.io_utils import write_csv, write_json
@@ -21,6 +23,46 @@ from hub.llm_client import LLMClient
 from hub.research_routes import allocate_route_budget, route_hypotheses
 
 MAX_BRIDGE_INPUT_JSON_BYTES = 5 * 1024 * 1024
+
+# 结构性高回撤的毒特征包：家族表里凡用 momentum_cross_section 的回撤无一例外 -26%~-42%，
+# P7 深修提了 IC 也压不住回撤。直接拉黑，任何来源（route_space / 继承父代 / 冷启动种子）
+# 出现都换成 generated_feature_pack。详见分析记录。
+BLACKLISTED_FEATURE_PROFILES = {'momentum_cross_section'}
+SAFE_DEFAULT_FEATURE_PROFILE = 'generated_feature_pack'
+
+
+def _sanitize_feature_profile(profile: Any) -> str:
+    """把被拉黑的特征包替换成安全默认值。"""
+    fp = str(profile or '').strip()
+    if not fp or fp in BLACKLISTED_FEATURE_PROFILES:
+        return SAFE_DEFAULT_FEATURE_PROFILE
+    return fp
+
+
+def _clean_feature_profiles(profiles: List[Any]) -> List[str]:
+    """清洗特征包候选池：剔除黑名单并去重保序。"""
+    out: List[str] = []
+    for p in profiles:
+        fp = str(p or '').strip()
+        if not fp or fp in BLACKLISTED_FEATURE_PROFILES:
+            continue
+        if fp not in out:
+            out.append(fp)
+    return out or [SAFE_DEFAULT_FEATURE_PROFILE]
+
+
+def _pick(seq: List[Any], idx: int, cycle_index: int, rng: Optional[random.Random]) -> Any:
+    """从候选池取一个。
+
+    有 rng 时随机抽样（每轮不同，实现真探索）；无 rng 时退回旧的确定性取模，
+    保证不传 rng 的老调用方行为不变。
+    """
+    seq = list(seq)
+    if not seq:
+        return None
+    if rng is not None:
+        return rng.choice(seq)
+    return seq[(idx + cycle_index) % len(seq)]
 
 
 def stable_hash(payload: Dict[str, Any], length: int = 12) -> str:
@@ -60,7 +102,7 @@ def _seed_parents(base_config: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
     strategy = dict(base_config.get('strategy', {}))
     seeds = []
-    for feature_profile in ['baseline_plus', 'momentum_cross_section', 'vol_liq_quality']:
+    for feature_profile in ['baseline_plus', 'vol_liq_quality', 'generated_feature_pack']:
         for model_family in ['xgboost_gpu', 'lightgbm_gpu', 'ridge_ranker', 'lightgbm_auto']:
             for training_logic in ['baseline', 'weighted_recent', 'feature_select']:
                 seeds.append({
@@ -90,6 +132,47 @@ def _top_parents(registry_df, n: int, base_config: Dict[str, Any]) -> List[Dict[
         return _seed_parents(base_config)[:n]
     cols = ['total_score', 'sharpe', 'valid_ic', 'test_ic']
     return registry_df.sort_values(cols, ascending=[False, False, False, False]).head(max(n, 1)).to_dict(orient='records')
+
+
+CHAMPION_SPEC_FILES = ('feature_pack.spec.json', 'train_override.spec.json', 'generated_model.spec.json')
+
+
+def _champion_specs_source(parent: Dict[str, Any], cycle_dir: Path) -> Optional[Path]:
+    """定位冠军父代的三个 spec.json 来源目录，用于 verbatim 复刻其特征包/训练计划/模型。
+
+    优先用稳定存档（champions_archive/<strategy_key>）；存档没有就回退到父代原始 lab
+    （registry 的 workspace_dir）。两处都拿到时，把原始 lab 的 spec 快照进存档——
+    这样即使旧 cycle 的 labs 日后被清理，冠军基因仍能确定性复刻。返回 None=无可用来源。
+    """
+    def _has_specs(d: Optional[Path]) -> bool:
+        return bool(d) and all((d / name).exists() for name in CHAMPION_SPEC_FILES)
+
+    strategy_key = str(parent.get('strategy_key', '') or '').strip()
+    archive_dir: Optional[Path] = None
+    if strategy_key:
+        try:
+            archive_dir = cycle_dir.parent.parent / 'champions_archive' / strategy_key
+        except Exception:
+            archive_dir = None
+
+    if _has_specs(archive_dir):
+        return archive_dir
+
+    raw_ws = str(parent.get('workspace_dir', '') or '').strip()
+    if not raw_ws:
+        return None
+    ws = Path(raw_ws)
+    if not _has_specs(ws):
+        return None
+    if archive_dir is not None:
+        try:
+            archive_dir.mkdir(parents=True, exist_ok=True)
+            for name in CHAMPION_SPEC_FILES:
+                shutil.copy2(ws / name, archive_dir / name)
+            return archive_dir
+        except Exception:
+            pass
+    return ws
 
 
 def _load_json_if_small(path: Path) -> Dict[str, Any]:
@@ -221,9 +304,24 @@ def _llm_route_override(llm_client: LLMClient, diagnosis: Dict[str, Any], route_
     return llm_client.chat_json(system_prompt=system_prompt, user_prompt=user_prompt, temperature=0.2)
 
 
-def _candidate_spec(route: str, parent: Dict[str, Any], space: Dict[str, Any], idx: int, cycle_index: int, hypotheses: Dict[str, List[str]]) -> Dict[str, Any]:
-    """构建单个候选结构。"""
-    fps = list(space.get('feature_profiles', ['baseline_plus']))
+def _candidate_spec(
+    route: str,
+    parent: Dict[str, Any],
+    space: Dict[str, Any],
+    idx: int,
+    cycle_index: int,
+    hypotheses: Dict[str, List[str]],
+    rng: Optional[random.Random] = None,
+    exploit: bool = False,
+) -> Dict[str, Any]:
+    """构建单个候选结构。
+
+    rng:    每轮独立的随机源。有它就随机抽样（真探索，每轮不同）；没有就退回
+            确定性取模（老行为）。
+    exploit: True 时直接 verbatim 复评父代配方（hold-the-line，专给候选1=冠军用），
+            不做任何路线改写，只清洗黑名单特征包。
+    """
+    fps = _clean_feature_profiles(list(space.get('feature_profiles', ['baseline_plus'])))
     mfs = _ordered_model_choices(space, default=['ridge_ranker'])
     tls = list(space.get('training_logics', ['baseline']))
     lhs = list(space.get('label_horizons', [5, 10, 20]))
@@ -231,40 +329,56 @@ def _candidate_spec(route: str, parent: Dict[str, Any], space: Dict[str, Any], i
     exposures = list(space.get('base_exposures', [1.0, 0.9, 0.8]))
     weaks = list(space.get('weak_exposures', [0.5, 0.4, 0.3]))
 
+    parent_fp = _sanitize_feature_profile(parent.get('feature_profile')) if parent.get('feature_profile') else _pick(fps, idx, cycle_index, rng)
+    parent_mf = parent.get('model_family') if parent.get('model_family') in mfs else _pick(mfs, idx, cycle_index, rng)
+    parent_tl = parent.get('training_logic') if parent.get('training_logic') in tls else _pick(tls, idx, cycle_index, rng)
+
     spec = {
         'research_route': route,
-        'feature_profile': parent.get('feature_profile', fps[(idx + cycle_index) % len(fps)]),
-        'model_family': parent.get('model_family') if parent.get('model_family') in mfs else mfs[(idx + cycle_index) % len(mfs)],
-        'training_logic': parent.get('training_logic', tls[(idx + cycle_index) % len(tls)]),
-        'label_horizon': int(parent.get('label_horizon', lhs[(idx + cycle_index) % len(lhs)])),
-        'top_k': int(parent.get('top_k', tks[(idx + cycle_index) % len(tks)])),
-        'portfolio_base_exposure': float(exposures[(idx + cycle_index) % len(exposures)]),
-        'portfolio_weak_market_exposure': float(weaks[(idx + cycle_index) % len(weaks)]),
+        'feature_profile': parent_fp,
+        'model_family': parent_mf,
+        'training_logic': parent_tl,
+        'label_horizon': int(parent.get('label_horizon', _pick(lhs, idx, cycle_index, rng))),
+        'top_k': int(parent.get('top_k', _pick(tks, idx, cycle_index, rng))),
+        'portfolio_base_exposure': float(parent.get('portfolio_base_exposure', _pick(exposures, idx, cycle_index, rng))),
+        'portfolio_weak_market_exposure': float(parent.get('portfolio_weak_market_exposure', _pick(weaks, idx, cycle_index, rng))),
         'hypothesis': hypotheses.get(route, [''])[idx % max(len(hypotheses.get(route, [''])), 1)],
     }
+
+    # 冠军基因保护：exploit 直接复评父代完整配方，不让路线逻辑覆盖好基因。
+    # 必须完全确定性（不沾 rng），否则候选1每轮 hash 漂移、认不出是冠军复评，
+    # 既攒不到稳定性样本、又把“每轮换新 spec”的churn 带回来。registry 没记仓位暴露，
+    # 用 config 列表首项作稳定回填。
+    if exploit:
+        spec['portfolio_base_exposure'] = float(parent.get('portfolio_base_exposure', exposures[0]))
+        spec['portfolio_weak_market_exposure'] = float(parent.get('portfolio_weak_market_exposure', weaks[0]))
+        spec['label_horizon'] = int(parent.get('label_horizon', lhs[0]))
+        spec['top_k'] = int(parent.get('top_k', tks[0]))
+        spec['hypothesis'] = 'hold-the-line：verbatim 复评当前冠军配方，确认稳定性并防止研究退步。'
+        spec['feature_profile'] = _sanitize_feature_profile(spec['feature_profile'])
+        return spec
+
     if route == 'feature':
-        spec['feature_profile'] = fps[(idx + cycle_index) % len(fps)]
-        if idx % 3 == 2:
-            spec['feature_profile'] = 'generated_feature_pack'
+        spec['feature_profile'] = _pick(fps, idx, cycle_index, rng)
     elif route == 'model':
-        # 模型路线优先让 GPU 家族得到预算。
-        gpu_first = [m for m in mfs if m in {'xgboost_gpu', 'lightgbm_gpu', 'lightgbm_auto'}] + [m for m in mfs if m not in {'xgboost_gpu', 'lightgbm_gpu', 'lightgbm_auto'}]
-        spec['model_family'] = gpu_first[(idx + cycle_index) % len(gpu_first)]
-        if idx % 5 == 4 and 'generated_family' in mfs:
-            spec['model_family'] = 'generated_family'
+        # 模型路线打破“全 lightgbm”单一化：固定挑最强的非 lightgbm 异构对照。
+        # NaN-in-y 崩溃已被 training_engine._drop_unlabeled 修好，xgboost 现在能正常训练，
+        # 所以确定性优先 xgboost（pool[0]），不再随机抽到已知废掉的 ridge，确保拿到有效对照数据。
+        non_lgb = [m for m in mfs if m != 'lightgbm_gpu']
+        gpu_non_lgb = [m for m in non_lgb if m in {'xgboost_gpu', 'lightgbm_auto', 'generated_family'}] + [m for m in non_lgb if m not in {'xgboost_gpu', 'lightgbm_auto', 'generated_family'}]
+        pool = gpu_non_lgb or non_lgb or mfs
+        spec['model_family'] = pool[0]
     elif route == 'training':
-        spec['training_logic'] = tls[(idx + cycle_index) % len(tls)]
-        if idx % 3 == 2:
-            spec['training_logic'] = 'generated_training'
+        spec['training_logic'] = _pick(tls, idx, cycle_index, rng)
     elif route == 'portfolio':
-        spec['top_k'] = int(tks[(idx + cycle_index) % len(tks)])
-        spec['portfolio_base_exposure'] = float(exposures[(idx + cycle_index) % len(exposures)])
+        spec['top_k'] = int(_pick(tks, idx, cycle_index, rng))
+        spec['portfolio_base_exposure'] = float(_pick(exposures, idx, cycle_index, rng))
     elif route == 'risk':
-        spec['portfolio_weak_market_exposure'] = float(weaks[(idx + cycle_index) % len(weaks)])
-        spec['portfolio_dd_stage1'] = [0.08, 0.10, 0.12][(idx + cycle_index) % 3]
-        spec['portfolio_dd_stage2'] = [0.15, 0.18, 0.22][(idx + cycle_index) % 3]
+        spec['portfolio_weak_market_exposure'] = float(_pick(weaks, idx, cycle_index, rng))
+        spec['portfolio_dd_stage1'] = _pick([0.08, 0.10, 0.12], idx, cycle_index, rng)
+        spec['portfolio_dd_stage2'] = _pick([0.15, 0.18, 0.22], idx, cycle_index, rng)
     elif route == 'data':
-        spec['feature_profile'] = 'generated_feature_pack'
+        spec['feature_profile'] = SAFE_DEFAULT_FEATURE_PROFILE
         spec['model_family'] = _pick_model_family(
             space,
             preferred_order=['xgboost_gpu', 'lightgbm_gpu', 'lightgbm_auto', 'ridge_ranker', 'generated_family'],
@@ -273,11 +387,11 @@ def _candidate_spec(route: str, parent: Dict[str, Any], space: Dict[str, Any], i
             fallback='ridge_ranker',
         )
     elif route == 'hybrid':
-        spec['feature_profile'] = fps[(idx + cycle_index) % len(fps)]
-        spec['model_family'] = mfs[(idx + cycle_index) % len(mfs)]
-        spec['training_logic'] = tls[(idx + cycle_index) % len(tls)]
-        if idx % 2 == 1 and 'generated_family' in mfs:
-            spec['model_family'] = 'generated_family'
+        spec['feature_profile'] = _pick(fps, idx, cycle_index, rng)
+        spec['model_family'] = _pick(mfs, idx, cycle_index, rng)
+        spec['training_logic'] = _pick(tls, idx, cycle_index, rng)
+
+    spec['feature_profile'] = _sanitize_feature_profile(spec['feature_profile'])
     return spec
 
 
@@ -306,6 +420,15 @@ def build_cycle_plan(base_config: Dict[str, Any], registry_df, cycle_index: int,
         llm_override['route_weights'] = dict(bridge_route_override)
     if isinstance(llm_override.get('route_weights'), dict):
         budget = allocate_route_budget({'route_weights': llm_override['route_weights']}, total_candidates=total_candidates, min_each=route_min_candidates)
+    # 调度器(权威)已按 profile 定好每路候选数并写进 feedback 的 route_budget。
+    # 它最终拍板：否则 quick_test 把 route_weights 收窄成 1 路、调度器 route_budget=1，
+    # 这里却按 7 路 route_weights × min_each=1 重算回 7 个候选，1 候选冒烟跑变成长 GPU 跑。
+    perf_route_budget = {
+        str(r): int(n) for r, n in dict(perf_feedback.get('route_budget', {}) or {}).items()
+        if int(n or 0) > 0
+    }
+    if perf_route_budget:
+        budget = perf_route_budget
 
     lab = CodegenLab(llm_client)
     seen_in_cycle = set()
@@ -323,9 +446,16 @@ def build_cycle_plan(base_config: Dict[str, Any], registry_df, cycle_index: int,
     gpu_profile = dict(base_config.get('gpu_profile', {}))
     resource_constraints = dict(base_config.get('resource_constraints', {}))
 
+    # 每轮独立随机源：用带时间戳的 cycle_dir 名派生种子，保证每次 --mode batch 真生成
+    # 不同候选（破除“每轮重复同 7 个 spec”），但同一轮内可复现。
+    run_seed = int(hashlib.md5(str(cycle_dir.name).encode('utf-8')).hexdigest(), 16)
+
     for idx, route in enumerate(route_seq, start=1):
         parent = parents[(idx - 1) % len(parents)]
-        spec = _candidate_spec(route, parent, route_space, idx - 1, cycle_index, hypotheses)
+        # 候选1 = 冠军 hold-the-line：verbatim 复评家族最佳父代，对抗研究退步。
+        exploit = (idx == 1 and not registry_df.empty)
+        rng = random.Random(f"{run_seed}:{idx}:{route}")
+        spec = _candidate_spec(route, parent, route_space, idx - 1, cycle_index, hypotheses, rng=rng, exploit=exploit)
         spec['alpha_label_mode'] = str(base_config['strategy'].get('alpha_label_mode', 'raw_return'))
         spec['feature_market_policy'] = str(base_config['strategy'].get('feature_market_policy', 'allow'))
         spec['feature_liquidity_policy'] = str(base_config['strategy'].get('feature_liquidity_policy', 'allow'))
@@ -333,6 +463,14 @@ def build_cycle_plan(base_config: Dict[str, Any], registry_df, cycle_index: int,
         sig['cycle_index'] = cycle_index
         sig['candidate_index'] = idx
         spec_hash = stable_hash(sig, 12)
+        if exploit:
+            # 冠军 hold-the-line replica 的 strategy_key 必须跨 cycle 稳定：spec_hash 含
+            # cycle_index/candidate_index 会让同一冠军每轮拿到新 key，而 evolve_strategy_family
+            # 按 strategy_key 分组、需多次复评才晋级 —— 新 key 永远攒不够重复观测。
+            # 用冠军父代身份派生稳定 key（同一冠军在位期间不变；冠军更替时随父代 key 变化）。
+            champion_anchor = str(parent.get('strategy_key', '') or '').strip()
+            if champion_anchor and champion_anchor != 'seed_root':
+                spec_hash = stable_hash({'champion_replica_of': champion_anchor}, 12)
         if spec_hash in seen_in_cycle:
             sig['candidate_index'] = idx * 100 + cycle_index
             spec_hash = stable_hash(sig, 12)
@@ -356,7 +494,14 @@ def build_cycle_plan(base_config: Dict[str, Any], registry_df, cycle_index: int,
         cfg['strategy']['train_output_subdir'] = f"{base_config['strategy']['train_output_subdir']}_c{cycle_index:03d}_{idx:03d}_{spec_hash[:8]}"
 
         workspace_dir = cycle_dir / 'labs' / f'candidate_{idx:03d}_{spec_hash[:8]}'
-        lab_info = lab.build_workspace(workspace_dir, context={'route': route, 'spec': spec, 'diagnosis': diagnosis, 'llm_override': llm_override})
+        lab_context = {'route': route, 'spec': spec, 'diagnosis': diagnosis, 'llm_override': llm_override}
+        # 候选1(exploit)的 hold-the-line：若能定位冠军父代的存档 spec，就确定性重编译复刻其
+        # 特征包/训练计划/模型（不调用 LLM），真正复评冠军基因；定位不到再退回正常生成。
+        champion_specs = _champion_specs_source(parent, cycle_dir) if exploit else None
+        if champion_specs is not None:
+            lab_info = lab.build_workspace_from_specs(workspace_dir, champion_specs, context=lab_context)
+        else:
+            lab_info = lab.build_workspace(workspace_dir, context=lab_context)
         model_options = {
             'lightgbm_device_type': str(gpu_profile.get('lightgbm_device_type', 'gpu')),
             'gpu_platform_id': gpu_profile.get('gpu_platform_id'),

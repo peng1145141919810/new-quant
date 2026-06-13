@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-HUB_ROOT = REPO_ROOT / "src/ashare" / "src/ashare"
+HUB_ROOT = REPO_ROOT / "src" / "ashare"
 if str(HUB_ROOT) not in sys.path:
     sys.path.insert(0, str(HUB_ROOT))
 
@@ -32,7 +32,7 @@ def _fallback_release_doc(config: dict) -> dict:
 
 
 def main() -> int:
-    config_path = HUB_ROOT / "configs" / "hub_config.v6.runtime.daily_production.json"
+    config_path = HUB_ROOT / "configs" / "hub_config.runtime.daily_production.json"
     config = load_config(config_path)
     try:
         release_doc = load_latest_release(config=config)

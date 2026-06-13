@@ -10,7 +10,7 @@ import pandas as pd
 
 def _bootstrap_repo() -> None:
     script_path = Path(__file__).resolve()
-    package_root = script_path.parents[1] / "src/ashare" / "src/ashare"
+    package_root = script_path.parents[1] / "src" / "ashare"
     if str(package_root) not in sys.path:
         sys.path.insert(0, str(package_root))
 

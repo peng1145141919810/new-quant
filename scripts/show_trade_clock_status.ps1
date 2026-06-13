@@ -8,7 +8,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $tradeClockRoot = Join-Path $repoRoot "data\trade_clock"
 $runtimeRoot = Join-Path $tradeClockRoot "runtime"
 $phaseStateRoot = Join-Path $tradeClockRoot "phase_state"
-$releaseRoot = Join-Path $repoRoot "data\trade_release_v1"
+$releaseRoot = Join-Path $repoRoot "data\trade_release"
 $omsRoot = Join-Path $repoRoot "data\live_execution_bridge\oms_v1"
 $automationRoot = Join-Path $repoRoot "outputs\automation_runs"
 

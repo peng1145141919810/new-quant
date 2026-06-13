@@ -47,6 +47,29 @@ from engine.clock_supervisor import RuntimeReloadRequested, run_trade_clock
 from engine.runtime_profiles import normalize_profile, profile_overrides
 
 
+def _prevent_system_sleep() -> bool:
+    """Keep the machine awake while the clock daemon is alive (Windows only).
+
+    Uses SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED). The flag
+    stays in effect for the lifetime of this thread (the main while-loop), so the
+    OS will not enter standby/sleep as long as the supervisor keeps running.
+    Best-effort: never raises, returns True only when the flag was set.
+    """
+    if os.name != "nt":
+        return False
+    try:
+        import ctypes
+
+        ES_CONTINUOUS = 0x80000000
+        ES_SYSTEM_REQUIRED = 0x00000001
+        result = ctypes.windll.kernel32.SetThreadExecutionState(
+            ES_CONTINUOUS | ES_SYSTEM_REQUIRED
+        )
+        return bool(result)
+    except Exception:
+        return False
+
+
 def _deep_update(config: Dict[str, Any], overrides: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     for section, values in overrides.items():
         bucket = dict(config.get(section, {}) or {})
@@ -122,7 +145,7 @@ def _write_runtime_config(
         "execution_namespace": str(config.get("execution_policy", {}).get("namespace", "") or ""),
         "shadow_run": bool(config.get("execution_policy", {}).get("shadow_run", False)),
     }
-    config_path = PACKAGE_ROOT / "configs" / f"hub_config.v6.runtime.{resolved_profile}.json"
+    config_path = PACKAGE_ROOT / "configs" / f"hub_config.runtime.{resolved_profile}.json"
     _atomic_write_text(config_path, json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
     return config_path
 
@@ -145,6 +168,9 @@ def main() -> None:
     args = parse_args()
     repo_root = Path(__file__).resolve().parent
     retry_sleep_seconds = max(int(args.poll_seconds or 60), 30)
+    if not bool(args.once):
+        if _prevent_system_sleep():
+            print("[trade_clock] keep-awake enabled: system standby suppressed while daemon runs.")
     while True:
         config_path = (
             Path(args.config).resolve()

@@ -36,6 +36,10 @@ class ResourceBudgetSkip(RuntimeError):
 
 DATE_CAP_HEAVY_FAMILIES = {'random_forest', 'extra_trees'}
 GPU_FAMILIES = {'lightgbm_gpu', 'xgboost_gpu'}
+# 树模型原生支持缺失值，应让 NaN 透传由模型自己分裂学习，而不是填 0（填 0 会把
+# "缺失"伪装成一个极端数值、制造假信号）。线性模型（如 ridge_ranker）无法吃 NaN，
+# 用【训练集每列中位数】回填（中位数来自 train，无未来泄漏）。
+TREE_FAMILIES = {'lightgbm_gpu', 'lightgbm_auto', 'xgboost_gpu', 'hist_gbdt'}
 
 
 def _env_flag(name: str, default: bool = False) -> bool:
@@ -309,8 +313,22 @@ def _assert_codegen_valid(candidate: Dict[str, Any]) -> None:
     raise ResourceBudgetSkip(f'invalid generated modules: {names}', meta=meta)
 
 
-def _clean_feature_frame(df: pd.DataFrame, cols: List[str]) -> pd.DataFrame:
-    return df[cols].replace([np.inf, -np.inf], np.nan).fillna(0.0).astype(float)
+def _clean_feature_frame(
+    df: pd.DataFrame,
+    cols: List[str],
+    fill_values: Optional[pd.Series] = None,
+) -> pd.DataFrame:
+    """整理特征矩阵。
+
+    fill_values 为 None  → 保留 NaN（树模型路线，让模型自己学缺失分裂）。
+    fill_values 为 Series → 按该值回填（线性模型路线，传训练集中位数，避免泄漏）。
+    """
+    # float32 而非 float64：训练表行数 ~1500 万 × 70+ 列，float64 的稠密块会吃 ~17GB。
+    # GBDT/线性排序对 float32 精度完全够用，内存直接砍半。
+    out = df[cols].replace([np.inf, -np.inf], np.nan).astype(np.float32)
+    if fill_values is not None:
+        out = out.fillna(fill_values).fillna(0.0)
+    return out
 
 
 def _project_runtime_frame(
@@ -419,7 +437,18 @@ def _select_features(df: pd.DataFrame, feature_cols: List[str], profile: str) ->
     if profile == 'baseline_plus':
         return cols
     if profile == 'momentum_cross_section':
-        out = [c for c in cols if c.startswith(('ret_', 'alpha_ret_', 'hs300_ret_'))]
+        # 风险调整中长周期动量：A 股短周期(ret_1/ret_5)是强反转噪声，剔除；
+        # 保留中长动量 + 行业中性动量(alpha_ret)，再带波动率让模型做风险调整压回撤。
+        _reversal = {'ret_1', 'ret_5'}
+        out = [
+            c for c in cols
+            if c not in _reversal
+            and (
+                c.startswith('ret_')
+                or c.startswith('alpha_ret_')
+                or c.startswith('vol_')
+            )
+        ]
         return out or cols
     if profile == 'vol_liq_quality':
         out = [c for c in cols if c.startswith(('vol_', 'amount_', 'turnover_')) or c in {'listed_days', 'total_mv', 'circ_mv'}]
@@ -454,6 +483,42 @@ def _apply_interaction_sparse(df: pd.DataFrame, cols: List[str]) -> Tuple[pd.Dat
             out[name] = out[a].astype(float) * out[b].astype(float)
             extra_cols.append(name)
     keep = list(dict.fromkeys(cols + extra_cols))
+    return out, keep
+
+
+def _apply_momentum_cross_section(
+    df: pd.DataFrame,
+    cols: List[str],
+    date_col: str,
+    industry_col: Optional[str] = None,
+) -> Tuple[pd.DataFrame, List[str]]:
+    """把动量特征做按日截面排名，得到真正的"相对强弱"截面动量。
+
+    momentum_cross_section 原来只是挑了几个原始收益列，名字带 cross_section 却没有
+    任何截面变换。这里在每个交易日内对全市场横向 rank 到 [0,1]，把绝对收益值转成
+    "今天比同行强多少"——这才是经典的截面动量因子。按日分组、不跨日，无未来泄漏。
+    原始列保留（模型可同时用绝对值和相对排名），新增 xs_* 排名列。
+
+    Args:
+        df: 数据表。
+        cols: 选中的动量特征列。
+        date_col: 日期列名（按它分组做截面）。
+        industry_col: 行业列名（保留参数，当前用全市场截面更稳健）。
+
+    Returns:
+        (新数据表, 新特征列)
+    """
+    if date_col not in df.columns:
+        return df, cols
+    valid = [c for c in cols if c in df.columns]
+    if not valid:
+        return df, cols
+    out = df.copy()
+    numeric = out[valid].apply(pd.to_numeric, errors='coerce')
+    ranked = numeric.groupby(out[date_col]).rank(pct=True)
+    ranked.columns = [f'xs_{c}' for c in valid]
+    out = pd.concat([out, ranked], axis=1)
+    keep = list(dict.fromkeys(cols + list(ranked.columns)))
     return out, keep
 
 
@@ -567,6 +632,48 @@ def _apply_budget_guard(
     return train_df, meta
 
 
+def _fit_with_early_stopping(
+    model: Any,
+    realized_family: str,
+    X_train: pd.DataFrame,
+    y_train: pd.Series,
+    X_valid: pd.DataFrame,
+    y_valid: pd.Series,
+    base_kwargs: Dict[str, Any],
+) -> Dict[str, Any]:
+    """用已切出的验证集对 LGBM/XGB 做早停，避免 420 棵树无脑跑满。
+
+    Why: train_df/valid_df 早就切好了却没拿来早停，树跑满既慢又易过拟合。
+    只对梯度提升树生效；ridge/extra_trees 等 sklearn 模型不支持 eval_set，走普通 fit。
+    """
+    kwargs = dict(base_kwargs)
+    rounds = _env_int('RESEARCH_EARLY_STOP_ROUNDS', 60)
+    name = model.__class__.__name__
+    has_valid = X_valid is not None and len(X_valid) > 0
+    meta: Dict[str, Any] = {'early_stopping_rounds': rounds if (rounds > 0 and has_valid) else 0}
+    if rounds > 0 and has_valid and name.startswith('LGBM'):
+        import lightgbm as lgb  # type: ignore
+        kwargs['eval_set'] = [(X_valid, y_valid)]
+        kwargs['eval_metric'] = 'l2'
+        kwargs['callbacks'] = [lgb.early_stopping(rounds, verbose=False), lgb.log_evaluation(0)]
+        meta['early_stopping_applied'] = 'lightgbm'
+    elif rounds > 0 and has_valid and name.startswith('XGB'):
+        try:
+            model.set_params(early_stopping_rounds=rounds)
+            kwargs['eval_set'] = [(X_valid, y_valid)]
+            kwargs['verbose'] = False
+            meta['early_stopping_applied'] = 'xgboost'
+        except Exception:
+            meta['early_stopping_applied'] = 'xgboost_setparams_failed'
+    else:
+        meta['early_stopping_applied'] = 'none'
+    model.fit(X_train, y_train, **kwargs)
+    best = getattr(model, 'best_iteration_', None) or getattr(model, 'best_iteration', None)
+    if best is not None:
+        meta['best_iteration'] = int(best)
+    return meta
+
+
 def train_and_predict(
     bundle: DatasetBundle,
     candidate: Dict[str, Any],
@@ -599,6 +706,8 @@ def train_and_predict(
     selected = _select_features(df, feature_cols, candidate['feature_profile'])
     if candidate['feature_profile'] == 'interaction_sparse':
         df, selected = _apply_interaction_sparse(df, selected)
+    elif candidate['feature_profile'] == 'momentum_cross_section':
+        df, selected = _apply_momentum_cross_section(df, selected, bundle.date_col, bundle.industry_col)
     selected, feature_policy_meta = _apply_feature_beta_policy(selected, candidate)
     selected, liquidity_policy_meta = _apply_feature_liquidity_policy(selected, candidate)
     feature_policy_meta.update(liquidity_policy_meta)
@@ -628,11 +737,40 @@ def train_and_predict(
     train_df, valid_df, test_df = split_by_dates(df, date_col=date_col, embargo_days=split_embargo_days)
     time_alignment["split_embargo_days"] = int(split_embargo_days)
 
+    # 剔除"没有真实未来收益"的样本（停牌、每段尾部 horizon 天等）。
+    # 否则在 rank 标签模式下它们会被填成 0（中位数排名）硬塞进训练，污染信号、
+    # 也让 test IC 把这些假样本算进去。注意只清训练/验证/测试三段，绝不动用于
+    # latest 预测的 df —— 最新交易日的未来收益天然为空，但它不需要标签。
+    def _drop_unlabeled(frame: pd.DataFrame) -> pd.DataFrame:
+        # 同时要求"真实未来收益"和"训练标签"都非 NaN。
+        # 行业中性排名标签（industry_neutral_rank）在行业缺失/分组过小的股票上算不出
+        # 排名 → 标签 NaN；只清 realized_label_col 会把这些行漏掉，导致 ridge 等
+        # 线性模型 fit 时报 "Input y contains NaN"。树模型恰好没踩到，但留着也是脏样本。
+        mask = pd.Series(True, index=frame.index)
+        for _col in (realized_label_col, training_label_col):
+            if _col and _col in frame.columns:
+                mask &= pd.to_numeric(frame[_col], errors="coerce").notna()
+        return frame.loc[mask].copy()
+
+    n_before = len(train_df) + len(valid_df) + len(test_df)
+    train_df = _drop_unlabeled(train_df)
+    valid_df = _drop_unlabeled(valid_df)
+    test_df = _drop_unlabeled(test_df)
+    time_alignment["rows_dropped_unlabeled"] = int(n_before - (len(train_df) + len(valid_df) + len(test_df)))
+
     train_plan = _load_training_override(train_override_path)
-    if candidate['training_logic'] == 'feature_select' or train_plan.get('feature_cap'):
-        cap = int(train_plan.get('feature_cap', 60) or 60)
-        vars_ = train_df[selected].replace([np.inf, -np.inf], np.nan).fillna(0.0).var(axis=0).sort_values(ascending=False)
-        selected = vars_.head(min(cap, len(vars_))).index.tolist()
+    _tl = str(candidate['training_logic'])
+    if _tl in {'feature_select', 'generated_training'} or train_plan.get('feature_cap'):
+        # 相对降维抗过拟合：generated_training 较激进(保留 65%)+近期加权，feature_select 温和(保留 75%)。
+        # 旧逻辑默认 cap=60，对 30~38 列的生成特征包完全不起作用，使 training_logic 形同虚设。
+        # 注：generated_training 原设 50% 太狠，实测欠拟合(得分 -2.0)，放宽到 65%。
+        n_sel = len(selected)
+        ratio = 0.65 if _tl == 'generated_training' else 0.75
+        rel_cap = max(int(round(n_sel * ratio)), 5)
+        cap = int(train_plan.get('feature_cap', rel_cap) or rel_cap)
+        cap = max(min(cap, rel_cap, n_sel), 1)
+        vars_ = train_df[selected].replace([np.inf, -np.inf], np.nan).astype(np.float32).fillna(0.0).var(axis=0).sort_values(ascending=False)
+        selected = vars_.head(cap).index.tolist()
 
     constraints = dict(candidate.get('resource_constraints', {}))
     train_df, resource_meta = _apply_budget_guard(
@@ -643,14 +781,23 @@ def train_and_predict(
         constraints=constraints,
     )
 
-    X_train = _clean_feature_frame(train_df, selected)
+    # 树模型让 NaN 透传；线性模型用训练集中位数回填（无未来泄漏）。
+    is_tree_model = str(candidate['model_family']) in TREE_FAMILIES
+    if is_tree_model:
+        fill_values: Optional[pd.Series] = None
+    else:
+        fill_values = (
+            train_df[selected].replace([np.inf, -np.inf], np.nan).astype(float).median()
+        )
+
+    X_train = _clean_feature_frame(train_df, selected, fill_values=fill_values)
     y_train = train_df[training_label_col].astype(float)
-    X_valid = _clean_feature_frame(valid_df, selected)
+    X_valid = _clean_feature_frame(valid_df, selected, fill_values=fill_values)
     y_valid = valid_df[training_label_col].astype(float)
-    X_test = _clean_feature_frame(test_df, selected)
+    X_test = _clean_feature_frame(test_df, selected, fill_values=fill_values)
     y_test = test_df[training_label_col].astype(float)
 
-    if candidate['training_logic'] in {'weighted_recent', 'regularized_recent'} or train_plan.get('sample_weight_mode') == 'recent_exponential':
+    if candidate['training_logic'] in {'weighted_recent', 'regularized_recent', 'generated_training'} or train_plan.get('sample_weight_mode') == 'recent_exponential':
         sample_weight = _recent_exponential_weights(train_df[date_col])
     else:
         sample_weight = None
@@ -663,7 +810,8 @@ def train_and_predict(
         fit_kwargs['sample_weight'] = sample_weight
 
     try:
-        model.fit(X_train, y_train, **fit_kwargs)
+        es_meta = _fit_with_early_stopping(model, realized_family, X_train, y_train, X_valid, y_valid, fit_kwargs)
+        model_meta.update(es_meta)
     except Exception as exc:
         # GPU 路线失败时，允许回退到 CPU 版本，避免整轮报废。
         allow_gpu_fallback = bool(constraints.get('allow_gpu_fallback', True))
@@ -671,7 +819,8 @@ def train_and_predict(
             fallback_family = 'lightgbm_auto' if model_family == 'lightgbm_gpu' else 'hist_gbdt'
             model, realized_family, model_meta = build_model(fallback_family, generated_model_path=generated_model_path, model_options={})
             model_meta['gpu_fallback_reason'] = str(exc)
-            model.fit(X_train, y_train, **fit_kwargs)
+            es_meta = _fit_with_early_stopping(model, realized_family, X_train, y_train, X_valid, y_valid, fit_kwargs)
+            model_meta.update(es_meta)
         else:
             raise
     if hasattr(model, 'export_meta'):
@@ -697,7 +846,7 @@ def train_and_predict(
 
     latest_date = df[date_col].max()
     latest_source_df = df.loc[df[date_col] == latest_date].copy()
-    X_latest = _clean_feature_frame(latest_source_df, selected)
+    X_latest = _clean_feature_frame(latest_source_df, selected, fill_values=fill_values)
     latest_df = _project_runtime_frame(latest_source_df, code_col=code_col, label_col=label_col)
     latest_df['pred_score'] = _predict_scores(model=model, X=X_latest, realized_family=realized_family)
 

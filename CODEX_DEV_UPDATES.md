@@ -8,6 +8,173 @@
 
 ## Change Log
 
+### CDL-20260606-054
+- Local time: `2026-06-06 19:40`
+- Type: `research-finding-backtest`
+- Scope: `消息面（业绩预告事件）→未来收益有效性回测，五轮交叉验证，结论落档`
+- Author: `Claude`
+- Touched paths（均为一次性分析脚本，未接入运行时；产物在 data\event_lake\_event_*.csv）:
+  - `_event_alpha_backtest.py` / `_event_alpha_v2.py`（事件→前向 N 日超额，等权全A & HS300 双基准）
+  - `_event_drift_check.py`（公告前 T-20 vs 公告后 T+10 超额拆解）
+  - `_event_adaptive_hold.py`（按事件幅度自适应持有 1~10 日）
+  - `_event_ml.py` / `_event_ml_horizon.py`（XGBoost 识别"什么消息怎么涨"，10/20/40/60 日多窗口，样本外）
+  - `_event_year_pattern.py`（2016–2025 逐年规律 + 牛熊 regime 检验）
+- What changed:
+  - 没有改运行时代码。这是对"消息收集到底有没有用"做的一次完整数据证伪，回答 [[project-next-focus-news-signal]] 里挂了很久的问题。
+  - 用 tushare 业绩预告(forecast)做"事件→未来收益"回测：十年(2016-2025)、双基准(等权全A/HS300)、多窗口(10/20/40/60日)、xgboost 样本外(训≤2022 测≥2023)。入场口径=公告日次一交易日收盘(避免前视、对齐 T+1)。
+- 铁结论:
+  - "看公开业绩预告追涨"是一个**已被磨平的死信号**，且不是牛熊周期问题、不会因行情好转复活。
+  - 五条证据：(1) 多空价差从 2016(+3.7%)/2017(+11.6%) 一路衰减到 2023-2025 归零/转负；(2) 是**纯时间衰减不是 regime**——corr(年份,多空价差10)=−0.65 强负，corr(大盘涨跌,信号)≈−0.1~−0.24 弱/负，2018大熊信号照样+2.13%、2025大牛信号反而最差−2.70%；(3) xgboost 10/20日样本外 IC 为负(−0.05/−0.08，关系反转)，40/60日才转正但顶档实际仍≈0，价差全靠"底档跌得狠"=只够避雷不够选股；(4) 发预告的股票作为群体平均跑输等权全A(y10均值−0.77%)；(5) 公告前20日就有显著超额(2024 +3.32%)，肉在公告前被抢跑，公告后(引擎能下手的 T+1)是残羹。
+  - 模型能稳定吃到的特征只有三类且都是"扣分向"：是不是预减(最重要)、预告幅度、公告前涨幅(price-in)。
+- Impact / 落地建议（**待用户拍板，尚未改引擎**）:
+  - 把消息引擎从"integrated_thesis_score 加分选股"改成"扣分排雷"(预减/大幅利空/已抢跑→风险票出候选池)，维持或调低当前 ~5% 权重，别加码。
+  - 想真吃消息面 alpha 只剩"抢在公告前埋伏"这条硬路（公开预告这条路已死）。
+- Validation:
+  - 全部基于真实十年行情(qfq, market_enriched_daily ~1022万行加载)+5.5万条真实业绩预告事件，非推测。
+  - 逐年表 `_event_year_pattern.csv`；多窗口/明细数据集 `_event_ml_horizon_dataset.csv` 等。
+- Compatibility:
+  - 未改任何运行时/配置/契约；analysis 脚本带 `_` 前缀、未纳入 git 跟踪，可随时删。
+- Rollback:
+  - 无需回滚（无代码变更）。如需清理直接删 `_event_*.py` 与 `data\event_lake\_event_*.csv`。
+
+### CDL-20260606-053
+- Local time: `2026-06-06 18:30`
+- Type: `feature-llm-extraction-hardening`
+- Scope: `消息面抓取/识别：PDF 正文喂 LLM、LLM 直出方向、否定词感知规则兜底、入库去重`
+- Author: `Claude`
+- Touched paths（未提交，working tree modified）:
+  - `src\ashare\engine\event_extract.py`
+  - `src\ashare\engine\local_ollama_worker.py`
+- What changed:
+  - (a) 下载到的公告 PDF 正文现在真喂给 LLM（原来只喂标题、白下载），`build_prompt(title, body)`。
+  - (b) LLM 直接输出 `direction`(利好/利空/中性)，不再只靠数关键词；`ollama_direction`/`event_direction` 落字段。
+  - (c) 规则兜底 `_infer_event_direction(title, content, event_type)` 改成"否定词感知"：终止/取消/暂停 会反转方向（"终止减持"判利好、"终止回购"判利空）。
+  - (d) `save_event_store` 入库按 `event_id` 去重（原来 append 不去重会堆）。
+- Validation:
+  - 22 项离线用例 + 4 发 qwen2.5:7b 实弹全过；实弹验证 qwen 在"标题中性、正文反转"难例上也判对。
+- Compatibility:
+  - 仍是本地 qwen2.5:7b + deepseek 抽取链路，不改下游消费契约；消息面在最终选股仍只占 ~5% 权重(integrated_thesis_score×0.05)，不进模型训练特征。
+  - 注意：本次优化的是"抓得准不准/识别得对不对"，与 [[CDL-20260606-054]] 证明的"信号本身已失效"是两件事——管道更准了，但公开预告这条信号当选股器依然是亏的。
+- Rollback:
+  - `git checkout -- src\ashare\engine\event_extract.py src\ashare\engine\local_ollama_worker.py`。
+
+### CDL-20260606-052
+- Local time: `2026-06-06 11:00`
+- Type: `research-brain-fix`
+- Scope: `xgboost_gpu 解除过期禁令 + 冠军特征包/训练计划确定性复刻`
+- Author: `Claude`
+- Touched paths（未提交，working tree modified）:
+  - `src\ashare\engine\objective_scheduler.py`
+  - `src\ashare\research_brain\hub\candidate_factory.py`
+  - `src\ashare\research_brain\hub\codegen.py`
+  - `src\ashare\research_brain\hub\training_engine.py`
+- What changed:
+  - 解除 quick_test 对 `xgboost_gpu` / `generated_family` 的禁令：当初 ban 是因为它老崩(−999 / `Input y contains NaN`)，根因已在训练侧修掉，现重新把 `xgboost_gpu` 列入 `preferred_models`。
+  - 冠军复刻：新增 `CHAMPION_SPEC_FILES=(feature_pack/train_override/generated_model).spec.json` 与 `_champion_specs_source(...)`，优先从稳定存档 `champions_archive/<strategy_key>` verbatim 复刻冠军父代基因，存档缺失再回退父代原始 lab——即使旧 cycle 的 labs 日后被清理，冠军基因仍能确定性复刻。
+  - `SAFE_DEFAULT_FEATURE_PROFILE='generated_feature_pack'`，特征 profile 搜索纳入 `generated_feature_pack`。
+- Validation:
+  - 离线 import/py_compile 通过；属 [[refactor_plan]] 四目标里"修 alpha / 保留有效部分"的两项验证修复。
+- Compatibility:
+  - 未加新调度层；仅恢复被临时 ban 的模型族 + 增强冠军确定性。尚未跑整轮端到端验证（需用户授权才跑 pipeline）。
+- Rollback:
+  - `git checkout --` 上述四个文件即可恢复到 `bf71854` 基线。
+
+### CDL-20260604-051
+- Local time: `2026-06-04 17:35`
+- Type: `engine-rewrite-baseline`
+- Scope: `决策引擎单遍重写 + 删除 9 个旧仲裁塔模块`
+- Author: `Claude`
+- Git: 已提交 `bf71854`（"重构基线：决策引擎单遍重写 + 删除旧仲裁塔模块"）。补记 CDL——当时该提交只把 Codex 的 `CDL-20260531-050` 一并提交、漏写了本次重写自己的条目。
+- Touched paths:
+  - 新增 `src\ashare\engine\decision\`(`__init__.py` / `constraints.py` / `engine.py`)
+  - 删除 9 个旧塔模块：`constraint_brain.py` / `global_objective.py` / `trade_discipline.py` / `outer_intelligence.py` / `econometric_guardrails.py` / `harvest_risk.py` / `intelligent_scheduler.py` / `execution_ems.py` / `execution_llm_review.py`
+  - 改接：`portfolio_recommendation.py` / `candidate_pipeline.py` / `execution_manager.py`
+  - `src\ashare\engine\local_settings.example.py` / `local_settings.py`、配置/文档/脚本同步
+- What changed:
+  - 新增单遍决策引擎：按分数比例定权、单名封顶水填充、regime 只过一次、panic 只减不加。
+  - 删掉 9 个旧"仲裁塔"模块，决策从多塔串联收敛为一遍过；修悬空 import。
+  - local_settings 小账户约束：`max_names=5` / 单名 25% / `min_names=3` / panic 只减不加；关闭被砍模块开关。
+- Impact:
+  - 对齐 [[refactor_plan]] "清职能"目标——把堆叠的决策层精简成单遍，便于审计与回滚。固化为可回滚安全点。
+- Validation:
+  - import smoke 通过；提交时即标注"便于后续跑一轮验证决策引擎重写是否端到端生效"（端到端验证待授权跑 pipeline）。
+- Compatibility:
+  - 移除的 9 个模块的开关已在 local_settings 关闭；下游 3 个消费点已改接单遍引擎。
+- Rollback:
+  - `git revert bf71854` 可整体回退到旧塔架构。
+
+### CDL-20260531-050
+- Local time: `2026-05-31 17:45`
+- Type: `data-refresh-and-naming-debt-followup`
+- Scope: `daily_production refresh, runtime-config alias cleanup, active runtime naming cleanup`
+- Author: `Codex`
+- Touched paths:
+  - `ashare_control\control_plane.py`
+  - `trade_clock_service.py`
+  - `.gitignore`
+  - `RUN_PROFILES.yaml`
+  - `SYSTEM_MANIFEST.yaml`
+  - `scripts\build_research_sqlite_store.py`
+  - `scripts\build_train_table.py`
+  - `scripts\probe_t_audit.py`
+  - `scripts\show_trade_clock_status.ps1`
+  - `scripts\dev_env_utf8.ps1`
+  - `src\ashare\engine\config_builder.py`
+  - `src\ashare\engine\local_augmentations.py`
+  - `src\ashare\engine\local_settings.example.py`
+  - `src\ashare\configs\hub_config.runtime.*.json`
+  - `src\ashare\configs\runtime_config.*.json`
+  - `src\ashare\configs\probe_intraday_tactics.quick_test.json`
+  - `CODEX_DEV_STABLE.md`
+  - `CODEX_DEV_UPDATES.md`
+  - `CODEX_DEV_LOG_INDEX.md`
+  - `CLAUDE_CODEX_DIALOGUE.md`
+- What changed:
+  - Ran the user-authorized `daily_production` pre-research refresh bundle. It completed `ok=true` with no warnings: affordable, external, research-fact, market-pipeline, and derived-alpha stages all reported success.
+  - Confirmed market SQL freshness in `data\sql_store\research_data_v1.sqlite3`: `market_enriched_daily`, `market_hs300_daily`, `market_price_snapshot`, `valuation_daily`, and `crowding_daily` are current through latest A-share trading day `2026-05-29`. The run was on Sunday `2026-05-31`, so no newer trading date was expected.
+  - Confirmed `research_fact_layers_v1.sqlite3::source_fetch_run_log` advanced to 686 rows with max `finished_at=2026-05-31 17:40:01`.
+  - Ran `scripts\build_train_table.py check`; the clean train table has 15,627,132 rows, recent two-year key coverage passed (`total_mv/circ_mv/turnover_rate/close=1.000`, `pe_ttm=0.737 >= 0.70`, `pb=0.994`), and per-stock low `total_mv` coverage is `0/5599`.
+  - Fixed a console-unsafe emoji in `build_train_table.py` that made the successful check exit non-zero under Windows GBK output.
+  - Closed active runtime naming gaps left by the previous cleanup: runtime configs now generate `hub_config.runtime.<profile>.json`, trade-clock uses the same alias, `.gitignore` tracks the new generated-config pattern, stale `trade_release_v1` / `event_lake_v6` script references were removed, and runtime review config keys now use `research_review_*` instead of `v5_review_*`.
+  - Removed stale profile keys (`v6_plan_reuse_hours`, `v5_cycles`) from `RUN_PROFILES.yaml` and renamed manifest runtime path labels away from versioned names.
+- Validation:
+  - `daily_production` pre-research refresh bundle: `ok=true`, `warning_count=0`; artifact written to `data\daily_cache\manual_daily_production_refresh_20260531.json`.
+  - SQL probe after refresh confirmed max dates and source log counts.
+  - `.venv313\Scripts\python.exe scripts\build_train_table.py check` exits 0.
+  - Targeted `py_compile` passed for touched Python entrypoints/scripts.
+  - `launch_canonical.py --preflight-only --profile quick_test --mode integrated_supervisor` passed.
+  - Targeted `rg` over active runtime/code/config returned no hits for `hub_config.v6.runtime`, `trade_release_v1`, `event_lake_v6`, `V5_PROJECT_ROOT`, `v5_review`, `v6_plan_reuse_hours`, or `v5_cycles`.
+- Compatibility:
+  - No new scheduler, gate, service, or abstraction layer was added.
+  - Historical docs and archived entry names may still mention V5/V6; active runtime-path cleanup should not be interpreted as all historical documentation being rewritten.
+  - `img.png` remains untracked and was not touched.
+- Rollback:
+  - Revert this CDL patch set and regenerate runtime configs from the previous `config_builder.py` if the new naming surface is rejected. Data refresh writes are runtime data and are not reverted by git.
+
+### CDL-20260531-049
+- Local time: `2026-05-31`
+- Type: `naming-cleanup`
+- Scope: `全库 V5/V5.1/V6 版本后缀命名债务清零`
+- Author: `Claude`
+- Touched paths (三阶段合并记录):
+  - **Stage A（代码符号）**: `research_brain/hub/cli_v5.py→cli.py`, `single_run_v5.py→single_run.py`, `run_single_candidate_v5.py→run_single_candidate.py`, `run_research_hub_v5_1_local.py→run_research_hub_local.py`; configs `hub_config.v5_1.*.json→hub_config.*.json`; supervisor `_build_v5_gpu_config→_build_gpu_config`, `_run_v5_gpu→_run_gpu`
+  - **Stage B（数据目录）**: `train_table_v2→train_table`（干净表），`train_table_v1→data/_archive/train_table_v1`（破损表归档）; `daily_cache_v6→daily_cache`, `event_lake_v6→event_lake`, `market_state_v6→market_state`, `portfolio_recommendation_v6→portfolio_recommendation`, `trade_release_v1→trade_release`; 同步修复 train_table_dir 指向错误（旧配置指向破损 v1 表）
+  - **Stage C（规划层 + 持久化契约）**: `orchestrator_v6.py→orchestrator.py`, `v5_bridge.py→research_bridge.py`, `run_v6_full_cycle_real.py→run_full_cycle_real.py`, `hub_config.v6.runtime.*.json→hub_config.runtime.*.json`; config 键 `v5_gpu_*→gpu_research_*`; supervisor_state 键 `v6_ran/v6_error→research_plan_*`, `v5_gpu_*→gpu_research_*`, `v5_cycle_review→cycle_review`; stage id `v6_planning→research_plan`, `v5_gpu→gpu_research`; LS 常量 `V5_GPU_*→GPU_RESEARCH_*`
+  - **Stage D（文档）**: `docs/00_V6*.md→00_系统执行摘要.md` 等 7 个 doc 文件 git mv；`DEPRECATED_ENTRYPOINTS.md` 旧路径修正；`CODEX_DEV_STABLE.md` 3 处过时引用更新
+- What changed:
+  - 彻底消除源码、配置、运行时状态契约、数据目录、文档中所有 V5/V5.1/V6 版本后缀标识符
+  - 修复了一个隐性数据 bug：多处 train_table_dir 指向破损的 train_table_v1（~60% market_cap 为 null）
+  - 操作者可见字符串 V5/V6 → 研究计划/GPU 研究
+- Validation:
+  - import smoke: supervisor / orchestrator / research_bridge / research_cycle_orchestrator 全部 OK
+  - `build_runtime_config()` 无残留旧 token，`gpu_research_max_cycles_per_tick` 存在
+  - preflight（overnight / integrated_supervisor）所有 check `ok=True`
+- Compatibility:
+  - supervisor_state.json 中旧 key（v6_ran、v5_gpu_completed 等）在下次写入前会消失；不影响首次运行
+  - hub_config.runtime.*.json 是 .gitignore 排除的运行时文件，首次跑时重新生成
+- Rollback:
+  - git revert 对应三个 commit（56ad0f9 Stage A、f456d8e Stage B、e5ee91d Stage C + 本次 doc commit）
+
 ### CDL-20260529-048
 - Local time: `2026-05-29 23:00:27`
 - Type: `cross-ai-dialogue-maintenance-policy`

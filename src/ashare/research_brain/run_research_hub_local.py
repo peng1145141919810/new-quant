@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """本地一键运行入口。"""
 
-from hub.cli_v5 import run_local
+from hub.cli import run_local
 
 
 if __name__ == '__main__':

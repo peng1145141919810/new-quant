@@ -34,16 +34,18 @@ archive/
 
 # ====== Logs ======
 *.log
-data/event_lake_v6/logs/
+data/event_lake/logs/
 
 # ====== 生成的运行时 config（每次跑都不同）======
 src/ashare/configs/generated_runtime/
 src/ashare/configs/*.autogen.json
 src/ashare/configs/gmtrade_runtime_config.autogen.json
-src/ashare/configs/runtime_config.runtime.*.json
-src/ashare/configs/hub_config.v6.runtime.*.json
-!src/ashare/configs/hub_config.v6.runtime.daily_production.json
-!src/ashare/configs/hub_config.v6.runtime.quick_test.json
+src/ashare/configs/runtime_config.*.json
+src/ashare/configs/hub_config.runtime.*.json
+!src/ashare/configs/runtime_config.daily_production.json
+!src/ashare/configs/runtime_config.quick_test.json
+!src/ashare/configs/hub_config.runtime.daily_production.json
+!src/ashare/configs/hub_config.runtime.quick_test.json
 
 # ====== 大型数据（git 不擅长存 GB 级 SQLite/CSV）======
 data/sql_store/*.sqlite3
@@ -54,28 +56,29 @@ data/daily_csv_qfq/
 data/enriched_daily_csv_qfq/
 data/ml_datasets/
 data/auxiliary_data/
+data/_archive/
 
 # ====== Runtime state（每天会变；不该 commit）======
 data/trade_clock/
-data/trade_release_v1/
+data/trade_release/
 data/live_execution_bridge/
 data/research_hub_integrated/
 data/research_hub_v5_1_gpu_integrated/
-data/portfolio_recommendation_v6/
-data/daily_cache_v6/
-data/event_lake_v6/raw/
-data/event_lake_v6/curated/
-data/event_lake_v6/inventory/
-data/event_lake_v6/bridge/
-data/event_lake_v6/research/supervisor/
-data/event_lake_v6/research/context_pack/
-data/event_lake_v6/research/integrated_thesis/
-data/event_lake_v6/research/industry_router/
-data/event_lake_v6/research/evidence_cards/
-data/event_lake_v6/research/technical_confirmation/
-data/event_lake_v6/research/manual_event_proxy/
+data/portfolio_recommendation/
+data/daily_cache/
+data/event_lake/raw/
+data/event_lake/curated/
+data/event_lake/inventory/
+data/event_lake/bridge/
+data/event_lake/research/supervisor/
+data/event_lake/research/context_pack/
+data/event_lake/research/integrated_thesis/
+data/event_lake/research/industry_router/
+data/event_lake/research/evidence_cards/
+data/event_lake/research/technical_confirmation/
+data/event_lake/research/manual_event_proxy/
 data/audit_v1/
-data/market_state_v6/
+data/market_state/
 data/external_research_feeds/
 data/account_switch_archive/
 data/private/
@@ -106,6 +109,6 @@ tmp_*.html
 *.orig
 
 # Added 2026-05-30: runtime artifacts that were accidentally tracked in initial import
-data/event_lake_v6/research/briefs/
-data/event_lake_v6/research/extract_summary/
+data/event_lake/research/briefs/
+data/event_lake/research/extract_summary/
 data/index_daily_csv/

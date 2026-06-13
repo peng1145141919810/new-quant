@@ -1,6 +1,6 @@
 {
   "portfolio_root": "H:\\Ashare\\data\\research_hub_integrated",
-  "portfolio_recommendation_root": "F:\\quant_data\\Ashare\\data\\portfolio_recommendation_v6",
+  "portfolio_recommendation_root": "F:\\quant_data\\Ashare\\data\\portfolio_recommendation",
   "explicit_portfolio_path": "",
   "price_snapshot_path": "F:\\quant_data\\Ashare\\data\\live_execution_bridge\\daily_price_snapshot.csv",
   "output_dir": "F:\\quant_data\\Ashare\\data\\live_execution_bridge",

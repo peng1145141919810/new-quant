@@ -12,6 +12,12 @@
 - Prior workspace `F:\quant_data\AshareC#`: historical reference only, read-only.
 
 ## Recent Entries
+- `CDL-20260606-054` — 消息面（业绩预告）有效性五轮回测闭环：十年/双基准/多窗口/样本外一致证明"看公开预告追涨"是被磨平的死信号（纯时间衰减、非牛熊regime），消息引擎应从加分选股改为扣分排雷。无代码变更。Author: Claude.
+- `CDL-20260606-053` — 消息面抓取/识别加固：PDF 正文喂 LLM、LLM 直出方向、否定词感知规则兜底、event_id 入库去重（22离线+4实弹通过，未提交）。Author: Claude.
+- `CDL-20260606-052` — xgboost_gpu 解除过期禁令（根因已修）+ 冠军特征包/训练计划从 champions_archive 确定性 verbatim 复刻（未提交）。Author: Claude.
+- `CDL-20260604-051` — 决策引擎单遍重写（按分数定权/单名封顶水填充/regime过一次/panic只减不加）+ 删除 9 个旧仲裁塔模块；补记，提交在 bf71854。Author: Claude.
+- `CDL-20260531-050` — Codex ran the user-authorized `daily_production` refresh, confirmed SQL/train-table freshness, fixed the Windows console check failure, and closed active runtime naming gaps left after Claude's cleanup. Author: Codex.
+- `CDL-20260531-049` — 全库 V5/V5.1/V6 版本后缀命名债务清零（代码符号/数据目录/持久化契约/文档四阶段）；附带修复 train_table_dir 指向破损 v1 表的隐性 bug。Author: Claude.
 - `CDL-20260529-048` — tightened `CLAUDE_CODEX_DIALOGUE.md` into an active-thread board with 25-message / ~25KB archive triggers and compact archive rules. Author: Codex.
 - `CDL-20260529-047` — V5.1 stock-ranker now defaults to cross-sectional alpha labels and excludes direct market-beta features from training while preserving raw realized returns for backtests. Author: Codex.
 - `CDL-20260529-046` — H: workspace bootstrap complete. Venvs installed on H, local_settings rewritten, F: paths batch-cleaned, git init, preflight green (28/28). Author: Claude.
@@ -71,6 +77,11 @@
 - LLM tracing: `src\ashare\engine\llm_trace.py`
 
 ## Update Index
+- `CDL-20260606-054`: 消息面有效性五轮回测结论——公开业绩预告追涨=死信号（corr(年份,多空价差)=−0.65 纯时间衰减、corr(大盘,信号)≈0 排除regime）；建议改"扣分排雷"；脚本 `_event_*.py`、产物 `data\event_lake\_event_*.csv`；无运行时代码改动
+- `CDL-20260606-053`: 消息面抽取加固——`build_prompt(title,body)` 喂 PDF 正文、LLM 直出 `direction`、`_infer_event_direction` 否定词感知兜底、`save_event_store` 按 `event_id` 去重（`event_extract.py` / `local_ollama_worker.py`，未提交）
+- `CDL-20260606-052`: 解除 `xgboost_gpu`/`generated_family` 过期禁令并重列 `preferred_models`；新增 `CHAMPION_SPEC_FILES` + `_champion_specs_source` 从 `champions_archive\<strategy_key>` 确定性复刻冠军（`objective_scheduler.py`/`candidate_factory.py`/`codegen.py`/`training_engine.py`，未提交）
+- `CDL-20260604-051`: 决策引擎单遍重写新增 `src\ashare\engine\decision\`，删除 9 个旧塔模块（constraint_brain/global_objective/trade_discipline/outer_intelligence/econometric_guardrails/harvest_risk/intelligent_scheduler/execution_ems/execution_llm_review），改接 portfolio_recommendation/candidate_pipeline/execution_manager；提交 `bf71854`
+- `CDL-20260531-050`: refreshed SQL via the shared `daily_production` pre-research bundle, verified `research_data_v1.sqlite3` through trade date `2026-05-29`, confirmed clean `train_table` coverage, fixed `build_train_table.py check` GBK output, and removed active runtime naming leftovers (`hub_config.v6.runtime`, `trade_release_v1`, `event_lake_v6`, `v5_review`, stale profile keys)
 - `CDL-20260529-048`: made `CLAUDE_CODEX_DIALOGUE.md` an active-thread board, added archive triggers, compact archive format, and future session reading boundaries
 - `CDL-20260529-047`: changed V5.1 alpha training defaults to daily cross-sectional rank labels, excluded direct market-beta features from the stock-ranker, and preserved realized raw returns for portfolio backtests
 - `CDL-20260509-049`: made post-portfolio evidence audit default-on, portfolio rebuild after audit default-on, and audit-failure execution blocking default-on
@@ -124,6 +135,9 @@
 - `CDL-20260410-001`: split dev log into stable/history/index, rewrote primary readmes and operator guide, updated doc sync tooling
 
 ## Retrieval Hints
+- Search `CDL-20260531-050` in `CODEX_DEV_UPDATES.md` for the 2026-05-31 user-authorized `daily_production` refresh, SQL freshness proof, train-table coverage proof, and active runtime naming-debt follow-up.
+- Search `manual_daily_production_refresh_20260531.json` under `data\daily_cache` for the refresh artifact from that run.
+- Search `research_review_enabled`, `runtime_config_alias_paths`, and `hub_config.runtime` for the post-cleanup runtime config naming surface.
 - Search `CDL-20260529-048` in `CODEX_DEV_UPDATES.md` and `维护规则` in `CLAUDE_CODEX_DIALOGUE.md` for the current cross-AI dialogue archive policy.
 - Archive closed cross-AI threads to `CLAUDE_CODEX_DIALOGUE_ARCHIVE.md` when the dialogue file exceeds 25 messages, about 25 KB, or when long entries already have CDL coverage.
 - Search `CDL-20260529-047` in `CODEX_DEV_UPDATES.md` for the alpha-label / market-beta separation patch.

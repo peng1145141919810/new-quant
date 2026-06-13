@@ -22,7 +22,7 @@ def _default_read_root() -> Path:
     legacy = Path(r"F:\quant_data\Ashare\data")
     local_contract = (
         (local / "trade_clock" / "system_safety_state.json").exists()
-        and (local / "trade_release_v1" / "latest_release.json").exists()
+        and (local / "trade_release" / "latest_release.json").exists()
         and (local / "live_execution_bridge" / "oms_v1" / "snapshots" / "oms_summary.json").exists()
     )
     if local_contract:
@@ -34,7 +34,7 @@ def build_probe_config(write_root: Path, read_root: Path) -> dict:
     return {
         "paths": {
             "trade_clock_root": str((read_root / "trade_clock").resolve()),
-            "trade_release_root": str((read_root / "trade_release_v1").resolve()),
+            "trade_release_root": str((read_root / "trade_release").resolve()),
             "oms_output_root": str((read_root / "live_execution_bridge" / "oms_v1").resolve()),
             "live_execution_root": str((read_root / "live_execution_bridge").resolve()),
             "automation_runs_root": str((Path(r"H:\Ashare\outputs\automation_runs")).resolve()),

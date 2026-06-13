@@ -26,7 +26,7 @@ def _default_read_root() -> Path:
     legacy = Path(r"F:\quant_data\Ashare\data")
     local_contract = (
         (local / "trade_clock" / "system_safety_state.json").exists()
-        and (local / "trade_release_v1" / "latest_release.json").exists()
+        and (local / "trade_release" / "latest_release.json").exists()
         and (local / "live_execution_bridge" / "oms_v1" / "snapshots" / "oms_summary.json").exists()
     )
     return local if local_contract else legacy
@@ -36,11 +36,11 @@ def _build_config(write_root: Path, read_root: Path) -> dict:
     return {
         "paths": {
             "trade_clock_root": str((write_root / "trade_clock").resolve()),
-            "trade_release_root": str((read_root / "trade_release_v1").resolve()),
+            "trade_release_root": str((read_root / "trade_release").resolve()),
             "oms_output_root": str((read_root / "live_execution_bridge" / "oms_v1").resolve()),
             "live_execution_root": str((read_root / "live_execution_bridge").resolve()),
             "live_price_snapshot_path": str((read_root / "live_execution_bridge" / "daily_price_snapshot.csv").resolve()),
-            "technical_confirmation_root": str((read_root / "event_lake_v6" / "research" / "technical_confirmation").resolve()),
+            "technical_confirmation_root": str((read_root / "event_lake" / "research" / "technical_confirmation").resolve()),
             "affordable_snapshot_root": str((Path(r"H:\Ashare\data") / "affordable_feeds" / "latest").resolve()),
         },
         "trade_clock": {

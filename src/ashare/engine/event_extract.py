@@ -58,8 +58,11 @@ POSITIVE_HINTS = [
     "回购", "增持", "中标", "重大合同", "预增", "扭亏", "分红", "摘帽", "收购", "重组",
 ]
 NEGATIVE_HINTS = [
-    "减持", "处罚", "问询", "诉讼", "仲裁", "停牌", "违约", "风险提示", "预亏", "减值", "终止",
+    "减持", "处罚", "问询", "诉讼", "仲裁", "停牌", "违约", "风险提示", "预亏", "减值",
 ]
+# 否定词：出现在某个利好/利空关键词前面时，会把该关键词的方向反转
+# （如"终止减持"→利好，"终止回购"→利空）。"终止"因此从利空词表挪到这里。
+NEGATION_PREFIXES = ("终止", "取消", "暂停", "中止", "放弃", "撤回", "撤销", "不再", "停止", "未能")
 SECTOR_MARKET_HINTS = [
     "行业", "板块", "政策", "国务院", "央行", "财政部", "证监会", "工信部", "交易所", "指导意见",
 ]
@@ -231,17 +234,47 @@ def _anti_overfit_weight(item: Dict[str, Any], event_type: str, title_hits: List
     return _clamp(1.0 - penalty, 0.18, 1.0)
 
 
+def _signed_hits(text: str, token: str, base: int) -> int:
+    """统计 token 的带符号命中：若 token 前面紧挨否定词，则方向反转。"""
+    if not token:
+        return 0
+    total = 0
+    start = 0
+    while True:
+        idx = text.find(token, start)
+        if idx < 0:
+            break
+        # 回看 token 前最多 16 字、但只看本短句(遇标点/空白即截断)，以捕捉否定词与
+        # 关键词隔着长定语的情况，如"终止筹划重大资产重组"(终止…重组)；同时避免跨句误判
+        # (如"完成回购，终止某事"里"终止"不应反转前句的"回购")。
+        prefix = text[max(0, idx - 16):idx]
+        for sep in "，。；！？、,.;!? \t\n":
+            cut = prefix.rfind(sep)
+            if cut >= 0:
+                prefix = prefix[cut + 1:]
+        negated = any(neg in prefix for neg in NEGATION_PREFIXES)
+        total += (-base if negated else base)
+        start = idx + len(token)
+    return total
+
+
 def _infer_event_direction(title: str, content: str, event_type: str) -> str:
+    """否定词感知的方向推断（规则兜底；LLM 给了方向时优先用 LLM 的）。"""
     text = f"{_safe_text(title)} {_safe_text(content)[:300]}"
-    pos_hits = sum(token in text for token in POSITIVE_HINTS)
-    neg_hits = sum(token in text for token in NEGATIVE_HINTS)
-    if event_type in {"regulatory_action", "litigation_arbitration", "risk_warning"}:
-        neg_hits += 1
-    if event_type in {"buyback_dividend", "major_contract"}:
-        pos_hits += 1
-    if pos_hits > neg_hits:
+    net = 0
+    for token in POSITIVE_HINTS:
+        net += _signed_hits(text, token, 1)
+    for token in NEGATIVE_HINTS:
+        net += _signed_hits(text, token, -1)
+    # 仅当关键词没有明确净方向时，才用事件类型这种弱先验兜底
+    if net == 0:
+        if event_type in {"regulatory_action", "litigation_arbitration", "risk_warning"}:
+            net -= 1
+        elif event_type in {"buyback_dividend", "major_contract"}:
+            net += 1
+    if net > 0:
         return "positive"
-    if neg_hits > pos_hits:
+    if net < 0:
         return "negative"
     return "uncertain"
 
@@ -374,6 +407,7 @@ def _build_structured_facts(raw: Dict[str, Any], parsed: Dict[str, Any], final_e
         "normalized_event_type": final_event_type,
         "ollama_event_type": parsed.get("event_type"),
         "ollama_importance": parsed.get("importance"),
+        "ollama_direction": parsed.get("direction"),
         "ollama_summary": parsed.get("summary"),
         "extract_ok": extract_ok,
         "extract_error": _safe_text(parsed.get("extract_error")),
@@ -463,7 +497,11 @@ def _normalize_ollama_item(raw: Dict[str, Any], item: Dict[str, Any]) -> Dict[st
         "company_name": _safe_text(item.get("entity")) or _safe_text(raw.get("company_name_hint")),
         "industry_tags": [],
         "event_type": final_event_type,
-        "event_direction": _infer_event_direction(title, raw_text, final_event_type),
+        "event_direction": (
+            _safe_text(item.get("direction"))
+            if _safe_text(item.get("direction")) in {"positive", "negative", "uncertain"}
+            else _infer_event_direction(title, raw_text, final_event_type)
+        ),
         "impact_scope": _safe_text(raw.get("_impact_scope")),
         "impact_horizon": _safe_text(raw.get("_impact_horizon")),
         "confidence": round(confidence, 4),
@@ -587,7 +625,41 @@ def save_event_store(config: Dict[str, Any], events: List[Dict[str, Any]]) -> Pa
     root = Path(str(config["paths"]["event_store_root"]))
     ensure_dir(root)
     out_path = root / "event_store.jsonl"
-    with out_path.open("a", encoding="utf-8") as f:
-        for item in events:
-            f.write(json.dumps(item, ensure_ascii=False) + "\n")
+    # 按 event_id 去重：同 id 用本次结果覆盖旧记录（抽取规则/LLM 修复后重跑必须能
+    # 刷新存量分类，不能静默丢弃），并顺带折叠历史重复行；无 event_id 的原样追加。
+    incoming: Dict[str, Dict[str, Any]] = {}
+    passthrough: List[Dict[str, Any]] = []
+    for item in events:
+        eid = _safe_text(item.get("event_id"))
+        if eid:
+            incoming[eid] = item  # 同批内后出现者覆盖
+        else:
+            passthrough.append(item)
+    lines: List[str] = []
+    replaced: set[str] = set()
+    if out_path.exists():
+        with out_path.open("r", encoding="utf-8") as f:
+            for line in f:
+                raw = line.strip()
+                if not raw:
+                    continue
+                eid = ""
+                try:
+                    eid = _safe_text(json.loads(raw).get("event_id"))
+                except Exception:
+                    eid = ""
+                if eid and eid in incoming:
+                    if eid not in replaced:
+                        lines.append(json.dumps(incoming[eid], ensure_ascii=False))
+                        replaced.add(eid)
+                    continue
+                lines.append(raw)
+    for eid, item in incoming.items():
+        if eid not in replaced:
+            lines.append(json.dumps(item, ensure_ascii=False))
+    for item in passthrough:
+        lines.append(json.dumps(item, ensure_ascii=False))
+    tmp_path = out_path.with_suffix(".jsonl.tmp")
+    tmp_path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
+    tmp_path.replace(out_path)
     return out_path

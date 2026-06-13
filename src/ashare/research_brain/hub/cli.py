@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""V5 主控入口。"""
+"""研究中枢主控入口。"""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import os
 import subprocess
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -17,7 +18,7 @@ from typing import Any, Dict, List, Optional
 def _try_load_valid_result(result_path: Path) -> Optional[Dict[str, Any]]:
     """如果 result.json 存在且 record.status 合法，返回 dict，否则返回 None。
 
-    Why: cli_v5 不能再用 subprocess returncode 判定成败。lightgbm_gpu 在 Python
+    Why: cli 不能再用 subprocess returncode 判定成败。lightgbm_gpu 在 Python
     解释器关闭阶段经常崩（exit 120 / 0xC0000005），但 artifacts 已经全部写完。
     这种"完成但脏退出"应被接受。
     """
@@ -55,7 +56,7 @@ def parse_args() -> argparse.Namespace:
     Returns:
         argparse.Namespace
     """
-    p = argparse.ArgumentParser(description='量化研究中枢 V5')
+    p = argparse.ArgumentParser(description='量化研究中枢')
     p.add_argument('--config', required=True)
     p.add_argument('--mode', default='adaptive_research_brain', choices=['validate_only', 'plan', 'batch', 'adaptive_research_brain'])
     p.add_argument('--dry-run', action='store_true')
@@ -206,12 +207,15 @@ def run_batch(config: Dict[str, Any], dry_run: bool, cycle_index: int) -> Dict[s
     plan = ctx['plan']
     results = []
     pyexe = str(config.get('execution', {}).get('python_executable', sys.executable) or sys.executable)
-    candidate_runner = Path(__file__).resolve().parent.parent / 'run_single_candidate_v5.py'
+    candidate_runner = Path(__file__).resolve().parent.parent / 'run_single_candidate.py'
     # 子进程环境强制 unbuffered，避免 supervisor 看到的 log 文件 0 字节。
     sub_env = os.environ.copy()
     sub_env['PYTHONUNBUFFERED'] = '1'
     log.info('本轮计划已生成。cycle=%s n_candidates=%s budget=%s', plan['cycle_id'], len(plan['candidate_configs']), plan['budget'])
-    for idx, cfg in enumerate(plan['candidate_configs'], start=1):
+    n_total = len(plan['candidate_configs'])
+    max_par = max(int(config.get('execution', {}).get('max_parallel_candidates', 1) or 1), 1)
+
+    def _run_one(idx: int, cfg: Dict[str, Any]) -> Dict[str, Any]:
         c = cfg['candidate']
         result_path = Path(str(c['config_path'])).with_suffix('.result.json')
 
@@ -219,14 +223,13 @@ def run_batch(config: Dict[str, Any], dry_run: bool, cycle_index: int) -> Dict[s
         # 适用场景：上一次 cycle 在某个候选后崩了，重跑同 cycle_dir 时不浪费 LLM/算力。
         existing = _try_load_valid_result(result_path)
         if existing is not None and str(existing['record'].get('status', '')) == 'ok':
-            log.info('候选 %s/%s 已有有效 result.json，跳过重跑：%s', idx, len(plan['candidate_configs']), c['strategy_name'])
-            results.append(existing['record'])
-            continue
+            log.info('候选 %s/%s 已有有效 result.json，跳过重跑：%s', idx, n_total, c['strategy_name'])
+            return existing['record']
         # 不合法的旧 result 先清掉，避免 stale 读
         if result_path.exists():
             result_path.unlink()
 
-        log.info('开始执行候选实验 %s/%s: %s | route=%s model=%s feature=%s logic=%s', idx, len(plan['candidate_configs']), c['strategy_name'], c['research_route'], c['model_family'], c['feature_profile'], c['training_logic'])
+        log.info('开始执行候选实验 %s/%s: %s | route=%s model=%s feature=%s logic=%s', idx, n_total, c['strategy_name'], c['research_route'], c['model_family'], c['feature_profile'], c['training_logic'])
         accepted_record: Optional[Dict[str, Any]] = None
         last_returncode: Optional[int] = None
         for attempt in range(3):
@@ -247,13 +250,11 @@ def run_batch(config: Dict[str, Any], dry_run: bool, cycle_index: int) -> Dict[s
                 if rec_status in {'ok', 'skipped_budget_guard'}:
                     if proc.returncode != 0:
                         log.warning('候选 %s 进程 exit=%s 但 artifact 完整，接受。strategy_key=%s', c['strategy_name'], proc.returncode, c['strategy_key'])
-                    accepted_record = ret['record']
-                    break
+                    return ret['record']
                 # status=failed：内部捕获的 Python 异常，重试一次也没用
                 if rec_status == 'failed':
                     log.error('候选 %s 内部抛异常：%s', c['strategy_name'], ret['record'].get('error_message', ''))
-                    accepted_record = ret['record']
-                    break
+                    return ret['record']
 
             # artifact 缺失或无效 → 真的需要重试
             if attempt >= 2:
@@ -263,9 +264,19 @@ def run_batch(config: Dict[str, Any], dry_run: bool, cycle_index: int) -> Dict[s
                 result_path.unlink()
             time.sleep(5)
 
-        if accepted_record is None:
-            raise RuntimeError(f'candidate_subprocess_failed_no_artifact idx={idx} strategy_key={c["strategy_key"]} returncode={last_returncode}')
-        results.append(accepted_record)
+        raise RuntimeError(f'candidate_subprocess_failed_no_artifact idx={idx} strategy_key={c["strategy_key"]} returncode={last_returncode}')
+
+    indexed = list(enumerate(plan['candidate_configs'], start=1))
+    if max_par <= 1:
+        results = [_run_one(idx, cfg) for idx, cfg in indexed]
+    else:
+        log.info('并行执行候选。max_parallel=%s n_candidates=%s', max_par, n_total)
+        results_map: Dict[int, Dict[str, Any]] = {}
+        with ThreadPoolExecutor(max_workers=max_par) as executor:
+            future_map = {executor.submit(_run_one, idx, cfg): idx for idx, cfg in indexed}
+            for future in as_completed(future_map):
+                results_map[future_map[future]] = future.result()
+        results = [results_map[idx] for idx, _ in indexed]
     family_gate = _refresh_family_and_gate(config)
     summary = {
         'cycle_id': plan['cycle_id'],
