@@ -1153,6 +1153,13 @@ def build_portfolio_recommendation(config: Dict[str, Any], bridge_root: Path | N
             prev_df=prev_df,
         )
         reweight_before = float(pos_df['portfolio_weight'].sum()) if not pos_df.empty else 0.0
+        # 防御档(risk_off/caution 已归一为 caution、panic)下，decide_target_weights 已把
+        # 总敞口主动压到 reweight_before；proxy objective 若仍按全局 total_exposure_cap 归一，
+        # 会把防御性缩仓又吹回满仓。所以防御档给 proxy 传缩减后的实际敞口作上限。
+        _posture = str(decision_weight_summary.get('posture', 'active') or 'active')
+        proxy_exposure_cap = float(total_exposure_cap)
+        if _posture in ('caution', 'panic') and 0.0 < reweight_before < proxy_exposure_cap:
+            proxy_exposure_cap = reweight_before
         # 证据闸门/盘中代理目标不是被删的仲裁塔，是独立的惩罚层；开关在各自函数/配置里。
         pos_df, evidence_gate_summary = apply_evidence_gate(pos_df, config=config)
         if bool(rec_cfg.get('pre_release_intraday_proxy_objective_enabled', False)):
@@ -1163,7 +1170,7 @@ def build_portfolio_recommendation(config: Dict[str, Any], bridge_root: Path | N
                     config=config,
                     rec_cfg=rec_cfg,
                     account_ctx=account_ctx,
-                    total_exposure_cap=float(total_exposure_cap),
+                    total_exposure_cap=float(proxy_exposure_cap),
                     single_name_cap=float(single_name_cap),
                 )
             except Exception as exc:
