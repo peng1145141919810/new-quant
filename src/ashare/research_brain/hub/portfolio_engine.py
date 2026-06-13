@@ -16,7 +16,7 @@ from hub.metrics import annualized_from_period_returns, max_drawdown_from_nav, s
 def _load_backtest_frame(source: pd.DataFrame | str | Path, label_col: str) -> pd.DataFrame:
     wanted = {
         'date', 'code', 'ts_code', 'board', 'industry', 'listed_days', 'in_hs300',
-        'is_st', 'is_suspended', 'is_limit', 'is_tradable_basic', 'close', 'pct_chg',
+        'is_st', 'is_suspended', 'is_limit', 'is_tradable_basic', 'close', 'close_raw', 'pct_chg',
         'amount', 'amount_mean_20', 'vol_20', 'hs300_ret_20', label_col, 'pred_score',
     }
     if isinstance(source, pd.DataFrame):
@@ -39,9 +39,12 @@ def _apply_basic_filters(df: pd.DataFrame, strategy: Dict[str, Any]) -> pd.DataF
     if 'is_st' in out.columns:
         out = out.loc[out['is_st'].fillna(0) == 0]
     # P5 集中模式流动性保护：低价票冲击成本高、易踩坑；默认 0=关，赚钱模式可收紧。
+    # 价格地板比的是"当时真实成交价"，必须用未复权 close_raw；qfq 后的 close 在历史段
+    # 被复权比例缩放，会把当年真实价格远高于地板的老观测误删。close_raw 缺失才退回 close。
     min_price = float(strategy.get('portfolio_min_price', 0.0) or 0.0)
-    if min_price > 0 and 'close' in out.columns:
-        out = out.loc[pd.to_numeric(out['close'], errors='coerce').fillna(0) >= min_price]
+    price_col = 'close_raw' if 'close_raw' in out.columns else ('close' if 'close' in out.columns else '')
+    if min_price > 0 and price_col:
+        out = out.loc[pd.to_numeric(out[price_col], errors='coerce').fillna(0) >= min_price]
     # 板块排除：可排掉北交所(BSE)这类流动性极差的板块；默认空=不排。
     exclude_boards = strategy.get('portfolio_exclude_boards', []) or []
     if exclude_boards and 'board' in out.columns:

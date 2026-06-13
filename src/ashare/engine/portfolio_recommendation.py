@@ -249,8 +249,14 @@ def _assign_decision_weights(
 
     from live_execution_bridge.models import AccountState, Position
 
-    if pos_df is None or pos_df.empty:
-        return pos_df, {"applied": False, "reason": "empty_candidates"}
+    has_candidates = pos_df is not None and not pos_df.empty
+    has_prev = prev_df is not None and not prev_df.empty and "portfolio_weight" in prev_df.columns
+    if not has_candidates and not has_prev:
+        return (pos_df if pos_df is not None else pd.DataFrame()), {"applied": False, "reason": "empty_candidates"}
+    if not has_candidates:
+        # 候选全被过滤光也不能提前返回：panic/reduce-only 下仍要从 prev_df 产出
+        # "维持持仓"目标，否则下游 diff 会把空表解读成全部清仓。
+        pos_df = pd.DataFrame(columns=[_symbol_col(prev_df), "portfolio_weight"])
 
     sym_col = _symbol_col(pos_df)
     score_series = None
@@ -1127,8 +1133,9 @@ def build_portfolio_recommendation(config: Dict[str, Any], bridge_root: Path | N
     pre_release_proxy_summary: Dict[str, Any] = {'applied': False, 'reason': 'decision_engine_single_pass'}
     reweight_before = 0.0
     reweight_after = 0.0
-    if 'portfolio_weight' in pos_df.columns:
+    if 'portfolio_weight' in pos_df.columns or pos_df.empty:
         # 单遍定权：按分数分配、单名封顶取 min、regime 只过一次。
+        # 空候选也要进（panic 时由 prev_df 产出"维持持仓"目标，见 _assign_decision_weights）。
         pos_df, decision_weight_summary = _assign_decision_weights(
             pos_df=pos_df,
             config=config,

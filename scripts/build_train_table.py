@@ -190,8 +190,9 @@ def phase_pull(start: str, end: str) -> None:
         dst.parent.mkdir(parents=True, exist_ok=True)
         daily = _call(pro, "daily", trade_date=td)
         if daily.empty:
-            # 非交易日或当天无数据，写空占位避免反复重拉
-            pd.DataFrame().to_parquet(dst)
+            # 交易日历说这天开市，daily 却为空 = 当天行情尚未发布（end=today 盘后早跑）
+            # 或接口瞬时抖动。不能写空占位缓存——否则 dst.exists() 让该日永久缺失。
+            _log(f"  [warn] {td} daily 返回空，本次不缓存，下次运行重拉")
             continue
         basic = _call(pro, "daily_basic", trade_date=td, fields=",".join(BASIC_FIELDS))
         adj = _call(pro, "adj_factor", trade_date=td)
@@ -351,6 +352,9 @@ def phase_build() -> None:
     last_adj = panel.sort_values("date").groupby("code")["adj_factor"].last()
     scale = panel["adj_factor"] / panel["code"].map(last_adj).replace(0, np.nan)
     scale = scale.fillna(1.0)
+    # 保留未复权收盘价：价格地板/手数等"以当时真实价格为准"的过滤要用它，
+    # qfq 价历史段差一个复权比例，不能拿来比价格阈值。
+    panel["close_raw"] = pd.to_numeric(panel["close"], errors="coerce")
     for col in ("open", "high", "low", "close", "pre_close"):
         if col in panel.columns:
             panel[col] = pd.to_numeric(panel[col], errors="coerce") * scale
