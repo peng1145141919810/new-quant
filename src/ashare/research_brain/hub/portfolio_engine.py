@@ -270,13 +270,28 @@ def _signal_weights(
                     weights = weights / s * exposure
 
     name_cap = float(strategy.get('portfolio_single_name_cap', 0.0) or 0.0)
-    if name_cap > 0:
-        weights = _cap_weights(weights, name_cap)
     ind_cap = float(strategy.get('portfolio_single_industry_cap', 0.0) or 0.0)
-    if ind_cap > 0 and industries is not None and len(industries) == n:
-        weights = _cap_industry_weights(weights, np.asarray(industries), ind_cap)
+    has_ind = ind_cap > 0 and industries is not None and len(industries) == n
+    inds_arr = np.asarray(industries) if has_ind else None
+    # 两个上限互相影响：单票再分配会把超额摊给同行业其它票、顶破行业上限；行业再分配
+    # 又会把权重摊给别的票、顶破单票上限。交替施加直到都满足(或到迭代上限)，
+    # 单次串行(名额→行业→名额)无法保证两者同时成立。
+    if name_cap > 0 or has_ind:
+        for _ in range(12):
+            changed = False
+            if name_cap > 0:
+                prev = weights.copy()
+                weights = _cap_weights(weights, name_cap)
+                changed = changed or not np.allclose(prev, weights, atol=1e-9)
+            if has_ind:
+                prev = weights.copy()
+                weights = _cap_industry_weights(weights, inds_arr, ind_cap)
+                changed = changed or not np.allclose(prev, weights, atol=1e-9)
+            if not changed:
+                break
+        # 单票是更硬的风控/经纪限额：收敛后再夹一次保证它绝对成立(残余行业超限<eps)。
         if name_cap > 0:
-            weights = _cap_weights(weights, name_cap)  # 行业再分配后复查单票上限
+            weights = np.minimum(weights, name_cap)
     return weights
 
 

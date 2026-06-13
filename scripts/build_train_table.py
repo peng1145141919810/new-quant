@@ -83,6 +83,7 @@ TRAIN_TABLE_COLUMNS_V1 = [
 NEW_FIELDS = [
     "turnover_rate_f", "volume_ratio", "pe", "pe_ttm", "pb", "ps", "ps_ttm",
     "dv_ratio", "total_share", "float_share", "free_share",
+    "close_raw",  # 未复权收盘价：portfolio_engine 价格地板按当时真实价比，非 qfq close
 ]
 TRAIN_TABLE_COLUMNS = TRAIN_TABLE_COLUMNS_V1 + NEW_FIELDS
 

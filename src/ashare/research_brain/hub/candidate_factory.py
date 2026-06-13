@@ -420,6 +420,15 @@ def build_cycle_plan(base_config: Dict[str, Any], registry_df, cycle_index: int,
         llm_override['route_weights'] = dict(bridge_route_override)
     if isinstance(llm_override.get('route_weights'), dict):
         budget = allocate_route_budget({'route_weights': llm_override['route_weights']}, total_candidates=total_candidates, min_each=route_min_candidates)
+    # 调度器(权威)已按 profile 定好每路候选数并写进 feedback 的 route_budget。
+    # 它最终拍板：否则 quick_test 把 route_weights 收窄成 1 路、调度器 route_budget=1，
+    # 这里却按 7 路 route_weights × min_each=1 重算回 7 个候选，1 候选冒烟跑变成长 GPU 跑。
+    perf_route_budget = {
+        str(r): int(n) for r, n in dict(perf_feedback.get('route_budget', {}) or {}).items()
+        if int(n or 0) > 0
+    }
+    if perf_route_budget:
+        budget = perf_route_budget
 
     lab = CodegenLab(llm_client)
     seen_in_cycle = set()

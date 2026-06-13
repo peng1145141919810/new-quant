@@ -19,7 +19,7 @@ INDUSTRY_CANDIDATES = ['industry', 'sw_level1', 'sector']
 RESERVED_EXACT = {
     'year', 'month', 'day', 'pred_score', 'portfolio_weight', 'cash_weight', 'weight',
     'is_st', 'is_limit', 'is_suspended', 'is_tradable_basic', 'in_hs300', 'board_code',
-    'industry_code'
+    'industry_code', 'close_raw',  # close_raw 仅供回测价格地板用，不作训练特征(否则泄漏价格尺度)
 }
 
 
@@ -52,7 +52,7 @@ def _iter_data_files(data_root: Path) -> List[Path]:
     # 只取 data_root 顶层的聚合分片；不递归进 staging/ 和 _meta/。
     # staging/raw/YYYY/YYYYMMDD.parquet 是按天的原始中间产物（5000+ 文件），
     # 与顶层聚合分片是同一批数据的另一种切分，递归抓取会让训练表行数翻倍。
-    _EXCLUDE_DIRS = {'staging', '_meta', '_cache'}
+    _EXCLUDE_DIRS = {'staging', '_meta', '_cache', '_rebuild_tmp'}
     patterns = ['*.parquet', '*.csv']
     files: List[Path] = []
     for p in patterns:
