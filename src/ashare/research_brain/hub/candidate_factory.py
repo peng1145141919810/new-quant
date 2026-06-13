@@ -454,6 +454,14 @@ def build_cycle_plan(base_config: Dict[str, Any], registry_df, cycle_index: int,
         sig['cycle_index'] = cycle_index
         sig['candidate_index'] = idx
         spec_hash = stable_hash(sig, 12)
+        if exploit:
+            # 冠军 hold-the-line replica 的 strategy_key 必须跨 cycle 稳定：spec_hash 含
+            # cycle_index/candidate_index 会让同一冠军每轮拿到新 key，而 evolve_strategy_family
+            # 按 strategy_key 分组、需多次复评才晋级 —— 新 key 永远攒不够重复观测。
+            # 用冠军父代身份派生稳定 key（同一冠军在位期间不变；冠军更替时随父代 key 变化）。
+            champion_anchor = str(parent.get('strategy_key', '') or '').strip()
+            if champion_anchor and champion_anchor != 'seed_root':
+                spec_hash = stable_hash({'champion_replica_of': champion_anchor}, 12)
         if spec_hash in seen_in_cycle:
             sig['candidate_index'] = idx * 100 + cycle_index
             spec_hash = stable_hash(sig, 12)

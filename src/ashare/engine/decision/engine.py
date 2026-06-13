@@ -20,7 +20,8 @@ from .constraints import DecisionConstraints
 
 # regime -> 处置档：active 正常 / caution 缩规模 / panic 只减不加
 _PANIC = {"panic", "halt", "crisis"}
-_CAUTION = {"caution", "defensive", "reduce", "warn"}
+# risk_off 是 market_state 的默认防御档，必须按 caution 缩仓，否则会走 active 满仓到 1.0。
+_CAUTION = {"caution", "defensive", "reduce", "warn", "risk_off", "riskoff", "risk-off"}
 
 
 def _posture(regime: Any) -> str:

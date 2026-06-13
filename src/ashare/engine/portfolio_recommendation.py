@@ -320,6 +320,13 @@ def _assign_decision_weights(
             carry = carry.rename(columns={prev_sym_col: sym_col}) if prev_sym_col != sym_col else carry
             pos_df = pd.concat([pos_df, carry], ignore_index=True)
     pos_df["portfolio_weight"] = pos_df[sym_col].astype(str).map(weight_map).fillna(0.0)
+    # 生命周期/准入限额(target_weight_cap_v2a：pilot≈0.04、退出/被替换=0)是风控硬上限，
+    # 决策定权用全局单名上限定权，这里必须再按 per-row 上限夹一次，否则 pilot/deferred/
+    # replaced 行会被放大到全局单名上限，绕过准入风控。NaN 视为不约束。
+    if "target_weight_cap_v2a" in pos_df.columns:
+        _w = pd.to_numeric(pos_df["portfolio_weight"], errors="coerce").fillna(0.0)
+        _cap = pd.to_numeric(pos_df["target_weight_cap_v2a"], errors="coerce")
+        pos_df["portfolio_weight"] = _w.where(_cap.isna(), _w.clip(upper=_cap)).fillna(0.0)
     pos_df = pos_df[pd.to_numeric(pos_df["portfolio_weight"], errors="coerce").fillna(0.0) > 0].copy()
     return pos_df, {
         "applied": True,

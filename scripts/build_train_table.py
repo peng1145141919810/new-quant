@@ -308,14 +308,14 @@ def _compute_features_vectorized(panel: pd.DataFrame) -> pd.DataFrame:
     return g
 
 
-def _write_parts(df: pd.DataFrame) -> int:
+def _write_parts(df: pd.DataFrame, target_dir: Path, prefix: str = "part_") -> int:
     df = df.sort_values(["date", "code"]).reset_index(drop=True)
     n = len(df)
     parts = 0
     for start in range(0, n, PART_ROWS):
         chunk = df.iloc[start:start + PART_ROWS]
         parts += 1
-        chunk.to_parquet(OUT_ROOT / f"part_{parts:05d}.parquet", index=False)
+        chunk.to_parquet(target_dir / f"{prefix}{parts:05d}.parquet", index=False)
     return parts
 
 
@@ -404,10 +404,15 @@ def phase_build() -> None:
     out = panel[TRAIN_TABLE_COLUMNS].copy()
     out["date"] = pd.to_datetime(out["date"]).dt.strftime("%Y-%m-%d")
 
-    # 清掉旧分片
-    for old in OUT_ROOT.glob("part_*.parquet"):
-        old.unlink()
-    n_parts = _write_parts(out)
+    # 原子替换：新分片先写到临时目录，全部成功后再删旧的、整体搬入。
+    # 这样长重建中途崩溃 / parquet 写失败时，原有训练表保持完整，不会留空/残缺表。
+    tmp_dir = OUT_ROOT / "_rebuild_tmp"
+    if tmp_dir.exists():
+        for f in tmp_dir.glob("*"):
+            f.unlink()
+    else:
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+    n_parts = _write_parts(out, tmp_dir, prefix="part_")
     summary = {
         "built_at": datetime.now().isoformat(timespec="seconds"),
         "rows": int(len(out)),
@@ -418,10 +423,20 @@ def phase_build() -> None:
         "columns": TRAIN_TABLE_COLUMNS,
         "new_fields_vs_v1": NEW_FIELDS,
     }
-    META_DIR.mkdir(parents=True, exist_ok=True)
-    (OUT_ROOT / "build_summary.json").write_text(
+    (tmp_dir / "build_summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+    META_DIR.mkdir(parents=True, exist_ok=True)
+    # 至此新分片已全部落盘成功 —— 现在才动旧表（删旧 + rename 入位，窗口极短）。
+    for old in OUT_ROOT.glob("part_*.parquet"):
+        old.unlink()
+    for newp in sorted(tmp_dir.glob("part_*.parquet")):
+        newp.replace(OUT_ROOT / newp.name)
+    (tmp_dir / "build_summary.json").replace(OUT_ROOT / "build_summary.json")
+    try:
+        tmp_dir.rmdir()
+    except OSError:
+        pass
     _log(f"phase B 完成: {len(out):,} 行 / {n_parts} 分片 / {out['code'].nunique()} 只票")
 
 

@@ -244,8 +244,15 @@ def _signed_hits(text: str, token: str, base: int) -> int:
         idx = text.find(token, start)
         if idx < 0:
             break
-        window = text[max(0, idx - 5):idx]
-        negated = any(neg in window for neg in NEGATION_PREFIXES)
+        # 回看 token 前最多 16 字、但只看本短句(遇标点/空白即截断)，以捕捉否定词与
+        # 关键词隔着长定语的情况，如"终止筹划重大资产重组"(终止…重组)；同时避免跨句误判
+        # (如"完成回购，终止某事"里"终止"不应反转前句的"回购")。
+        prefix = text[max(0, idx - 16):idx]
+        for sep in "，。；！？、,.;!? \t\n":
+            cut = prefix.rfind(sep)
+            if cut >= 0:
+                prefix = prefix[cut + 1:]
+        negated = any(neg in prefix for neg in NEGATION_PREFIXES)
         total += (-base if negated else base)
         start = idx + len(token)
     return total

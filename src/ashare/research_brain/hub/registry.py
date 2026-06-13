@@ -3,12 +3,50 @@
 
 from __future__ import annotations
 
+import os
+import time
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, List
 
 import pandas as pd
 
 from hub.io_utils import ensure_dir, write_csv
+
+
+@contextmanager
+def _registry_lock(path: Path, timeout: float = 60.0, stale: float = 120.0):
+    """跨进程文件锁：并行候选子进程各自 append 同一 registry，必须串行化
+    读-concat-写，否则后写覆盖先写 / 留下半截 CSV，损坏冠军选择与续跑依据。
+    用 O_CREAT|O_EXCL 独占创建 .lock 实现，超时抢占陈旧锁(进程崩溃残留)。"""
+    ensure_dir(path.parent)
+    lock_path = path.with_suffix(path.suffix + ".lock")
+    deadline = time.time() + timeout
+    fd = None
+    while True:
+        try:
+            fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_RDWR)
+            break
+        except FileExistsError:
+            # 抢占陈旧锁：持有者多半已崩溃
+            try:
+                if time.time() - os.path.getmtime(lock_path) > stale:
+                    os.unlink(lock_path)
+                    continue
+            except OSError:
+                pass
+            if time.time() > deadline:
+                raise TimeoutError(f"registry lock 超时: {lock_path}")
+            time.sleep(0.2)
+    try:
+        yield
+    finally:
+        if fd is not None:
+            os.close(fd)
+        try:
+            os.unlink(lock_path)
+        except OSError:
+            pass
 
 
 REGISTRY_COLUMNS = [
@@ -51,9 +89,11 @@ def append_record(path: Path, record: Dict[str, Any]) -> pd.DataFrame:
     Returns:
         更新后的 DataFrame。
     """
-    df = load_registry(path)
     row = {c: record.get(c) for c in REGISTRY_COLUMNS}
-    df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
-    ensure_dir(path.parent)
-    write_csv(path, df)
+    with _registry_lock(path):
+        # 锁内重新读，确保看到其它子进程刚写入的行（读-改-写整体原子）。
+        df = load_registry(path)
+        df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+        ensure_dir(path.parent)
+        write_csv(path, df)
     return df
